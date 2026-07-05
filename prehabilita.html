@@ -1,0 +1,2631 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f766e" />
+  <meta name="description" content="PreHabilita: programa domiciliario y autogestionado de prehabilitacion anestesica antes de una cirugia de alta complejidad, con incentivos de gamificacion." />
+  <title>PreHabilita &middot; Prehabilitacion anestesica</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AB%81%3C/text%3E%3C/svg%3E" />
+  <style>
+/* styles.css — PreHabilita */
+
+:root {
+  --bg: #f1f5f9;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --accent: #0f766e;
+  --accent-2: #14b8a6;
+  --accent-soft: #ccfbf1;
+  --danger: #dc2626;
+  --gold: #f59e0b;
+  --radius: 18px;
+  --shadow: 0 2px 12px rgba(15, 23, 42, .07);
+  --shadow-lg: 0 12px 40px rgba(15, 23, 42, .18);
+  --nav-h: 68px;
+  font-size: 16px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--ink);
+  line-height: 1.45;
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+#app { max-width: 560px; margin: 0 auto; min-height: 100vh; position: relative; }
+.noscript { padding: 2rem; text-align: center; }
+.muted { color: var(--muted); }
+.small { font-size: .82rem; }
+
+/* ---------- Cabecera ---------- */
+.app-header {
+  position: sticky; top: 0; z-index: 20;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  color: #fff;
+  padding: max(14px, env(safe-area-inset-top)) 16px 14px;
+  border-radius: 0 0 22px 22px;
+  box-shadow: var(--shadow);
+}
+.header-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; }
+.brand-logo { font-size: 1.8rem; filter: drop-shadow(0 2px 4px rgba(0,0,0,.2)); }
+.brand-name { font-weight: 800; font-size: 1.15rem; letter-spacing: -.3px; }
+.brand-sub { font-size: .8rem; opacity: .9; }
+.countdown { text-align: center; background: rgba(255,255,255,.18); border-radius: 14px; padding: 6px 12px; min-width: 74px; backdrop-filter: blur(4px); }
+.countdown strong { display: block; font-size: 1.5rem; line-height: 1; font-weight: 800; }
+.countdown small { font-size: .62rem; opacity: .9; display: block; }
+.countdown.today { background: var(--gold); }
+.countdown.neutral { opacity: .8; }
+
+.level-row { display: flex; align-items: center; gap: 10px; margin-top: 14px; }
+.level-badge { background: #fff; color: var(--accent); font-weight: 800; font-size: .8rem; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+.level-bar { flex: 1; }
+.level-xp { font-size: .66rem; opacity: .9; margin-top: 3px; }
+.streak { font-weight: 700; font-size: .95rem; white-space: nowrap; }
+
+/* ---------- Barras de progreso ---------- */
+.bar { background: rgba(255,255,255,.28); border-radius: 999px; height: 9px; overflow: hidden; }
+.content .bar { background: #e2e8f0; }
+.bar span { display: block; height: 100%; border-radius: 999px; background: var(--accent); transition: width .5s cubic-bezier(.2,.8,.2,1); }
+
+/* ---------- Contenido ---------- */
+.content { padding: 16px 14px calc(var(--nav-h) + 24px); }
+.section-label { font-weight: 800; font-size: .8rem; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); margin: 6px 4px 10px; }
+
+.card {
+  background: var(--card); border-radius: var(--radius);
+  padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow);
+}
+.card h2 { font-size: 1.1rem; }
+.card h3 { font-size: 1rem; margin-bottom: 8px; }
+
+/* ---------- Objetivo diario ---------- */
+.daily-goal.is-complete { outline: 2px solid var(--accent-2); background: linear-gradient(180deg, #f0fdfa, #fff); }
+.daily-goal-head { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 12px; gap: 12px; }
+.daily-ring {
+  width: 56px; height: 56px; border-radius: 50%; display: grid; place-items: center;
+  background: var(--accent-soft); color: var(--accent); font-weight: 800; font-size: 1.5rem; flex-shrink: 0;
+  flex-direction: column;
+}
+.daily-ring small { font-size: .5rem; font-weight: 600; }
+.daily-goal-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; font-size: .8rem; color: var(--muted); }
+.badge-ok { color: var(--accent); font-weight: 700; }
+
+/* ---------- Reto semanal ---------- */
+.challenge { border-left: 4px solid var(--gold); }
+.challenge-head { display: flex; justify-content: space-between; font-weight: 700; font-size: .92rem; margin-bottom: 8px; gap: 10px; }
+.challenge-xp { color: var(--gold); white-space: nowrap; }
+
+/* ---------- Pilares y tareas ---------- */
+.pillar-group { padding: 0; overflow: hidden; }
+.pillar-head {
+  width: 100%; border: 0; background: transparent; cursor: pointer;
+  display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+  border-left: 5px solid var(--pc); font: inherit; text-align: left;
+}
+.pillar-emoji { font-size: 1.3rem; }
+.pillar-title { flex: 1; font-weight: 700; }
+.pillar-count { font-size: .8rem; color: var(--muted); background: #f1f5f9; padding: 2px 9px; border-radius: 999px; }
+.task-list { padding: 0 14px 6px; }
+
+.task { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-top: 1px solid #f1f5f9; }
+.task:first-child { border-top: 0; }
+.task-check {
+  width: 30px; height: 30px; border-radius: 9px; border: 2px solid #cbd5e1; background: #fff;
+  cursor: pointer; flex-shrink: 0; font-size: .95rem; color: #fff; font-weight: 800;
+  display: grid; place-items: center; transition: all .18s;
+}
+.task.done .task-check { background: var(--accent-2); border-color: var(--accent-2); }
+.task-body { flex: 1; min-width: 0; }
+.task-title { font-weight: 700; font-size: .95rem; }
+.task-desc { font-size: .8rem; color: var(--muted); margin-top: 2px; }
+.task-xp { font-size: .78rem; font-weight: 800; color: var(--accent); background: var(--accent-soft); padding: 3px 8px; border-radius: 999px; flex-shrink: 0; }
+.task.done .task-title { color: var(--muted); }
+
+.counter-row { display: flex; align-items: center; gap: 12px; margin: 10px 0 8px; }
+.stepper {
+  width: 36px; height: 36px; border-radius: 10px; border: 1.5px solid #cbd5e1; background: #fff;
+  font-size: 1.3rem; font-weight: 700; cursor: pointer; color: var(--accent); line-height: 1;
+}
+.stepper:active { transform: scale(.92); }
+.counter-val { font-weight: 800; font-size: 1.05rem; }
+.counter-val small { font-weight: 500; color: var(--muted); font-size: .78rem; }
+
+/* ---------- Ánimo ---------- */
+.mood-row { display: flex; justify-content: space-between; gap: 6px; margin-top: 8px; }
+.mood-btn { flex: 1; font-size: 1.6rem; background: #f8fafc; border: 2px solid transparent; border-radius: 12px; padding: 8px 0; cursor: pointer; transition: all .15s; }
+.mood-btn.sel { border-color: var(--accent-2); background: var(--accent-soft); transform: scale(1.05); }
+
+/* ---------- Plan ---------- */
+.plan-pillar-head { display: flex; gap: 12px; align-items: center; }
+.plan-pillar-head h3 { margin: 0; }
+.plan-pillar { border-top: 4px solid var(--pc); }
+.why { background: #f8fafc; border-radius: 12px; padding: 10px 12px; font-size: .84rem; color: #334155; margin: 10px 0; }
+.plan-tasks { list-style: none; }
+.plan-tasks li { display: flex; gap: 10px; align-items: center; padding: 9px 0; border-top: 1px solid #f1f5f9; font-size: .88rem; }
+.plan-tasks li span:first-child { font-size: 1.2rem; }
+.plan-tasks li div { flex: 1; }
+.xp-tag { font-size: .72rem; font-weight: 800; color: var(--accent); }
+
+/* ---------- Progreso ---------- */
+.chips { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 14px; }
+.chip { background: var(--card); border-radius: 14px; padding: 12px; box-shadow: var(--shadow); display: flex; gap: 8px; align-items: center; }
+.chip-ico { font-size: 1.3rem; }
+.chip strong { display: block; font-size: 1.2rem; font-weight: 800; line-height: 1; }
+.chip small { font-size: .68rem; color: var(--muted); }
+
+.heatmap { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin: 8px 0; }
+.heat { aspect-ratio: 1; border-radius: 6px; background: #e2e8f0; }
+.heat.l0 { background: #e2e8f0; } .heat.l1 { background: #99f6e4; }
+.heat.l2 { background: #2dd4bf; } .heat.l3 { background: var(--accent); }
+.heat-legend { display: flex; align-items: center; gap: 5px; font-size: .68rem; color: var(--muted); margin-top: 8px; }
+.heat-legend i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+
+.mood-history { display: flex; justify-content: space-around; gap: 4px; }
+.mh { text-align: center; } .mh span { font-size: 1.5rem; display: block; } .mh small { font-size: .62rem; color: var(--muted); }
+
+.row-btns { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+
+/* ---------- Botones ---------- */
+.btn { border: 0; border-radius: 12px; padding: 12px 16px; font: inherit; font-weight: 700; cursor: pointer; background: #e2e8f0; color: var(--ink); }
+.btn.primary { background: var(--accent); color: #fff; }
+.btn.primary.big { width: 100%; padding: 15px; font-size: 1.05rem; margin-top: 6px; }
+.btn.ghost { background: #f1f5f9; }
+.btn.danger { background: var(--danger); color: #fff; }
+.btn.danger.ghost { background: #fef2f2; color: var(--danger); }
+.btn:active { transform: scale(.97); }
+
+/* ---------- Medallas ---------- */
+.badge-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.badge { background: var(--card); border-radius: 16px; padding: 16px 12px; text-align: center; box-shadow: var(--shadow); }
+.badge.locked { opacity: .55; filter: grayscale(.6); }
+.badge.unlocked { outline: 2px solid var(--gold); }
+.badge-emoji { font-size: 2.2rem; }
+.badge-name { font-weight: 800; font-size: .9rem; margin-top: 6px; }
+.badge-desc { font-size: .74rem; color: var(--muted); margin-top: 3px; }
+
+/* ---------- Educación ---------- */
+.lesson summary { font-weight: 700; cursor: pointer; list-style: none; }
+.lesson summary::-webkit-details-marker { display: none; }
+.lesson[open] summary { margin-bottom: 8px; color: var(--accent); }
+.lesson p { font-size: .88rem; color: #334155; }
+.lesson.read summary { color: var(--muted); }
+.preop { list-style: none; }
+.preop li { padding: 7px 0; border-top: 1px solid #f1f5f9; font-size: .88rem; }
+.disclaimer-card { background: #fffbeb; }
+.disclaimer-mini { font-size: .72rem; color: var(--muted); text-align: center; margin: 8px 0; cursor: pointer; }
+
+/* ---------- Navegación inferior ---------- */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 560px; height: var(--nav-h);
+  background: rgba(255,255,255,.95); backdrop-filter: blur(10px);
+  border-top: 1px solid #e2e8f0; display: flex; z-index: 30;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.nav-item { flex: 1; border: 0; background: transparent; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; color: var(--muted); font: inherit; }
+.nav-ico { font-size: 1.3rem; }
+.nav-lbl { font-size: .66rem; font-weight: 600; }
+.nav-item.active { color: var(--accent); }
+.nav-item.active .nav-ico { transform: translateY(-1px) scale(1.08); }
+
+/* ---------- Onboarding ---------- */
+.onboarding-mode { padding-bottom: 30px; }
+.onboarding { padding: 20px 16px; }
+.onb-hero { text-align: center; padding: 24px 8px; }
+.onb-logo { font-size: 3.5rem; }
+.onb-hero h1 { font-size: 2rem; color: var(--accent); letter-spacing: -.5px; }
+.onb-hero p { color: var(--muted); margin-top: 8px; }
+.onb-form { display: flex; flex-direction: column; gap: 14px; }
+.onb-form label { font-weight: 600; font-size: .88rem; display: flex; flex-direction: column; gap: 6px; }
+.onb-form input[type=text], .onb-form input[type=date], .onb-form select {
+  font: inherit; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 12px; background: #fff; width: 100%;
+}
+.onb-form input:focus, .onb-form select:focus { outline: none; border-color: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-soft); }
+.check-inline { flex-direction: row !important; align-items: center; gap: 8px !important; }
+.check-inline input { width: 20px; height: 20px; }
+
+/* ---------- Toasts ---------- */
+.toast-layer { position: fixed; bottom: calc(var(--nav-h) + 16px); left: 50%; transform: translateX(-50%); z-index: 50; display: flex; flex-direction: column; gap: 8px; align-items: center; width: 100%; max-width: 560px; padding: 0 16px; pointer-events: none; }
+.toast {
+  background: var(--ink); color: #fff; padding: 11px 18px; border-radius: 999px; font-weight: 700; font-size: .88rem;
+  box-shadow: var(--shadow-lg); opacity: 0; transform: translateY(16px); transition: all .3s cubic-bezier(.2,.8,.2,1); max-width: 100%;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+.toast.level { background: linear-gradient(135deg, var(--gold), #f97316); }
+
+/* ---------- Modales ---------- */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.5); z-index: 60; display: grid; place-items: center; padding: 20px; animation: fade .2s; }
+.modal { background: #fff; border-radius: 20px; padding: 20px; max-width: 420px; width: 100%; box-shadow: var(--shadow-lg); animation: pop .25s cubic-bezier(.2,.8,.2,1); }
+.modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+.modal-x { border: 0; background: #f1f5f9; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-size: .9rem; }
+.modal-body p { margin-bottom: 10px; color: #334155; }
+.badge-modal { text-align: center; }
+.badge-modal .big-emoji { font-size: 4.5rem; animation: bounce .6s; }
+.badge-modal h2 { color: var(--gold); }
+.badge-modal .btn { margin-top: 14px; }
+.confetti { font-size: 2rem; animation: spin 1s; }
+
+@keyframes fade { from { opacity: 0; } }
+@keyframes pop { from { transform: scale(.9); opacity: 0; } }
+@keyframes bounce { 0%,100%{transform:translateY(0);} 30%{transform:translateY(-14px);} 60%{transform:translateY(-6px);} }
+@keyframes spin { from { transform: rotate(-20deg) scale(.5); opacity:0; } to { transform: rotate(0) scale(1); opacity:1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+@media (min-width: 480px) {
+  .chips { grid-template-columns: repeat(3, 1fr); }
+}
+
+
+/* ================= Ampliación: editor, recursos, blog, gráficas ================= */
+
+body.reduce-motion * { animation: none !important; transition: none !important; }
+
+.btn.block { width: 100%; display: block; text-align: center; margin-bottom: 12px; }
+.back-btn { display: inline-block; margin-bottom: 12px; }
+
+/* ---------- Gráficas ---------- */
+.chart { width: 100%; height: auto; display: block; }
+.chart-empty { padding: 20px; text-align: center; color: var(--muted); font-size: .85rem; }
+
+/* ---------- Recursos / vídeos ---------- */
+.resource-title { font-weight: 700; margin-bottom: 6px; }
+.video { position: relative; width: 100%; padding-top: 56.25%; border-radius: 12px; overflow: hidden; background: #000; margin-top: 10px; }
+.video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.empty-state { text-align: center; }
+.empty-emoji { font-size: 3rem; }
+.empty-state .btn { margin-top: 12px; }
+
+/* ---------- Blog ---------- */
+.post-list { display: flex; flex-direction: column; gap: 12px; margin-bottom: 6px; }
+.post-card { display: flex; gap: 12px; align-items: center; text-align: left; background: var(--card); border: 0; border-radius: 16px; padding: 10px; box-shadow: var(--shadow); cursor: pointer; font: inherit; width: 100%; }
+.post-card:active { transform: scale(.99); }
+.post-cover { width: 64px; height: 64px; border-radius: 12px; background-size: cover; background-position: center; flex-shrink: 0; background-color: var(--accent-soft); }
+.post-cover.ph { display: grid; place-items: center; font-size: 1.8rem; }
+.post-info { flex: 1; min-width: 0; }
+.post-info strong { display: block; }
+.post-card.read { opacity: .72; }
+.post-full { }
+.post-cover-full { width: 100%; height: 170px; border-radius: 12px; background-size: cover; background-position: center; margin-bottom: 12px; }
+.post-tag { display: inline-block; background: var(--accent-soft); color: var(--accent); font-size: .72rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+.post-full h2 { margin: 8px 0 4px; }
+.post-body { margin-top: 12px; color: #334155; line-height: 1.6; }
+
+/* ---------- Menú Más ---------- */
+.more-menu { padding: 4px 0; }
+.more-item { width: 100%; border: 0; background: transparent; display: flex; align-items: center; gap: 12px; padding: 14px 16px; cursor: pointer; font: inherit; text-align: left; border-top: 1px solid #f1f5f9; }
+.more-item:first-child { border-top: 0; }
+.more-ico { font-size: 1.4rem; }
+.more-txt { flex: 1; } .more-txt strong { display: block; } .more-txt small { font-size: .76rem; }
+.more-arrow { color: #cbd5e1; font-size: 1.4rem; }
+
+/* ---------- Editor ---------- */
+.editor-intro { margin: -4px 4px 12px; }
+.editor-tabs { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
+.etab { flex: 1; white-space: nowrap; border: 0; background: #e2e8f0; color: var(--ink); border-radius: 10px; padding: 9px 8px; font: inherit; font-weight: 700; font-size: .8rem; cursor: pointer; }
+.etab.active { background: var(--accent); color: #fff; }
+
+.etask-group-head { font-weight: 800; border-left: 4px solid var(--pc); padding-left: 8px; margin-bottom: 8px; }
+.etask, .eres { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #f1f5f9; }
+.etask:first-child, .eres:first-child { border-top: 0; }
+.etask.off { opacity: .5; }
+.etask-main, .eres-main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.etask-main small, .eres-main small { font-size: .72rem; }
+.eres-ico { font-size: 1.2rem; }
+.etask-actions { display: flex; gap: 4px; }
+.mini-btn { width: 34px; height: 34px; border-radius: 9px; border: 1px solid #e2e8f0; background: #fff; cursor: pointer; font-size: .95rem; }
+.mini-btn.danger { border-color: #fecaca; background: #fef2f2; }
+
+/* ---------- Formularios apilados ---------- */
+.stack-form { display: flex; flex-direction: column; gap: 12px; }
+.stack-form label { font-weight: 600; font-size: .86rem; display: flex; flex-direction: column; gap: 6px; }
+.stack-form input[type=text], .stack-form input[type=url], .stack-form input[type=number], .stack-form input[type=date], .stack-form select, .stack-form textarea {
+  font: inherit; padding: 11px; border: 1.5px solid #cbd5e1; border-radius: 10px; background: #fff; width: 100%;
+}
+.stack-form textarea { resize: vertical; }
+.stack-form input:focus, .stack-form select:focus, .stack-form textarea:focus { outline: none; border-color: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-soft); }
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* ---------- Ajustes ---------- */
+.goal-setter { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 8px; }
+.switch-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; font-weight: 600; font-size: .9rem; }
+.switch-row input[type=checkbox] { width: 44px; height: 26px; appearance: none; -webkit-appearance: none; background: #cbd5e1; border-radius: 999px; position: relative; cursor: pointer; transition: background .2s; flex-shrink: 0; }
+.switch-row input[type=checkbox]:checked { background: var(--accent-2); }
+.switch-row input[type=checkbox]::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; background: #fff; border-radius: 50%; transition: transform .2s; }
+.switch-row input[type=checkbox]:checked::after { transform: translateX(18px); }
+.times-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.time-chip { background: var(--accent-soft); color: var(--accent); font-weight: 700; padding: 5px 8px 5px 12px; border-radius: 999px; display: inline-flex; align-items: center; gap: 6px; }
+.time-chip button { border: 0; background: rgba(15,118,110,.15); width: 20px; height: 20px; border-radius: 50%; cursor: pointer; color: var(--accent); font-size: .7rem; }
+.add-time-row { display: flex; gap: 8px; align-items: center; }
+.add-time-row input[type=time] { font: inherit; padding: 9px; border: 1.5px solid #cbd5e1; border-radius: 10px; }
+.file-btn { position: relative; overflow: hidden; }
+.pin-input { font: inherit; font-size: 1.6rem; letter-spacing: 8px; text-align: center; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; margin: 8px 0; }
+.pin-input.shake { animation: shake .3s; border-color: var(--danger); }
+@keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+  </style>
+</head>
+<body>
+  <div id="app">
+    <noscript><div class="noscript">Esta aplicacion necesita JavaScript activado para funcionar.</div></noscript>
+  </div>
+  <div id="toast-layer" class="toast-layer" aria-live="polite" aria-atomic="true"></div>
+  <div id="modal-root"></div>
+  <script>
+(() => {
+  var __defProp = Object.defineProperty;
+  var __export = (target, all) => {
+    for (var name in all)
+      __defProp(target, name, {
+        get: all[name],
+        enumerable: true,
+        configurable: true,
+        set: (newValue) => all[name] = () => newValue
+      });
+  };
+
+  // js/state.js
+  var STORAGE_KEY = "prehabilita.v1";
+  function todayKey(d = new Date) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  }
+  function daysBetween(aKey, bKey) {
+    const a = new Date(aKey + "T00:00:00");
+    const b = new Date(bKey + "T00:00:00");
+    return Math.round((a - b) / 86400000);
+  }
+  function defaultState() {
+    return {
+      version: 2,
+      onboarded: false,
+      profile: {
+        name: "",
+        surgeryType: "",
+        surgeryDate: "",
+        activityLevel: "medio",
+        smoker: false,
+        startDate: todayKey()
+      },
+      logs: {},
+      stats: {
+        xp: 0,
+        level: 1,
+        streak: 0,
+        bestStreak: 0,
+        daysCompleted: 0,
+        lastCompletedDay: null,
+        taskCounts: {},
+        counterTotals: {},
+        lessonsRead: 0,
+        hydrationGoalDays: 0,
+        bonusXp: 0
+      },
+      readLessons: [],
+      readPosts: [],
+      badges: [],
+      challengeAwards: {},
+      library: {
+        seeded: false,
+        tasks: [],
+        taskOverrides: {},
+        resources: [],
+        posts: []
+      },
+      settings: {
+        reducedMotion: false,
+        dailyGoal: 60,
+        reminders: {
+          enabled: false,
+          times: ["09:00"],
+          notified: {}
+        },
+        editor: {
+          pinEnabled: false,
+          pin: ""
+        }
+      }
+    };
+  }
+  var state = defaultState();
+  function loadState() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        state = deepMerge(defaultState(), parsed);
+      }
+    } catch (e) {
+      console.warn("No se pudo leer el estado guardado, se usa el estado por defecto.", e);
+      state = defaultState();
+    }
+    return state;
+  }
+  function saveState() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    } catch (e) {
+      console.warn("No se pudo guardar el estado.", e);
+    }
+  }
+  function getState() {
+    return state;
+  }
+  function resetState() {
+    state = defaultState();
+    saveState();
+    return state;
+  }
+  function getDayLog(dayKey = todayKey()) {
+    if (!state.logs[dayKey]) {
+      state.logs[dayKey] = { tasks: {}, done: false, xp: 0, mood: null };
+    }
+    return state.logs[dayKey];
+  }
+  function deepMerge(base, override) {
+    if (Array.isArray(base))
+      return Array.isArray(override) ? override : base;
+    if (typeof base === "object" && base !== null) {
+      const out = { ...base };
+      for (const k of Object.keys(base)) {
+        if (override && k in override) {
+          out[k] = deepMerge(base[k], override[k]);
+        }
+      }
+      if (override && typeof override === "object") {
+        for (const k of Object.keys(override)) {
+          if (!(k in out))
+            out[k] = override[k];
+        }
+      }
+      return out;
+    }
+    return override === undefined ? base : override;
+  }
+  function exportState() {
+    return JSON.stringify(state, null, 2);
+  }
+  function importState(json) {
+    const parsed = JSON.parse(json);
+    state = deepMerge(defaultState(), parsed);
+    saveState();
+    return state;
+  }
+
+  // js/content.js
+  var PILLARS = [
+    {
+      id: "fisico",
+      name: "Ejercicio físico",
+      emoji: "\uD83C\uDFC3",
+      color: "#0ea5e9",
+      tagline: "Mejora tu reserva cardiorrespiratoria y tu fuerza.",
+      why: "Una mejor capacidad física antes de la cirugía se asocia con menos complicaciones, recuperación más rápida y menor estancia hospitalaria."
+    },
+    {
+      id: "respiratorio",
+      name: "Entrenamiento respiratorio",
+      emoji: "\uD83E\uDEC1",
+      color: "#8b5cf6",
+      tagline: "Fortalece tus músculos respiratorios.",
+      why: "El entrenamiento de la musculatura inspiratoria reduce el riesgo de complicaciones pulmonares tras la anestesia general."
+    },
+    {
+      id: "nutricion",
+      name: "Nutrición",
+      emoji: "\uD83E\uDD57",
+      color: "#22c55e",
+      tagline: "Llega a la cirugía bien nutrido e hidratado.",
+      why: "Un buen estado nutricional (sobre todo suficiente proteína) favorece la cicatrización y la respuesta al estrés quirúrgico."
+    },
+    {
+      id: "mental",
+      name: "Bienestar mental",
+      emoji: "\uD83E\uDDD8",
+      color: "#f59e0b",
+      tagline: "Reduce la ansiedad y duerme mejor.",
+      why: "Menor ansiedad preoperatoria se asocia con menos dolor percibido, menor necesidad de analgésicos y mejor recuperación."
+    },
+    {
+      id: "habitos",
+      name: "Hábitos saludables",
+      emoji: "\uD83D\uDEAD",
+      color: "#ef4444",
+      tagline: "Tabaco, alcohol y medicación bajo control.",
+      why: "Dejar de fumar y reducir el alcohol antes de la cirugía disminuye significativamente las complicaciones respiratorias y de la herida."
+    },
+    {
+      id: "educacion",
+      name: "Educación y preparación",
+      emoji: "\uD83D\uDCDA",
+      color: "#14b8a6",
+      tagline: "Entiende tu anestesia y tu cirugía.",
+      why: "Un paciente informado colabora mejor, tiene menos miedo y se recupera antes."
+    }
+  ];
+  var TASKS = [
+    {
+      id: "caminar",
+      pillar: "fisico",
+      type: "counter",
+      unit: "min",
+      target: 30,
+      xp: 25,
+      icon: "\uD83D\uDEB6",
+      title: "Caminata activa",
+      desc: "Camina a paso ligero (puedes hablar pero no cantar). Suma minutos a lo largo del día."
+    },
+    {
+      id: "fuerza",
+      pillar: "fisico",
+      type: "check",
+      xp: 20,
+      icon: "\uD83D\uDCAA",
+      title: "Rutina de fuerza",
+      desc: "Sentadillas a una silla, puntillas y elevaciones de brazos: 2 series de 10."
+    },
+    {
+      id: "movilidad",
+      pillar: "fisico",
+      type: "check",
+      xp: 10,
+      icon: "\uD83E\uDD38",
+      title: "Movilidad y estiramientos",
+      desc: "5 minutos de estiramientos suaves de piernas, espalda y hombros."
+    },
+    {
+      id: "inspiratorio",
+      pillar: "respiratorio",
+      type: "counter",
+      unit: "reps",
+      target: 30,
+      xp: 25,
+      icon: "\uD83E\uDEC1",
+      title: "Entrenamiento inspiratorio",
+      desc: "Inspiraciones profundas y lentas (o con tu inspirómetro incentivador si tienes uno)."
+    },
+    {
+      id: "diafragmatica",
+      pillar: "respiratorio",
+      type: "check",
+      xp: 15,
+      icon: "\uD83C\uDF2C️",
+      title: "Respiración diafragmática",
+      desc: "5 minutos: inhala 4 s por la nariz, exhala 6 s por la boca, moviendo el abdomen."
+    },
+    {
+      id: "tos-eficaz",
+      pillar: "respiratorio",
+      type: "check",
+      xp: 10,
+      icon: "\uD83D\uDCA8",
+      title: "Técnica de tos eficaz",
+      desc: "Practica la tos asistida que usarás tras la cirugía para despejar secreciones."
+    },
+    {
+      id: "proteina",
+      pillar: "nutricion",
+      type: "check",
+      xp: 20,
+      icon: "\uD83C\uDF73",
+      title: "Proteína en cada comida",
+      desc: "Incluye una fuente de proteína (huevo, legumbre, pescado, carne magra, lácteos) en cada comida principal."
+    },
+    {
+      id: "hidratacion",
+      pillar: "nutricion",
+      type: "counter",
+      unit: "vasos",
+      target: 8,
+      xp: 15,
+      icon: "\uD83D\uDCA7",
+      title: "Hidratación",
+      desc: "Bebe agua a lo largo del día (salvo indicación médica de restricción)."
+    },
+    {
+      id: "fruta-verdura",
+      pillar: "nutricion",
+      type: "check",
+      xp: 10,
+      icon: "\uD83E\uDD66",
+      title: "5 raciones de fruta/verdura",
+      desc: "Colorea tu plato con frutas y verduras para vitaminas y fibra."
+    },
+    {
+      id: "relajacion",
+      pillar: "mental",
+      type: "check",
+      xp: 20,
+      icon: "\uD83E\uDDD8",
+      title: "Relajación guiada",
+      desc: "10 minutos de relajación, meditación o respiración consciente."
+    },
+    {
+      id: "sueno",
+      pillar: "mental",
+      type: "check",
+      xp: 15,
+      icon: "\uD83D\uDE34",
+      title: "Higiene del sueño",
+      desc: "Sin pantallas 30 min antes de dormir; apunta a 7-8 h de sueño."
+    },
+    {
+      id: "animo",
+      pillar: "mental",
+      type: "check",
+      xp: 10,
+      icon: "\uD83D\uDCD3",
+      title: "Registro de ánimo",
+      desc: "Anota cómo te sientes hoy y una cosa por la que estés agradecido."
+    },
+    {
+      id: "no-tabaco",
+      pillar: "habitos",
+      type: "check",
+      xp: 30,
+      icon: "\uD83D\uDEAD",
+      title: "Día sin tabaco",
+      desc: "Cada día sin fumar mejora tu oxigenación y reduce complicaciones. ¡Cuenta!"
+    },
+    {
+      id: "no-alcohol",
+      pillar: "habitos",
+      type: "check",
+      xp: 20,
+      icon: "\uD83D\uDEB1",
+      title: "Día sin alcohol",
+      desc: "Evitar el alcohol mejora la coagulación, el hígado y el sistema inmune."
+    },
+    {
+      id: "medicacion",
+      pillar: "habitos",
+      type: "check",
+      xp: 15,
+      icon: "\uD83D\uDC8A",
+      title: "Medicación según indicación",
+      desc: "Toma tu medicación habitual tal y como te indicó tu equipo médico."
+    },
+    {
+      id: "leccion",
+      pillar: "educacion",
+      type: "check",
+      xp: 15,
+      icon: "\uD83D\uDCD6",
+      title: "Lección del día",
+      desc: "Lee una píldora educativa sobre tu proceso quirúrgico y anestésico."
+    },
+    {
+      id: "checklist-preop",
+      pillar: "educacion",
+      type: "check",
+      xp: 10,
+      icon: "✅",
+      title: "Repaso de preparativos",
+      desc: "Revisa tu lista de preparativos preoperatorios (ayuno, documentos, acompañante)."
+    }
+  ];
+  var LESSONS = [
+    { id: "l1", title: "¿Qué es la prehabilitación?", body: 'La prehabilitación es preparar tu cuerpo y tu mente ANTES de la cirugía para llegar en la mejor forma posible. Igual que un atleta entrena antes de una competición, tú te preparas para el "gran día". Cuanto mejor sea tu punto de partida, mejor toleras la anestesia y la cirugía, y más rápido te recuperas.' },
+    { id: "l2", title: "Los 4 pilares que más importan", body: "Ejercicio (capacidad física), respiración (músculos pulmonares), nutrición (proteína e hidratación) y bienestar mental (ansiedad y sueño). Sumar hábitos como dejar el tabaco potencia enormemente los resultados." },
+    { id: "l3", title: "Tu anestesia, paso a paso", body: "El día de la cirugía, el equipo de anestesia te monitorizará (corazón, oxígeno, presión). Con anestesia general dormirás profundamente y no sentirás dolor. Al despertar estarás en la sala de recuperación, vigilado de cerca. Preguntar tus dudas al anestesiólogo reduce mucho el miedo." },
+    { id: "l4", title: "Por qué entrenar la respiración", body: "Tras una anestesia general, los pulmones pueden colapsar zonas pequeñas (atelectasias). Entrenar la musculatura inspiratoria y practicar la respiración profunda reduce el riesgo de neumonía y otras complicaciones pulmonares." },
+    { id: "l5", title: "El poder de dejar de fumar", body: "Dejar de fumar aunque sea 4 semanas antes reduce de forma notable las complicaciones de la herida y respiratorias. A las 12-24 h ya bajan los niveles de monóxido de carbono y mejora el oxígeno que llega a tus tejidos." },
+    { id: "l6", title: "Proteína: el ladrillo de tu recuperación", body: "La cirugía es un estrés que consume proteína para cicatrizar y mantener tus músculos. Reparte la proteína entre todas las comidas del día. Si tienes poco apetito, coméntalo con tu equipo: pueden recomendarte suplementos." },
+    { id: "l7", title: "El ayuno preoperatorio moderno", body: 'Ya no es necesario "ayuno desde la medianoche" en la mayoría de casos. Muchos protocolos permiten líquidos claros hasta 2 h antes. SIEMPRE sigue exactamente las instrucciones concretas de tu centro: son tu norma.' },
+    { id: "l8", title: "Domina la ansiedad preoperatoria", body: "Es normal tener miedo. Técnicas como la respiración 4-6, la relajación muscular progresiva y visualizar una recuperación exitosa reducen el estrés. Dormir bien la semana previa también ayuda a tu sistema inmune." }
+  ];
+  var PREOP_CHECKLIST = [
+    "Confirma la fecha, hora y lugar de tu cirugía.",
+    "Anota tus dudas para la consulta de preanestesia.",
+    "Ten a mano la lista de tus medicamentos y alergias.",
+    "Confirma qué medicación debes suspender o mantener (según indicación).",
+    "Organiza a un acompañante para el día del alta.",
+    "Prepara ropa cómoda y artículos de aseo para el hospital.",
+    "Sigue al pie de la letra las instrucciones de ayuno de tu centro.",
+    "Ducha con el jabón antiséptico si te lo indicaron."
+  ];
+  var BADGES = [
+    {
+      id: "primer-paso",
+      name: "Primer paso",
+      emoji: "\uD83D\uDC5F",
+      desc: "Completa tu primer día de programa.",
+      check: (s) => s.stats.daysCompleted >= 1
+    },
+    {
+      id: "racha-3",
+      name: "En marcha",
+      emoji: "\uD83D\uDD25",
+      desc: "Mantén una racha de 3 días.",
+      check: (s) => s.stats.bestStreak >= 3
+    },
+    {
+      id: "racha-7",
+      name: "Semana perfecta",
+      emoji: "⭐",
+      desc: "Mantén una racha de 7 días.",
+      check: (s) => s.stats.bestStreak >= 7
+    },
+    {
+      id: "racha-14",
+      name: "Imparable",
+      emoji: "\uD83C\uDFC6",
+      desc: "Mantén una racha de 14 días.",
+      check: (s) => s.stats.bestStreak >= 14
+    },
+    {
+      id: "nivel-5",
+      name: "Atleta prehab",
+      emoji: "\uD83C\uDF96️",
+      desc: "Alcanza el nivel 5.",
+      check: (s) => s.stats.level >= 5
+    },
+    {
+      id: "pulmones",
+      name: "Pulmones de acero",
+      emoji: "\uD83E\uDEC1",
+      desc: "Completa 20 sesiones respiratorias.",
+      check: (s) => (s.stats.taskCounts["inspiratorio"] || 0) + (s.stats.taskCounts["diafragmatica"] || 0) >= 20
+    },
+    {
+      id: "caminante",
+      name: "Caminante",
+      emoji: "\uD83E\uDD7E",
+      desc: "Acumula 300 minutos de caminata.",
+      check: (s) => (s.stats.counterTotals["caminar"] || 0) >= 300
+    },
+    {
+      id: "humo-cero",
+      name: "Humo cero",
+      emoji: "\uD83D\uDEAD",
+      desc: "7 días seguidos sin tabaco.",
+      check: (s) => (s.stats.taskCounts["no-tabaco"] || 0) >= 7
+    },
+    {
+      id: "sabio",
+      name: "Bien informado",
+      emoji: "\uD83E\uDDE0",
+      desc: "Lee 5 lecciones educativas.",
+      check: (s) => (s.stats.lessonsRead || 0) >= 5
+    },
+    {
+      id: "hidratado",
+      name: "Bien hidratado",
+      emoji: "\uD83D\uDCA7",
+      desc: "Alcanza tu meta de hidratación 5 días.",
+      check: (s) => (s.stats.hydrationGoalDays || 0) >= 5
+    },
+    {
+      id: "listo",
+      name: "¡Listo para el quirófano!",
+      emoji: "\uD83C\uDF89",
+      desc: "Completa 21 días de programa.",
+      check: (s) => s.stats.daysCompleted >= 21
+    }
+  ];
+  var WEEKLY_CHALLENGES = [
+    { id: "w-camina", title: "Reto de la semana: 150 min de caminata", metric: "caminar", target: 150, unit: "min", xp: 100 },
+    { id: "w-resp", title: "Reto de la semana: 5 sesiones respiratorias", metric: "inspiratorio", target: 5, unit: "sesiones", xp: 80 },
+    { id: "w-agua", title: "Reto de la semana: hidrátate 5 días", metric: "hidratacion", target: 5, unit: "días", xp: 70 }
+  ];
+  var DISCLAIMER = "PreHabilita es una herramienta educativa y de acompañamiento. No sustituye la valoración ni las indicaciones de tu equipo médico y anestésico. Ante cualquier duda, dolor o síntoma nuevo, consulta con tu profesional de salud. Sigue siempre las instrucciones concretas de tu centro (ayuno, medicación, ejercicio permitido).";
+  var ERAS_NOTE = "Este programa sigue los principios de la recuperación intensificada (ERAS®): " + "prehabilitación multimodal (ejercicio + nutrición + apoyo psicológico), " + "cese de tabaco y alcohol, ayuno preoperatorio abreviado con carga de hidratos de carbono, " + "y educación del paciente. Debe adaptarse siempre al protocolo concreto de tu centro.";
+  var DEFAULT_POSTS = [
+    {
+      id: "post-eras",
+      title: "¿Qué es el protocolo ERAS y por qué te beneficia?",
+      category: "educacion",
+      cover: "",
+      author: "Equipo de prehabilitación",
+      date: "2026-01-01",
+      body: `ERAS son las siglas en inglés de "recuperación intensificada tras la cirugía". Es un conjunto de medidas, respaldadas por la evidencia científica, que buscan que te recuperes antes y con menos complicaciones.
+
+La idea central es sencilla: en lugar de esperar pasivamente a la operación, TÚ participas activamente en tu preparación. Esto incluye:
+
+• Prehabilitación: mejorar tu forma física, tu nutrición y tu bienestar mental en las semanas previas.
+• Optimizar hábitos: reducir o eliminar tabaco y alcohol.
+• Ayuno inteligente: nada de largas horas sin comer sin necesidad; a menudo se permite una bebida rica en hidratos de carbono unas horas antes.
+• Movilización precoz y control del dolor tras la cirugía.
+
+Cada tarea que completas en esta app es una pieza de ese rompecabezas. No se trata de hacerlo perfecto, sino de sumar pequeños pasos cada día.`
+    },
+    {
+      id: "post-carga",
+      title: "Carga de hidratos de carbono antes de la cirugía",
+      category: "nutricion",
+      cover: "",
+      author: "Equipo de prehabilitación",
+      date: "2026-01-02",
+      body: `Durante mucho tiempo se pidió a los pacientes estar "en ayunas desde medianoche". Hoy sabemos que llegar al quirófano con las reservas de energía agotadas no ayuda.
+
+Muchos protocolos ERAS recomiendan una bebida rica en hidratos de carbono la noche anterior y unas 2-3 horas antes de la cirugía (según indicación). Esto puede reducir la sensación de sed, hambre y ansiedad, y ayudar a tu cuerpo a afrontar mejor el estrés quirúrgico.
+
+IMPORTANTE: esto depende totalmente de tu tipo de cirugía y de las normas de tu centro. Nunca tomes nada por tu cuenta el día de la operación. Pregunta a tu equipo qué está permitido en tu caso concreto.`
+    },
+    {
+      id: "post-mindfulness",
+      title: "Prepara tu mente: mindfulness antes del quirófano",
+      category: "mental",
+      cover: "",
+      author: "Equipo de prehabilitación",
+      date: "2026-01-03",
+      body: `Sentir nervios antes de una cirugía es completamente normal. La buena noticia es que puedes entrenar tu mente para afrontarlo mejor.
+
+Prueba este ejercicio de 5 minutos:
+1. Siéntate cómodo y cierra los ojos.
+2. Inhala por la nariz contando hasta 4.
+3. Exhala despacio por la boca contando hasta 6.
+4. Si aparece un pensamiento, obsérvalo sin juzgarlo y vuelve a tu respiración.
+
+Practicar esto a diario reduce la ansiedad y puede disminuir la percepción de dolor tras la operación. Añade a tus recursos vídeos de meditación guiada que te resulten agradables y conviértelo en un hábito.`
+    },
+    {
+      id: "post-ejercicio",
+      title: "Ejercicio seguro en casa antes de la operación",
+      category: "fisico",
+      cover: "",
+      author: "Equipo de prehabilitación",
+      date: "2026-01-04",
+      body: `No necesitas un gimnasio para prepararte. La combinación más útil es:
+
+• Aeróbico: caminar a paso ligero, 20-30 minutos casi todos los días. Deberías poder hablar, pero no cantar.
+• Fuerza: 2-3 veces por semana. Levantarte de una silla sin manos, ponerte de puntillas, elevaciones de brazos con una botella de agua.
+• Respiración: ejercicios inspiratorios diarios.
+
+Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta de aire desproporcionada, para y consulta con tu equipo médico. Adapta siempre la intensidad a lo que tu profesional te haya autorizado.`
+    }
+  ];
+  var DEFAULT_RESOURCES = [
+    {
+      id: "res-mindfulness",
+      pillar: "mental",
+      type: "link",
+      url: "https://www.youtube.com/results?search_query=meditaci%C3%B3n+guiada+mindfulness+10+minutos",
+      title: "Meditaciones guiadas de mindfulness",
+      desc: "Ejemplos de meditación guiada (10 min). Reemplázalo por tu vídeo favorito."
+    },
+    {
+      id: "res-nutricion",
+      pillar: "nutricion",
+      type: "link",
+      url: "https://www.youtube.com/results?search_query=alimentaci%C3%B3n+rica+en+prote%C3%ADnas+recuperaci%C3%B3n",
+      title: "Alimentación rica en proteínas",
+      desc: "Ideas de comidas ricas en proteína para tu prehabilitación."
+    },
+    {
+      id: "res-ejercicio",
+      pillar: "fisico",
+      type: "link",
+      url: "https://www.youtube.com/results?search_query=ejercicios+en+casa+para+mayores+fuerza+suave",
+      title: "Ejercicios de fuerza suaves en casa",
+      desc: "Rutinas sencillas de fuerza sin material."
+    }
+  ];
+
+  // js/data.js
+  function uid(prefix = "id") {
+    return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 6)}`;
+  }
+  function seedLibrary(state2) {
+    const lib = state2.library;
+    if (lib.seeded)
+      return;
+    if (!lib.posts || lib.posts.length === 0)
+      lib.posts = DEFAULT_POSTS.map((p) => ({ ...p }));
+    if (!lib.resources || lib.resources.length === 0)
+      lib.resources = DEFAULT_RESOURCES.map((r) => ({ ...r }));
+    lib.seeded = true;
+  }
+  function getPillars(state2) {
+    const custom = state2.library.customPillars || [];
+    return [...PILLARS, ...custom];
+  }
+  function getPillarById(state2, id) {
+    return getPillars(state2).find((p) => p.id === id) || null;
+  }
+  function getTasks(state2) {
+    const overrides = state2.library.taskOverrides || {};
+    const base = TASKS.map((t) => {
+      const o = overrides[t.id];
+      return o ? { ...t, ...o } : t;
+    }).filter((t) => !t.disabled);
+    const custom = (state2.library.tasks || []).filter((t) => !t.disabled);
+    return [...base, ...custom];
+  }
+  function getAllTasksForEditor(state2) {
+    const overrides = state2.library.taskOverrides || {};
+    const base = TASKS.map((t) => {
+      const o = overrides[t.id];
+      return { ...t, ...o || {}, isDefault: true };
+    });
+    const custom = (state2.library.tasks || []).map((t) => ({ ...t, isDefault: false }));
+    return [...base, ...custom];
+  }
+  function getTaskById(state2, id) {
+    return getTasks(state2).find((t) => t.id === id) || null;
+  }
+  function getLessons() {
+    return LESSONS;
+  }
+  function getPosts(state2) {
+    return (state2.library.posts || []).slice().sort((a, b) => (b.date || "").localeCompare(a.date || ""));
+  }
+  function getPostById(state2, id) {
+    return (state2.library.posts || []).find((p) => p.id === id) || null;
+  }
+  function getResources(state2) {
+    return state2.library.resources || [];
+  }
+  function getDailyGoal(state2) {
+    return state2.settings?.dailyGoal || 60;
+  }
+  function parseYouTubeId(url) {
+    if (!url)
+      return null;
+    const patterns = [
+      /(?:youtube\.com\/watch\?[^#]*\bv=)([\w-]{11})/,
+      /(?:youtu\.be\/)([\w-]{11})/,
+      /(?:youtube\.com\/embed\/)([\w-]{11})/,
+      /(?:youtube\.com\/shorts\/)([\w-]{11})/,
+      /(?:youtube\.com\/live\/)([\w-]{11})/
+    ];
+    for (const re of patterns) {
+      const m = url.match(re);
+      if (m)
+        return m[1];
+    }
+    return null;
+  }
+  function youTubeEmbedUrl(id) {
+    return `https://www.youtube-nocookie.com/embed/${id}`;
+  }
+
+  // js/gamification.js
+  function cumulativeXpForLevel(level) {
+    let total = 0;
+    for (let l = 1;l < level; l++)
+      total += 100 + (l - 1) * 40;
+    return total;
+  }
+  function levelInfo(xp) {
+    let level = 1;
+    while (cumulativeXpForLevel(level + 1) <= xp)
+      level++;
+    const floor = cumulativeXpForLevel(level);
+    const ceil = cumulativeXpForLevel(level + 1);
+    const into = xp - floor;
+    const span = ceil - floor;
+    return { level, floor, ceil, into, span, progress: Math.min(1, into / span) };
+  }
+  function taskIsDone(t, dayLog) {
+    const v = dayLog?.tasks?.[t.id];
+    if (t.type === "check")
+      return v === true;
+    return typeof v === "number" && v >= t.target;
+  }
+  function dayXp(dayLog, tasks) {
+    if (!dayLog || !tasks)
+      return 0;
+    let xp = 0;
+    for (const t of tasks) {
+      if (taskIsDone(t, dayLog))
+        xp += t.xp;
+    }
+    return xp;
+  }
+  function isDayComplete(dayLog, tasks, goal) {
+    return dayXp(dayLog, tasks) >= goal;
+  }
+  function tasksDoneCount(dayLog, tasks) {
+    if (!dayLog || !tasks)
+      return 0;
+    return tasks.reduce((n, t) => n + (taskIsDone(t, dayLog) ? 1 : 0), 0);
+  }
+  function mondayOf(dateKey) {
+    const d = new Date(dateKey + "T00:00:00");
+    const dow = (d.getDay() + 6) % 7;
+    d.setDate(d.getDate() - dow);
+    return todayKey(d);
+  }
+  function getWeeklyChallenge(state2) {
+    const startMon = mondayOf(state2.profile.startDate || todayKey());
+    const nowMon = mondayOf(todayKey());
+    const weekIndex = Math.max(0, Math.round(daysBetween(nowMon, startMon) / 7));
+    const challenge = WEEKLY_CHALLENGES[weekIndex % WEEKLY_CHALLENGES.length];
+    const hydTask = getTaskById(state2, "hidratacion");
+    const hydTarget = hydTask ? hydTask.target : 8;
+    let progress = 0;
+    for (const [key, log] of Object.entries(state2.logs)) {
+      if (mondayOf(key) !== nowMon)
+        continue;
+      const v = log.tasks[challenge.metric];
+      if (challenge.id === "w-camina") {
+        if (typeof v === "number")
+          progress += v;
+      } else if (challenge.id === "w-resp") {
+        if (typeof v === "number" && v > 0)
+          progress += 1;
+      } else if (challenge.id === "w-agua") {
+        if (typeof v === "number" && v >= hydTarget)
+          progress += 1;
+      }
+    }
+    const done = progress >= challenge.target;
+    return { challenge, progress: Math.min(progress, challenge.target), rawProgress: progress, target: challenge.target, done, weekKey: nowMon };
+  }
+  function recompute(state2) {
+    const stats = state2.stats;
+    const tasks = getTasks(state2);
+    const goal = getDailyGoal(state2);
+    const hydTask = getTaskById(state2, "hidratacion");
+    const hydTarget = hydTask ? hydTask.target : 8;
+    const taskCounts = {};
+    const counterTotals = {};
+    let taskXpTotal = 0;
+    let hydrationGoalDays = 0;
+    const dayKeys = Object.keys(state2.logs).sort();
+    const doneDays = [];
+    for (const key of dayKeys) {
+      const log = state2.logs[key];
+      for (const t2 of tasks) {
+        const v = log.tasks[t2.id];
+        if (t2.type === "check" && v === true) {
+          taskCounts[t2.id] = (taskCounts[t2.id] || 0) + 1;
+        } else if (t2.type === "counter" && typeof v === "number") {
+          counterTotals[t2.id] = (counterTotals[t2.id] || 0) + v;
+          if (v >= t2.target)
+            taskCounts[t2.id] = (taskCounts[t2.id] || 0) + 1;
+        }
+      }
+      const xp = dayXp(log, tasks);
+      taskXpTotal += xp;
+      log.xp = xp;
+      log.done = xp >= goal;
+      if (log.done)
+        doneDays.push(key);
+      const hyd = log.tasks["hidratacion"];
+      if (typeof hyd === "number" && hyd >= hydTarget)
+        hydrationGoalDays++;
+    }
+    let bestRun = 0;
+    let run = 0;
+    let prev = null;
+    for (const key of doneDays) {
+      if (prev && daysBetween(key, prev) === 1)
+        run++;
+      else
+        run = 1;
+      prev = key;
+      if (run > bestRun)
+        bestRun = run;
+    }
+    let currentStreak = 0;
+    const doneSet = new Set(doneDays);
+    const t = todayKey();
+    const lastDone = doneDays[doneDays.length - 1];
+    if (lastDone && daysBetween(t, lastDone) <= 1) {
+      let c = lastDone;
+      while (doneSet.has(c)) {
+        currentStreak++;
+        const d = new Date(c + "T00:00:00");
+        d.setDate(d.getDate() - 1);
+        c = todayKey(d);
+      }
+    }
+    stats.taskCounts = taskCounts;
+    stats.counterTotals = counterTotals;
+    stats.hydrationGoalDays = hydrationGoalDays;
+    stats.daysCompleted = doneDays.length;
+    stats.streak = currentStreak;
+    stats.bestStreak = Math.max(stats.bestStreak || 0, bestRun, currentStreak);
+    stats.lastCompletedDay = lastDone || null;
+    stats.lessonsRead = state2.readLessons.length + (state2.readPosts ? state2.readPosts.length : 0);
+    const bonusXp = stats.bonusXp || 0;
+    stats.xp = taskXpTotal + bonusXp;
+    stats.level = levelInfo(stats.xp).level;
+    return stats;
+  }
+  function evaluateBadges(state2) {
+    const unlocked = new Set(state2.badges);
+    const fresh = [];
+    for (const b of BADGES) {
+      if (!unlocked.has(b.id) && b.check(state2)) {
+        state2.badges.push(b.id);
+        fresh.push(b);
+      }
+    }
+    return fresh;
+  }
+  function applyEngine(state2) {
+    const prevLevel = state2.stats.level || 1;
+    const wc = getWeeklyChallenge(state2);
+    state2.challengeAwards = state2.challengeAwards || {};
+    const awardKey = `${wc.weekKey}:${wc.challenge.id}`;
+    let challengeCompletedNow = false;
+    if (wc.done && !state2.challengeAwards[awardKey]) {
+      state2.challengeAwards[awardKey] = wc.challenge.xp;
+      state2.stats.bonusXp = (state2.stats.bonusXp || 0) + wc.challenge.xp;
+      challengeCompletedNow = true;
+    }
+    recompute(state2);
+    const newBadges = evaluateBadges(state2);
+    const level = state2.stats.level;
+    return {
+      prevLevel,
+      level,
+      leveledUp: level > prevLevel,
+      newBadges,
+      challengeCompletedNow,
+      challenge: wc.challenge
+    };
+  }
+
+  // js/ui.js
+  function esc(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  }
+  function formatBody(body) {
+    return esc(body).replace(/\n/g, "<br>");
+  }
+  function daysToSurgery(state2) {
+    const d = state2.profile.surgeryDate;
+    if (!d)
+      return null;
+    return daysBetween(d, todayKey());
+  }
+  function progressBar(pct, color = "var(--accent)") {
+    const p = Math.max(0, Math.min(100, Math.round(pct)));
+    return `<div class="bar"><span style="width:${p}%;background:${color}"></span></div>`;
+  }
+  function statChip(icon, value, label) {
+    return `<div class="chip"><span class="chip-ico">${icon}</span><div><strong>${esc(value)}</strong><small>${esc(label)}</small></div></div>`;
+  }
+  function renderHeader(state2) {
+    const li = levelInfo(state2.stats.xp);
+    const dts = daysToSurgery(state2);
+    let countdown = "";
+    if (dts === null) {
+      countdown = `<div class="countdown neutral"><strong>—</strong><small>fecha sin definir</small></div>`;
+    } else if (dts > 0) {
+      countdown = `<div class="countdown"><strong>${dts}</strong><small>día${dts === 1 ? "" : "s"} para tu cirugía</small></div>`;
+    } else if (dts === 0) {
+      countdown = `<div class="countdown today"><strong>Hoy</strong><small>¡es el día!</small></div>`;
+    } else {
+      countdown = `<div class="countdown neutral"><strong>+${Math.abs(dts)}</strong><small>días post-cirugía</small></div>`;
+    }
+    return `
+  <header class="app-header">
+    <div class="header-top">
+      <div class="brand">
+        <span class="brand-logo">\uD83E\uDEC1</span>
+        <div>
+          <div class="brand-name">PreHabilita</div>
+          <div class="brand-sub">Hola, ${esc(state2.profile.name || "paciente")} \uD83D\uDC4B</div>
+        </div>
+      </div>
+      ${countdown}
+    </div>
+    <div class="level-row">
+      <div class="level-badge">Nv ${li.level}</div>
+      <div class="level-bar">
+        ${progressBar(li.progress * 100)}
+        <div class="level-xp">${li.into} / ${li.span} XP</div>
+      </div>
+      <div class="streak" title="Racha de días">\uD83D\uDD25 ${state2.stats.streak}</div>
+    </div>
+  </header>`;
+  }
+  function renderToday(state2) {
+    const tasks = getTasks(state2);
+    const goal = getDailyGoal(state2);
+    const dayLog = state2.logs[todayKey()] || { tasks: {} };
+    const xp = dayXp(dayLog, tasks);
+    const complete = isDayComplete(dayLog, tasks, goal);
+    const doneN = tasksDoneCount(dayLog, tasks);
+    const goalPct = xp / goal * 100;
+    const wc = getWeeklyChallenge(state2);
+    const pillars = getPillars(state2);
+    const dailyCard = `
+    <section class="card daily-goal ${complete ? "is-complete" : ""}">
+      <div class="daily-goal-head">
+        <div>
+          <h2>Tu día de hoy</h2>
+          <p class="muted">${complete ? "¡Objetivo diario logrado! \uD83C\uDF89" : `Suma ${Math.max(0, goal - xp)} XP más para completar el día`}</p>
+        </div>
+        <div class="daily-ring">${doneN}<small>tareas</small></div>
+      </div>
+      ${progressBar(goalPct)}
+      <div class="daily-goal-foot">
+        <span>${xp} / ${goal} XP diarios</span>
+        ${complete ? '<span class="badge-ok">✔ Día completo</span>' : ""}
+      </div>
+    </section>`;
+    const challengeCard = `
+    <section class="card challenge">
+      <div class="challenge-head"><span>\uD83C\uDFAF ${esc(wc.challenge.title)}</span><span class="challenge-xp">+${wc.challenge.xp} XP</span></div>
+      ${progressBar(wc.progress / wc.target * 100, "#f59e0b")}
+      <div class="muted small">${wc.progress} / ${wc.target} ${esc(wc.challenge.unit)} ${wc.done ? "· ¡completado! ✅" : ""}</div>
+    </section>`;
+    const groups = pillars.map((p) => {
+      const pt = tasks.filter((t) => t.pillar === p.id);
+      if (pt.length === 0)
+        return "";
+      const items = pt.map((t) => renderTaskItem(t, dayLog)).join("");
+      const doneInPillar = pt.filter((t) => taskIsDone(t, dayLog)).length;
+      return `
+      <section class="card pillar-group" style="--pc:${p.color}">
+        <button class="pillar-head" data-action="open-pillar" data-pillar="${p.id}">
+          <span class="pillar-emoji">${p.emoji}</span>
+          <span class="pillar-title">${esc(p.name)}</span>
+          <span class="pillar-count">${doneInPillar}/${pt.length}</span>
+        </button>
+        <div class="task-list">${items}</div>
+      </section>`;
+    }).join("");
+    return `
+    ${dailyCard}
+    ${challengeCard}
+    <div class="section-label">Tareas de hoy</div>
+    ${groups}
+    ${moodCard(dayLog)}
+    <p class="disclaimer-mini" data-action="show-disclaimer">ⓘ Aviso médico importante</p>
+  `;
+  }
+  function renderTaskItem(t, dayLog) {
+    const v = dayLog.tasks[t.id];
+    const done = taskIsDone(t, dayLog);
+    if (t.type === "check") {
+      return `
+      <div class="task ${done ? "done" : ""}">
+        <button class="task-check" data-action="toggle-task" data-task="${t.id}" aria-pressed="${done}" aria-label="Marcar ${esc(t.title)}">
+          ${done ? "✔" : ""}
+        </button>
+        <div class="task-body">
+          <div class="task-title">${esc(t.icon || "")} ${esc(t.title)}</div>
+          <div class="task-desc">${esc(t.desc || "")}</div>
+        </div>
+        <div class="task-xp">+${t.xp}</div>
+      </div>`;
+    }
+    const cur = typeof v === "number" ? v : 0;
+    const pct = Math.min(100, cur / t.target * 100);
+    return `
+    <div class="task counter ${done ? "done" : ""}">
+      <div class="task-body">
+        <div class="task-title">${esc(t.icon || "")} ${esc(t.title)} ${done ? "✔" : ""}</div>
+        <div class="task-desc">${esc(t.desc || "")}</div>
+        <div class="counter-row">
+          <button class="stepper" data-action="counter-dec" data-task="${t.id}" aria-label="Restar">−</button>
+          <div class="counter-val">${cur} <small>/ ${t.target} ${esc(t.unit || "")}</small></div>
+          <button class="stepper" data-action="counter-inc" data-task="${t.id}" aria-label="Sumar">+</button>
+        </div>
+        ${progressBar(pct)}
+      </div>
+      <div class="task-xp">+${t.xp}</div>
+    </div>`;
+  }
+  function moodCard(dayLog) {
+    const moods = ["\uD83D\uDE23", "\uD83D\uDE15", "\uD83D\uDE10", "\uD83D\uDE42", "\uD83D\uDE04"];
+    const cur = dayLog.mood;
+    const btns = moods.map((m, i) => `
+    <button class="mood-btn ${cur === i + 1 ? "sel" : ""}" data-action="set-mood" data-mood="${i + 1}" aria-label="Ánimo ${i + 1} de 5">${m}</button>
+  `).join("");
+    return `
+    <section class="card mood">
+      <h3>¿Cómo te sientes hoy?</h3>
+      <div class="mood-row">${btns}</div>
+    </section>`;
+  }
+  function renderPlan(state2) {
+    const tasks = getTasks(state2);
+    const cards = getPillars(state2).map((p) => {
+      const pt = tasks.filter((t) => t.pillar === p.id);
+      if (pt.length === 0)
+        return "";
+      return `
+      <section class="card plan-pillar" style="--pc:${p.color}">
+        <div class="plan-pillar-head">
+          <span class="pillar-emoji">${p.emoji}</span>
+          <div>
+            <h3>${esc(p.name)}</h3>
+            <p class="muted small">${esc(p.tagline || "")}</p>
+          </div>
+        </div>
+        ${p.why ? `<p class="why">\uD83D\uDCA1 ${esc(p.why)}</p>` : ""}
+        <ul class="plan-tasks">
+          ${pt.map((t) => `<li><span>${esc(t.icon || "•")}</span><div><strong>${esc(t.title)}</strong><br><small class="muted">${esc(t.desc || "")}</small></div><span class="xp-tag">+${t.xp}</span></li>`).join("")}
+        </ul>
+      </section>`;
+    }).join("");
+    return `<div class="section-label">Tu programa de prehabilitación</div>${cards}`;
+  }
+  function renderProgress(state2, charts) {
+    const li = levelInfo(state2.stats.xp);
+    const tasks = getTasks(state2);
+    const goal = getDailyGoal(state2);
+    const chips = `
+    <div class="chips">
+      ${statChip("⭐", li.level, "Nivel")}
+      ${statChip("✨", state2.stats.xp, "XP total")}
+      ${statChip("\uD83D\uDD25", state2.stats.streak, "Racha actual")}
+      ${statChip("\uD83C\uDFC5", state2.stats.bestStreak, "Mejor racha")}
+      ${statChip("\uD83D\uDCC5", state2.stats.daysCompleted, "Días completos")}
+      ${statChip("\uD83C\uDF96️", state2.badges.length, "Medallas")}
+    </div>`;
+    const lineData = [];
+    for (let i = 13;i >= 0; i--) {
+      const d = new Date;
+      d.setDate(d.getDate() - i);
+      const key = todayKey(d);
+      const log = state2.logs[key];
+      lineData.push({ label: key.slice(8) + "/" + key.slice(5, 7), value: log ? dayXp(log, tasks) : 0 });
+    }
+    const lineCard = `
+    <section class="card">
+      <h3>\uD83D\uDCC8 XP diaria (últimos 14 días)</h3>
+      ${charts.lineChart(lineData, { color: "#0f766e" })}
+    </section>`;
+    const pillars = getPillars(state2);
+    const barData = pillars.map((p) => {
+      const pt = tasks.filter((t) => t.pillar === p.id);
+      if (pt.length === 0)
+        return null;
+      let done = 0, possible = 0;
+      for (let i = 6;i >= 0; i--) {
+        const d = new Date;
+        d.setDate(d.getDate() - i);
+        const log = state2.logs[todayKey(d)];
+        possible += pt.length;
+        if (log)
+          done += pt.filter((t) => taskIsDone(t, log)).length;
+      }
+      const pctv = possible ? Math.round(done / possible * 100) : 0;
+      return { label: p.emoji, value: pctv, color: p.color, sub: pctv + "%" };
+    }).filter(Boolean);
+    const barCard = `
+    <section class="card">
+      <h3>\uD83D\uDCCA Adherencia por pilar (7 días)</h3>
+      ${charts.barChart(barData)}
+    </section>`;
+    const cells = [];
+    for (let i = 20;i >= 0; i--) {
+      const d = new Date;
+      d.setDate(d.getDate() - i);
+      const key = todayKey(d);
+      const log = state2.logs[key];
+      const xp = log ? dayXp(log, tasks) : 0;
+      const lvl = xp === 0 ? 0 : xp >= goal ? 3 : xp >= goal / 2 ? 2 : 1;
+      cells.push(`<div class="heat l${lvl}" title="${key}: ${xp} XP"></div>`);
+    }
+    const heat = `
+    <section class="card">
+      <h3>Constancia (últimos 21 días)</h3>
+      <div class="heatmap">${cells.join("")}</div>
+      <div class="heat-legend"><span>Menos</span><i class="heat l0"></i><i class="heat l1"></i><i class="heat l2"></i><i class="heat l3"></i><span>Más</span></div>
+    </section>`;
+    const moodLogs = Object.entries(state2.logs).filter(([, l]) => l.mood).sort((a, b) => a[0].localeCompare(b[0])).slice(-7);
+    const moodEmoji = ["", "\uD83D\uDE23", "\uD83D\uDE15", "\uD83D\uDE10", "\uD83D\uDE42", "\uD83D\uDE04"];
+    const moodRow = moodLogs.length ? `<section class="card"><h3>Ánimo reciente</h3><div class="mood-history">${moodLogs.map(([k, l]) => `<div class="mh"><span>${moodEmoji[l.mood]}</span><small>${k.slice(5)}</small></div>`).join("")}</div></section>` : "";
+    return `${chips}${lineCard}${barCard}${heat}${moodRow}`;
+  }
+  function renderBadges(state2, BADGES2) {
+    const unlocked = new Set(state2.badges);
+    const grid = BADGES2.map((b) => {
+      const has = unlocked.has(b.id);
+      return `
+      <div class="badge ${has ? "unlocked" : "locked"}">
+        <div class="badge-emoji">${has ? b.emoji : "\uD83D\uDD12"}</div>
+        <div class="badge-name">${esc(b.name)}</div>
+        <div class="badge-desc">${esc(b.desc)}</div>
+      </div>`;
+    }).join("");
+    return `
+    <div class="section-label">Medallas · ${state2.badges.length}/${BADGES2.length}</div>
+    <div class="badge-grid">${grid}</div>`;
+  }
+  function renderResources(state2) {
+    const resources = getResources(state2);
+    if (resources.length === 0) {
+      return `
+      <div class="section-label">Biblioteca de recursos</div>
+      <section class="card empty-state">
+        <div class="empty-emoji">\uD83C\uDFAC</div>
+        <p>Aún no hay vídeos ni enlaces.</p>
+        <p class="muted small">Entra en <strong>Más → Modo médico → Recursos</strong> para añadir vídeos de YouTube (mindfulness, nutrición, ejercicio…) o cualquier enlace.</p>
+        <button class="btn primary" data-action="nav" data-view="editor" data-tab="recursos">➕ Añadir recursos</button>
+      </section>`;
+    }
+    const byPillar = getPillars(state2).map((p) => {
+      const rs = resources.filter((r) => r.pillar === p.id);
+      if (rs.length === 0)
+        return "";
+      const cards = rs.map((r) => renderResourceCard(r)).join("");
+      return `<div class="section-label" style="color:${p.color}">${p.emoji} ${esc(p.name)}</div>${cards}`;
+    }).join("");
+    const known = new Set(getPillars(state2).map((p) => p.id));
+    const others = resources.filter((r) => !known.has(r.pillar));
+    const otherHtml = others.length ? `<div class="section-label">Otros</div>${others.map(renderResourceCard).join("")}` : "";
+    return `<div class="section-label">\uD83C\uDFAC Biblioteca de recursos</div>${byPillar}${otherHtml}`;
+  }
+  function renderResourceCard(r) {
+    const ytId = parseYouTubeId(r.url);
+    if (ytId) {
+      return `
+      <section class="card resource">
+        <div class="resource-title">▶️ ${esc(r.title)}</div>
+        ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ""}
+        <div class="video"><iframe src="${youTubeEmbedUrl(ytId)}" title="${esc(r.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      </section>`;
+    }
+    return `
+    <section class="card resource">
+      <div class="resource-title">\uD83D\uDD17 ${esc(r.title)}</div>
+      ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ""}
+      <a class="btn ghost block" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">Abrir recurso ↗</a>
+    </section>`;
+  }
+  function renderLearn(state2) {
+    const posts = getPosts(state2);
+    const readPosts = new Set(state2.readPosts || []);
+    const postCards = posts.length ? posts.map((p) => `
+    <button class="post-card ${readPosts.has(p.id) ? "read" : ""}" data-action="open-post" data-id="${p.id}">
+      ${p.cover ? `<div class="post-cover" style="background-image:url('${esc(p.cover)}')"></div>` : `<div class="post-cover ph">\uD83D\uDCDD</div>`}
+      <div class="post-info">
+        <strong>${esc(p.title)}</strong>
+        <small class="muted">${esc(p.date || "")} · ${esc(p.category || "general")}</small>
+      </div>
+    </button>`).join("") : '<p class="muted small">Aún no hay publicaciones. Créalas desde el Modo médico.</p>';
+    const read = new Set(state2.readLessons);
+    const lessons = getLessons().map((l) => `
+    <details class="card lesson ${read.has(l.id) ? "read" : ""}" data-lesson="${l.id}">
+      <summary>${read.has(l.id) ? "✅" : "\uD83D\uDCD6"} ${esc(l.title)}</summary>
+      <p>${esc(l.body)}</p>
+    </details>`).join("");
+    const checklist = PREOP_CHECKLIST.map((c) => `<li>☐ ${esc(c)}</li>`).join("");
+    return `
+    <div class="section-label">\uD83D\uDCF0 Publicaciones</div>
+    <div class="post-list">${postCards}</div>
+    <div class="section-label">\uD83D\uDCA1 Píldoras rápidas</div>
+    ${lessons}
+    <section class="card">
+      <h3>✅ Preparativos preoperatorios</h3>
+      <ul class="preop">${checklist}</ul>
+      <p class="muted small">Sigue siempre las instrucciones concretas de tu centro; esta lista es orientativa.</p>
+    </section>
+    <section class="card disclaimer-card">
+      <h3>ⓘ Aviso médico</h3>
+      <p class="small">${esc(DISCLAIMER)}</p>
+    </section>`;
+  }
+  function renderPost(state2, id) {
+    const p = getPostById(state2, id);
+    if (!p)
+      return `<p class="muted">Publicación no encontrada.</p>`;
+    const pillar = getPillarById(state2, p.category);
+    return `
+    <button class="btn ghost back-btn" data-action="nav" data-view="aprende">← Volver</button>
+    <article class="card post-full">
+      ${p.cover ? `<div class="post-cover-full" style="background-image:url('${esc(p.cover)}')"></div>` : ""}
+      <span class="post-tag">${pillar ? pillar.emoji + " " + esc(pillar.name) : esc(p.category || "general")}</span>
+      <h2>${esc(p.title)}</h2>
+      <div class="post-meta muted small">${esc(p.date || "")}${p.author ? " · " + esc(p.author) : ""}</div>
+      <div class="post-body">${formatBody(p.body)}</div>
+    </article>`;
+  }
+  function renderMore(state2) {
+    const items = [
+      { view: "plan", icon: "\uD83D\uDCCB", label: "Tu plan completo", sub: "Todas las tareas por pilar" },
+      { view: "logros", icon: "\uD83C\uDFC5", label: "Medallas", sub: `${state2.badges.length} desbloqueadas` },
+      { view: "editor", icon: "\uD83E\uDE7A", label: "Modo médico", sub: "Crear tareas, vídeos y publicaciones" },
+      { view: "editor", icon: "\uD83D\uDD14", label: "Recordatorios", sub: state2.settings.reminders.enabled ? "Activados" : "Desactivados", tab: "ajustes" }
+    ];
+    const menu = items.map((i) => `
+    <button class="more-item" data-action="nav" data-view="${i.view}" ${i.tab ? `data-tab="${i.tab}"` : ""}>
+      <span class="more-ico">${i.icon}</span>
+      <span class="more-txt"><strong>${esc(i.label)}</strong><small class="muted">${esc(i.sub)}</small></span>
+      <span class="more-arrow">›</span>
+    </button>`).join("");
+    return `
+    <div class="section-label">Más opciones</div>
+    <section class="card more-menu">${menu}</section>
+    <section class="card">
+      <h3>\uD83D\uDC64 Tus datos personales</h3>
+      <p class="muted small">${esc(state2.profile.surgeryType || "Cirugía sin especificar")}${state2.profile.surgeryDate ? " · " + esc(state2.profile.surgeryDate) : ""}</p>
+      <button class="btn ghost block" data-action="edit-profile">✏️ Editar mis datos</button>
+    </section>
+    <section class="card disclaimer-card">
+      <h3>ⓘ Aviso médico</h3>
+      <p class="small">${esc(DISCLAIMER)}</p>
+    </section>`;
+  }
+  function profileFormHtml(state2) {
+    const p = state2.profile;
+    const today = todayKey();
+    return `
+  <form id="form-profile" class="stack-form">
+    <label>Nombre
+      <input name="name" type="text" required value="${esc(p.name || "")}" />
+    </label>
+    <label>Tipo de cirugía
+      <input name="surgeryType" type="text" value="${esc(p.surgeryType || "")}" placeholder="Ej.: cirugía abdominal mayor" />
+    </label>
+    <label>Fecha prevista de la cirugía
+      <input name="surgeryDate" type="date" value="${esc(p.surgeryDate || "")}" />
+    </label>
+    <label>Nivel de actividad
+      <select name="activityLevel">
+        <option value="bajo" ${p.activityLevel === "bajo" ? "selected" : ""}>Bajo</option>
+        <option value="medio" ${p.activityLevel === "medio" ? "selected" : ""}>Medio</option>
+        <option value="alto" ${p.activityLevel === "alto" ? "selected" : ""}>Alto</option>
+      </select>
+    </label>
+    <label class="check-inline"><input name="smoker" type="checkbox" ${p.smoker ? "checked" : ""} /> Actualmente fumo</label>
+    <button type="submit" class="btn primary block">Guardar</button>
+  </form>`;
+  }
+  function renderNav(route) {
+    const items = [
+      { id: "hoy", icon: "\uD83C\uDFE0", label: "Hoy" },
+      { id: "recursos", icon: "\uD83C\uDFAC", label: "Recursos" },
+      { id: "progreso", icon: "\uD83D\uDCC8", label: "Progreso" },
+      { id: "aprende", icon: "\uD83D\uDCDA", label: "Aprende" },
+      { id: "mas", icon: "⋯", label: "Más" }
+    ];
+    const activeSet = { hoy: "hoy", recursos: "recursos", progreso: "progreso", aprende: "aprende", post: "aprende", mas: "mas", plan: "mas", logros: "mas", editor: "mas" };
+    return `<nav class="bottom-nav">${items.map((i) => `
+    <button class="nav-item ${activeSet[route] === i.id ? "active" : ""}" data-action="nav" data-view="${i.id}">
+      <span class="nav-ico">${i.icon}</span><span class="nav-lbl">${i.label}</span>
+    </button>`).join("")}</nav>`;
+  }
+  function renderOnboarding() {
+    const today = todayKey();
+    return `
+  <div class="onboarding">
+    <div class="onb-hero">
+      <div class="onb-logo">\uD83E\uDEC1</div>
+      <h1>PreHabilita</h1>
+      <p>Prepárate en casa para tu cirugía. Entrena tu cuerpo y tu mente, gana puntos y llega en tu mejor forma al quirófano.</p>
+    </div>
+    <form id="onb-form" class="card onb-form">
+      <label>¿Cómo te llamas?
+        <input name="name" type="text" required placeholder="Tu nombre" autocomplete="given-name" />
+      </label>
+      <label>Tipo de cirugía (opcional)
+        <input name="surgeryType" type="text" placeholder="Ej.: cirugía abdominal mayor" />
+      </label>
+      <label>Fecha prevista de la cirugía
+        <input name="surgeryDate" type="date" min="${today}" />
+      </label>
+      <label>Nivel de actividad actual
+        <select name="activityLevel">
+          <option value="bajo">Bajo · me muevo poco</option>
+          <option value="medio" selected>Medio · algo de actividad</option>
+          <option value="alto">Alto · activo con frecuencia</option>
+        </select>
+      </label>
+      <label class="check-inline">
+        <input name="smoker" type="checkbox" /> Actualmente fumo
+      </label>
+      <p class="disclaimer-mini">${esc(ERAS_NOTE)}</p>
+      <p class="disclaimer-mini">${esc(DISCLAIMER)}</p>
+      <button type="submit" class="btn primary big">Empezar mi programa \uD83D\uDE80</button>
+    </form>
+  </div>`;
+  }
+
+  // js/editor.js
+  function pillarOptions(state2, selected) {
+    return getPillars(state2).map((p) => `<option value="${p.id}" ${p.id === selected ? "selected" : ""}>${esc(p.emoji + " " + p.name)}</option>`).join("");
+  }
+  function categoryOptions(state2, selected) {
+    return `<option value="general" ${selected === "general" ? "selected" : ""}>\uD83D\uDCCC General</option>` + pillarOptions(state2, selected);
+  }
+  function renderEditor(state2, tab = "tareas") {
+    const tabs = [
+      { id: "tareas", label: "✅ Tareas" },
+      { id: "recursos", label: "\uD83C\uDFAC Recursos" },
+      { id: "blog", label: "\uD83D\uDCDD Blog" },
+      { id: "ajustes", label: "⚙️ Metas" }
+    ];
+    const tabBar = `<div class="editor-tabs">${tabs.map((t) => `<button class="etab ${t.id === tab ? "active" : ""}" data-action="editor-tab" data-tab="${t.id}">${t.label}</button>`).join("")}</div>`;
+    let body = "";
+    if (tab === "tareas")
+      body = renderTasksTab(state2);
+    else if (tab === "recursos")
+      body = renderResourcesTab(state2);
+    else if (tab === "blog")
+      body = renderBlogTab(state2);
+    else
+      body = renderSettingsTab(state2);
+    return `
+    <div class="section-label">\uD83E\uDE7A Modo médico · gestión de contenidos</div>
+    <p class="muted small editor-intro">Aquí puedes ampliar y personalizar la app sin tocar código: crea tareas, añade vídeos y publicaciones, y ajusta las metas.</p>
+    ${tabBar}
+    <div class="editor-body">${body}</div>`;
+  }
+  function renderTasksTab(state2) {
+    const pillars = getPillars(state2);
+    const all = getAllTasksForEditor(state2);
+    const groups = pillars.map((p) => {
+      const tasks = all.filter((t) => t.pillar === p.id);
+      if (tasks.length === 0)
+        return "";
+      const items = tasks.map((t) => `
+      <div class="etask ${t.disabled ? "off" : ""}">
+        <div class="etask-main">
+          <span>${t.icon || "•"} ${esc(t.title)}</span>
+          <small class="muted">${t.type === "counter" ? `meta ${t.target} ${esc(t.unit || "")} · ` : ""}+${t.xp} XP ${t.isDefault ? "" : "· personalizada"}</small>
+        </div>
+        <div class="etask-actions">
+          <button class="mini-btn" data-action="edit-task" data-id="${t.id}">✏️</button>
+          <button class="mini-btn" data-action="toggle-task-active" data-id="${t.id}">${t.disabled ? "\uD83D\uDC41️" : "\uD83D\uDEAB"}</button>
+          ${t.isDefault ? "" : `<button class="mini-btn danger" data-action="delete-task" data-id="${t.id}">\uD83D\uDDD1️</button>`}
+        </div>
+      </div>`).join("");
+      return `<section class="card" style="--pc:${p.color}">
+      <div class="etask-group-head">${p.emoji} ${esc(p.name)}</div>
+      ${items}
+    </section>`;
+    }).join("");
+    return `
+    <button class="btn primary block" data-action="new-task">➕ Añadir nueva tarea</button>
+    ${groups}`;
+  }
+  function taskFormHtml(state2, task) {
+    const isEdit = !!task;
+    const isDefault = task ? task.isDefault : false;
+    const t = task || { type: "check", xp: 15, target: 10, unit: "", icon: "", pillar: getPillars(state2)[0].id };
+    return `
+  <form id="form-task" class="stack-form">
+    <input type="hidden" name="id" value="${isEdit ? esc(t.id) : ""}" />
+    <input type="hidden" name="isDefault" value="${isDefault ? "1" : ""}" />
+    <label>Título de la tarea
+      <input name="title" type="text" required value="${esc(t.title || "")}" placeholder="Ej.: Paseo por la mañana" />
+    </label>
+    <label>Pilar / categoría
+      <select name="pillar" ${isDefault ? "disabled" : ""}>${pillarOptions(state2, t.pillar)}</select>
+    </label>
+    <label>Icono (emoji, opcional)
+      <input name="icon" type="text" maxlength="4" value="${esc(t.icon || "")}" placeholder="\uD83D\uDEB6" />
+    </label>
+    <label>Tipo
+      <select name="type" ${isDefault ? "disabled" : ""}>
+        <option value="check" ${t.type === "check" ? "selected" : ""}>Casilla (hecho / no hecho)</option>
+        <option value="counter" ${t.type === "counter" ? "selected" : ""}>Contador (con meta)</option>
+      </select>
+    </label>
+    <div class="two-col">
+      <label>Meta (si es contador)
+        <input name="target" type="number" min="1" value="${esc(t.target || 10)}" />
+      </label>
+      <label>Unidad
+        <input name="unit" type="text" value="${esc(t.unit || "")}" placeholder="min, reps, vasos" />
+      </label>
+    </div>
+    <label>Puntos (XP) al completar
+      <input name="xp" type="number" min="0" max="100" value="${esc(t.xp ?? 15)}" />
+    </label>
+    <label>Descripción
+      <textarea name="desc" rows="3" placeholder="Instrucciones para el paciente">${esc(t.desc || "")}</textarea>
+    </label>
+    ${isDefault ? '<p class="muted small">Es una tarea del programa base: puedes personalizar sus textos, meta y puntos.</p>' : ""}
+    <button type="submit" class="btn primary block">${isEdit ? "Guardar cambios" : "Crear tarea"}</button>
+  </form>`;
+  }
+  function renderResourcesTab(state2) {
+    const res = getResources(state2);
+    const list = res.length ? res.map((r) => {
+      const yt = parseYouTubeId(r.url);
+      return `
+      <div class="eres">
+        <span class="eres-ico">${yt ? "▶️" : "\uD83D\uDD17"}</span>
+        <div class="eres-main"><strong>${esc(r.title)}</strong><small class="muted">${esc(r.desc || "")}</small></div>
+        <div class="etask-actions">
+          <button class="mini-btn" data-action="edit-resource" data-id="${r.id}">✏️</button>
+          <button class="mini-btn danger" data-action="delete-resource" data-id="${r.id}">\uD83D\uDDD1️</button>
+        </div>
+      </div>`;
+    }).join("") : '<p class="muted small">Aún no hay recursos. Añade tu primer vídeo o enlace.</p>';
+    return `
+    <button class="btn primary block" data-action="new-resource">➕ Añadir vídeo o enlace</button>
+    <section class="card">${list}</section>
+    <p class="muted small">Consejo: pega la dirección de un vídeo de YouTube (por ejemplo <em>youtube.com/watch?v=...</em>) y se mostrará incrustado dentro de la app.</p>`;
+  }
+  function resourceFormHtml(state2, res) {
+    const isEdit = !!res;
+    const r = res || { pillar: getPillars(state2)[0].id, url: "", title: "", desc: "" };
+    return `
+  <form id="form-resource" class="stack-form">
+    <input type="hidden" name="id" value="${isEdit ? esc(r.id) : ""}" />
+    <label>Título
+      <input name="title" type="text" required value="${esc(r.title || "")}" placeholder="Ej.: Meditación guiada 10 min" />
+    </label>
+    <label>Dirección (URL de YouTube u otro enlace)
+      <input name="url" type="url" required value="${esc(r.url || "")}" placeholder="https://www.youtube.com/watch?v=..." />
+    </label>
+    <label>Pilar / categoría
+      <select name="pillar">${pillarOptions(state2, r.pillar)}</select>
+    </label>
+    <label>Descripción (opcional)
+      <textarea name="desc" rows="2" placeholder="Breve descripción del recurso">${esc(r.desc || "")}</textarea>
+    </label>
+    <button type="submit" class="btn primary block">${isEdit ? "Guardar cambios" : "Añadir recurso"}</button>
+  </form>`;
+  }
+  function renderBlogTab(state2) {
+    const posts = getPosts(state2);
+    const list = posts.length ? posts.map((p) => `
+    <div class="eres">
+      <span class="eres-ico">\uD83D\uDCDD</span>
+      <div class="eres-main"><strong>${esc(p.title)}</strong><small class="muted">${esc(p.date || "")} · ${esc(p.category || "general")}</small></div>
+      <div class="etask-actions">
+        <button class="mini-btn" data-action="edit-post" data-id="${p.id}">✏️</button>
+        <button class="mini-btn danger" data-action="delete-post" data-id="${p.id}">\uD83D\uDDD1️</button>
+      </div>
+    </div>`).join("") : '<p class="muted small">Aún no hay publicaciones. Crea la primera entrada de tu blog.</p>';
+    return `
+    <button class="btn primary block" data-action="new-post">➕ Nueva publicación</button>
+    <section class="card">${list}</section>`;
+  }
+  function postFormHtml(state2, post) {
+    const isEdit = !!post;
+    const p = post || { category: "general", title: "", body: "", cover: "" };
+    return `
+  <form id="form-post" class="stack-form">
+    <input type="hidden" name="id" value="${isEdit ? esc(p.id) : ""}" />
+    <label>Título
+      <input name="title" type="text" required value="${esc(p.title || "")}" placeholder="Título de la entrada" />
+    </label>
+    <label>Categoría
+      <select name="category">${categoryOptions(state2, p.category)}</select>
+    </label>
+    <label>Imagen de portada (URL, opcional)
+      <input name="cover" type="url" value="${esc(p.cover || "")}" placeholder="https://..." />
+    </label>
+    <label>Contenido
+      <textarea name="body" rows="9" required placeholder="Escribe aquí tu contenido. Puedes usar saltos de línea y viñetas con •">${esc(p.body || "")}</textarea>
+    </label>
+    <button type="submit" class="btn primary block">${isEdit ? "Guardar cambios" : "Publicar"}</button>
+  </form>`;
+  }
+  function renderSettingsTab(state2) {
+    const s = state2.settings;
+    const goal = getDailyGoal(state2);
+    const rem = s.reminders;
+    const timesChips = (rem.times || []).map((tm, i) => `<span class="time-chip">${esc(tm)} <button data-action="remove-reminder-time" data-idx="${i}" aria-label="Quitar">✕</button></span>`).join("");
+    return `
+    <section class="card">
+      <h3>\uD83C\uDFAF Meta diaria</h3>
+      <p class="muted small">Puntos (XP) que el paciente debe sumar para completar el día.</p>
+      <div class="goal-setter">
+        <button class="stepper" data-action="goal-dec">−</button>
+        <div class="counter-val">${goal} <small>XP/día</small></div>
+        <button class="stepper" data-action="goal-inc">+</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>\uD83D\uDD14 Recordatorios</h3>
+      <label class="switch-row">
+        <span>Activar recordatorios</span>
+        <input type="checkbox" data-action="toggle-reminders" ${rem.enabled ? "checked" : ""} />
+      </label>
+      <p class="muted small">Recibirás un aviso a las horas indicadas mientras la app esté abierta o instalada. Requiere permiso de notificaciones del navegador.</p>
+      <div class="times-list">${timesChips || '<span class="muted small">Sin horas configuradas.</span>'}</div>
+      <div class="add-time-row">
+        <input type="time" id="new-reminder-time" value="09:00" />
+        <button class="btn ghost" data-action="add-reminder-time">➕ Añadir hora</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>\uD83D\uDD12 Protección del modo médico</h3>
+      <label class="switch-row">
+        <span>Pedir PIN para editar</span>
+        <input type="checkbox" data-action="toggle-pin" ${s.editor.pinEnabled ? "checked" : ""} />
+      </label>
+      ${s.editor.pinEnabled ? `
+      <label>PIN (4 dígitos)
+        <input type="text" inputmode="numeric" maxlength="4" id="editor-pin" value="${esc(s.editor.pin || "")}" placeholder="0000" />
+        <button class="btn ghost" data-action="save-pin">Guardar PIN</button>
+      </label>` : ""}
+    </section>
+
+    <section class="card">
+      <h3>♿ Accesibilidad</h3>
+      <label class="switch-row">
+        <span>Reducir animaciones</span>
+        <input type="checkbox" data-action="toggle-motion" ${s.reducedMotion ? "checked" : ""} />
+      </label>
+    </section>
+
+    <section class="card">
+      <h3>\uD83D\uDCBE Datos</h3>
+      <p class="muted small">Los datos se guardan solo en este dispositivo.</p>
+      <div class="row-btns">
+        <button class="btn ghost" data-action="export">⬇️ Exportar copia</button>
+        <label class="btn ghost file-btn">⬆️ Importar
+          <input type="file" id="import-file" accept="application/json" hidden />
+        </label>
+        <button class="btn danger ghost" data-action="reset">\uD83D\uDDD1️ Reiniciar todo</button>
+      </div>
+    </section>
+
+    <section class="card disclaimer-card">
+      <h3>ℹ️ Nota ERAS</h3>
+      <p class="small">${esc(ERAS_NOTE)}</p>
+    </section>`;
+  }
+
+  // js/charts.js
+  var exports_charts = {};
+  __export(exports_charts, {
+    lineChart: () => lineChart,
+    barChart: () => barChart
+  });
+  function esc2(s) {
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+  }
+  function lineChart(data, opts = {}) {
+    const W = 320, H = 150, padL = 28, padR = 8, padT = 12, padB = 22;
+    const color = opts.color || "#0f766e";
+    if (!data || data.length === 0)
+      return emptyChart();
+    const max = Math.max(1, ...data.map((d) => d.value));
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+    const stepX = data.length > 1 ? innerW / (data.length - 1) : 0;
+    const x = (i) => padL + i * stepX;
+    const y = (v) => padT + innerH - v / max * innerH;
+    const linePts = data.map((d, i) => `${x(i).toFixed(1)},${y(d.value).toFixed(1)}`).join(" ");
+    const areaPts = `${padL},${padT + innerH} ${linePts} ${x(data.length - 1)},${padT + innerH}`;
+    const grid = [0, 0.5, 1].map((f) => {
+      const gy = padT + innerH - f * innerH;
+      return `<line x1="${padL}" y1="${gy}" x2="${W - padR}" y2="${gy}" stroke="#e2e8f0" stroke-width="1"/>
+      <text x="2" y="${gy + 3}" font-size="8" fill="#94a3b8">${Math.round(max * f)}</text>`;
+    }).join("");
+    const dots = data.map((d, i) => `<circle cx="${x(i).toFixed(1)}" cy="${y(d.value).toFixed(1)}" r="2.4" fill="${color}"><title>${esc2(d.label)}: ${d.value}</title></circle>`).join("");
+    const idxs = data.length <= 1 ? [0] : [0, Math.floor((data.length - 1) / 2), data.length - 1];
+    const xlabels = idxs.map((i) => `<text x="${x(i).toFixed(1)}" y="${H - 6}" font-size="8" fill="#94a3b8" text-anchor="middle">${esc2(data[i].label)}</text>`).join("");
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfica de evolución">
+    ${grid}
+    <polygon points="${areaPts}" fill="${color}" fill-opacity="0.12"/>
+    <polyline points="${linePts}" fill="none" stroke="${color}" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round"/>
+    ${dots}
+    ${xlabels}
+  </svg>`;
+  }
+  function barChart(data, opts = {}) {
+    const W = 320, H = 160, padL = 8, padR = 8, padT = 12, padB = 34;
+    if (!data || data.length === 0)
+      return emptyChart();
+    const max = Math.max(1, ...data.map((d) => d.value));
+    const innerW = W - padL - padR;
+    const innerH = H - padT - padB;
+    const gap = 10;
+    const bw = (innerW - gap * (data.length - 1)) / data.length;
+    const bars = data.map((d, i) => {
+      const bh = d.value / max * innerH;
+      const bx = padL + i * (bw + gap);
+      const by = padT + innerH - bh;
+      const col = d.color || "#0f766e";
+      return `
+      <rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${Math.max(0, bh).toFixed(1)}" rx="4" fill="${col}"><title>${esc2(d.label)}: ${d.value}</title></rect>
+      <text x="${(bx + bw / 2).toFixed(1)}" y="${(by - 3).toFixed(1)}" font-size="9" fill="#334155" text-anchor="middle" font-weight="700">${esc2(d.sub ?? d.value)}</text>
+      <text x="${(bx + bw / 2).toFixed(1)}" y="${H - 18}" font-size="8.5" fill="#64748b" text-anchor="middle">${esc2(d.label)}</text>`;
+    }).join("");
+    return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Gráfica de barras">${bars}</svg>`;
+  }
+  function emptyChart() {
+    return `<div class="chart-empty">Aún no hay datos suficientes. ¡Completa tus tareas para ver tu evolución! \uD83D\uDCC8</div>`;
+  }
+
+  // js/app.js
+  var route = "hoy";
+  var editorTab = "tareas";
+  var currentPostId = null;
+  var editorUnlocked = false;
+  function init() {
+    loadState();
+    const state2 = getState();
+    seedLibrary(state2);
+    recompute(state2);
+    saveState();
+    applyReducedMotion();
+    render();
+    const app = document.getElementById("app");
+    app.addEventListener("click", onClick);
+    app.addEventListener("submit", onSubmit);
+    app.addEventListener("change", onChange);
+    const modalRoot = document.getElementById("modal-root");
+    modalRoot.addEventListener("click", onClick);
+    modalRoot.addEventListener("submit", onSubmit);
+    modalRoot.addEventListener("change", onChange);
+    registerServiceWorker();
+    startReminderLoop();
+  }
+  function applyReducedMotion() {
+    document.body.classList.toggle("reduce-motion", !!getState().settings.reducedMotion);
+  }
+  function render() {
+    const state2 = getState();
+    const app = document.getElementById("app");
+    if (!state2.onboarded) {
+      app.className = "onboarding-mode";
+      app.innerHTML = renderOnboarding();
+      return;
+    }
+    app.className = "";
+    let body = "";
+    switch (route) {
+      case "recursos":
+        body = renderResources(state2);
+        break;
+      case "progreso":
+        body = renderProgress(state2, exports_charts);
+        break;
+      case "aprende":
+        body = renderLearn(state2);
+        break;
+      case "post":
+        body = renderPost(state2, currentPostId);
+        break;
+      case "mas":
+        body = renderMore(state2);
+        break;
+      case "plan":
+        body = renderPlan(state2);
+        break;
+      case "logros":
+        body = renderBadges(state2, BADGES);
+        break;
+      case "editor":
+        body = renderEditor(state2, editorTab);
+        break;
+      default:
+        body = renderToday(state2);
+    }
+    app.innerHTML = `
+    ${renderHeader(state2)}
+    <main class="content" id="view">${body}</main>
+    ${renderNav(route)}
+  `;
+  }
+  function navigate(view, tab) {
+    if (view === "editor") {
+      if (tab)
+        editorTab = tab;
+      if (!enterEditorGuard())
+        return;
+    }
+    route = view;
+    render();
+    window.scrollTo(0, 0);
+  }
+  function enterEditorGuard() {
+    const s = getState().settings.editor;
+    if (s.pinEnabled && s.pin && !editorUnlocked) {
+      openPinPrompt(() => {
+        editorUnlocked = true;
+        route = "editor";
+        render();
+        window.scrollTo(0, 0);
+      });
+      return false;
+    }
+    return true;
+  }
+  function onClick(e) {
+    const el = e.target.closest("[data-action]");
+    if (!el)
+      return;
+    const action = el.dataset.action;
+    const state2 = getState();
+    switch (action) {
+      case "nav":
+        navigate(el.dataset.view, el.dataset.tab);
+        break;
+      case "toggle-task": {
+        const id = el.dataset.task;
+        const t = getTaskById(state2, id);
+        const log = getDayLog();
+        log.tasks[id] = !(log.tasks[id] === true);
+        afterTaskChange(log.tasks[id] === true ? t : null);
+        break;
+      }
+      case "counter-inc":
+      case "counter-dec": {
+        const id = el.dataset.task;
+        const t = getTaskById(state2, id);
+        if (!t)
+          break;
+        const step = t.target >= 20 ? 5 : 1;
+        const log = getDayLog();
+        const cur = typeof log.tasks[id] === "number" ? log.tasks[id] : 0;
+        const wasDone = cur >= t.target;
+        const next = Math.max(0, cur + (action === "counter-inc" ? step : -step));
+        log.tasks[id] = next;
+        afterTaskChange(!wasDone && next >= t.target ? t : null);
+        break;
+      }
+      case "set-mood": {
+        const log = getDayLog();
+        log.mood = Number(el.dataset.mood);
+        saveState();
+        render();
+        break;
+      }
+      case "open-pillar":
+        openPillarInfo(el.dataset.pillar);
+        break;
+      case "show-disclaimer":
+        openModal("Aviso médico", `<p>${esc(DISCLAIMER)}</p>`);
+        break;
+      case "export":
+        doExport();
+        break;
+      case "reset":
+        confirmReset();
+        break;
+      case "close-modal":
+        closeModal();
+        break;
+      case "open-post":
+        openPost(el.dataset.id);
+        break;
+      case "edit-profile":
+        openModal("Editar mis datos", profileFormHtml(state2));
+        break;
+      case "editor-tab":
+        editorTab = el.dataset.tab;
+        render();
+        break;
+      case "new-task":
+        openModal("Nueva tarea", taskFormHtml(state2, null));
+        break;
+      case "edit-task": {
+        const t = getAllTasksForEditor(state2).find((x) => x.id === el.dataset.id);
+        openModal("Editar tarea", taskFormHtml(state2, t));
+        break;
+      }
+      case "toggle-task-active":
+        toggleTaskActive(el.dataset.id);
+        break;
+      case "delete-task":
+        confirmDelete("tarea", () => deleteCustomTask(el.dataset.id));
+        break;
+      case "new-resource":
+        openModal("Nuevo recurso", resourceFormHtml(state2, null));
+        break;
+      case "edit-resource": {
+        const r = getResources(state2).find((x) => x.id === el.dataset.id);
+        openModal("Editar recurso", resourceFormHtml(state2, r));
+        break;
+      }
+      case "delete-resource":
+        confirmDelete("recurso", () => deleteResource(el.dataset.id));
+        break;
+      case "new-post":
+        openModal("Nueva publicación", postFormHtml(state2, null));
+        break;
+      case "edit-post": {
+        const p = getPosts(state2).find((x) => x.id === el.dataset.id);
+        openModal("Editar publicación", postFormHtml(state2, p));
+        break;
+      }
+      case "delete-post":
+        confirmDelete("publicación", () => deletePost(el.dataset.id));
+        break;
+      case "goal-inc":
+        changeGoal(5);
+        break;
+      case "goal-dec":
+        changeGoal(-5);
+        break;
+      case "add-reminder-time":
+        addReminderTime();
+        break;
+      case "remove-reminder-time":
+        removeReminderTime(Number(el.dataset.idx));
+        break;
+      case "save-pin":
+        savePin();
+        break;
+    }
+  }
+  function onChange(e) {
+    const el = e.target.closest("[data-action]");
+    const state2 = getState();
+    if (el) {
+      switch (el.dataset.action) {
+        case "toggle-reminders":
+          toggleReminders(el.checked);
+          return;
+        case "toggle-pin":
+          state2.settings.editor.pinEnabled = el.checked;
+          saveState();
+          render();
+          return;
+        case "toggle-motion":
+          state2.settings.reducedMotion = el.checked;
+          saveState();
+          applyReducedMotion();
+          render();
+          return;
+      }
+    }
+    if (e.target.id === "import-file")
+      importFromFile(e.target);
+  }
+  function onSubmit(e) {
+    const form = e.target;
+    e.preventDefault();
+    const state2 = getState();
+    if (form.id === "onb-form")
+      return submitOnboarding(form);
+    if (form.id === "form-profile")
+      return submitProfile(form);
+    if (form.id === "form-task")
+      return submitTask(form);
+    if (form.id === "form-resource")
+      return submitResource(form);
+    if (form.id === "form-post")
+      return submitPost(form);
+  }
+  function submitOnboarding(form) {
+    const fd = new FormData(form);
+    const state2 = getState();
+    state2.profile.name = (fd.get("name") || "").toString().trim() || "paciente";
+    state2.profile.surgeryType = (fd.get("surgeryType") || "").toString().trim();
+    state2.profile.surgeryDate = (fd.get("surgeryDate") || "").toString();
+    state2.profile.activityLevel = (fd.get("activityLevel") || "medio").toString();
+    state2.profile.smoker = fd.get("smoker") === "on";
+    state2.profile.startDate = todayKey();
+    state2.onboarded = true;
+    saveState();
+    route = "hoy";
+    render();
+    toast("\uD83C\uDF89 ¡Bienvenido! Tu programa está listo. ¡Empieza a sumar puntos!");
+  }
+  function submitProfile(form) {
+    const fd = new FormData(form);
+    const p = getState().profile;
+    p.name = (fd.get("name") || "").toString().trim() || "paciente";
+    p.surgeryType = (fd.get("surgeryType") || "").toString().trim();
+    p.surgeryDate = (fd.get("surgeryDate") || "").toString();
+    p.activityLevel = (fd.get("activityLevel") || "medio").toString();
+    p.smoker = fd.get("smoker") === "on";
+    saveState();
+    closeModal();
+    render();
+    toast("✔ Datos actualizados.");
+  }
+  function submitTask(form) {
+    const fd = new FormData(form);
+    const state2 = getState();
+    const id = (fd.get("id") || "").toString();
+    const isDefault = (fd.get("isDefault") || "") === "1";
+    const fields = {
+      title: (fd.get("title") || "").toString().trim(),
+      icon: (fd.get("icon") || "").toString().trim(),
+      xp: Math.max(0, Number(fd.get("xp")) || 0),
+      desc: (fd.get("desc") || "").toString().trim(),
+      type: (fd.get("type") || "check").toString(),
+      pillar: (fd.get("pillar") || "").toString(),
+      unit: (fd.get("unit") || "").toString().trim(),
+      target: Math.max(1, Number(fd.get("target")) || 1)
+    };
+    if (isDefault && id) {
+      const prev = state2.library.taskOverrides[id] || {};
+      state2.library.taskOverrides[id] = {
+        ...prev,
+        title: fields.title,
+        icon: fields.icon,
+        xp: fields.xp,
+        desc: fields.desc,
+        target: fields.target,
+        unit: fields.unit
+      };
+    } else if (id) {
+      const t = state2.library.tasks.find((x) => x.id === id);
+      if (t)
+        Object.assign(t, fields);
+    } else {
+      state2.library.tasks.push({ id: uid("task"), disabled: false, ...fields });
+    }
+    recompute(state2);
+    saveState();
+    closeModal();
+    render();
+    toast("✔ Tarea guardada.");
+  }
+  function toggleTaskActive(id) {
+    const state2 = getState();
+    if (state2.library.tasks.some((t) => t.id === id)) {
+      const t = state2.library.tasks.find((x) => x.id === id);
+      t.disabled = !t.disabled;
+    } else {
+      const o = state2.library.taskOverrides[id] || {};
+      o.disabled = !o.disabled;
+      state2.library.taskOverrides[id] = o;
+    }
+    recompute(state2);
+    saveState();
+    render();
+  }
+  function deleteCustomTask(id) {
+    const state2 = getState();
+    state2.library.tasks = state2.library.tasks.filter((t) => t.id !== id);
+    recompute(state2);
+    saveState();
+    render();
+    toast("Tarea eliminada.");
+  }
+  function submitResource(form) {
+    const fd = new FormData(form);
+    const state2 = getState();
+    const id = (fd.get("id") || "").toString();
+    const fields = {
+      title: (fd.get("title") || "").toString().trim(),
+      url: (fd.get("url") || "").toString().trim(),
+      pillar: (fd.get("pillar") || "").toString(),
+      desc: (fd.get("desc") || "").toString().trim()
+    };
+    if (id) {
+      const r = state2.library.resources.find((x) => x.id === id);
+      if (r)
+        Object.assign(r, fields);
+    } else {
+      state2.library.resources.push({ id: uid("res"), type: "auto", ...fields });
+    }
+    saveState();
+    closeModal();
+    render();
+    toast("✔ Recurso guardado.");
+  }
+  function deleteResource(id) {
+    const state2 = getState();
+    state2.library.resources = state2.library.resources.filter((r) => r.id !== id);
+    saveState();
+    render();
+    toast("Recurso eliminado.");
+  }
+  function submitPost(form) {
+    const fd = new FormData(form);
+    const state2 = getState();
+    const id = (fd.get("id") || "").toString();
+    const fields = {
+      title: (fd.get("title") || "").toString().trim(),
+      category: (fd.get("category") || "general").toString(),
+      cover: (fd.get("cover") || "").toString().trim(),
+      body: (fd.get("body") || "").toString()
+    };
+    if (id) {
+      const p = state2.library.posts.find((x) => x.id === id);
+      if (p)
+        Object.assign(p, fields);
+    } else {
+      state2.library.posts.push({ id: uid("post"), date: todayKey(), author: state2.profile.name || "Equipo médico", ...fields });
+    }
+    saveState();
+    closeModal();
+    render();
+    toast("✔ Publicación guardada.");
+  }
+  function deletePost(id) {
+    const state2 = getState();
+    state2.library.posts = state2.library.posts.filter((p) => p.id !== id);
+    saveState();
+    render();
+    toast("Publicación eliminada.");
+  }
+  function openPost(id) {
+    const state2 = getState();
+    currentPostId = id;
+    if (!state2.readPosts.includes(id)) {
+      state2.readPosts.push(id);
+      const events = applyEngine(state2);
+      saveState();
+      route = "post";
+      render();
+      handleEvents(events);
+    } else {
+      route = "post";
+      render();
+    }
+    window.scrollTo(0, 0);
+  }
+  function changeGoal(delta) {
+    const state2 = getState();
+    const g = getDailyGoal(state2) + delta;
+    state2.settings.dailyGoal = Math.max(20, Math.min(200, g));
+    recompute(state2);
+    saveState();
+    render();
+  }
+  async function toggleReminders(enabled) {
+    const state2 = getState();
+    if (enabled && "Notification" in window && Notification.permission !== "granted") {
+      try {
+        await Notification.requestPermission();
+      } catch (_) {}
+    }
+    state2.settings.reminders.enabled = enabled && (!("Notification" in window) || Notification.permission === "granted");
+    saveState();
+    render();
+    if (enabled && !state2.settings.reminders.enabled) {
+      toast("Activa las notificaciones en tu navegador para recibir recordatorios.");
+    }
+  }
+  function addReminderTime() {
+    const input = document.getElementById("new-reminder-time");
+    const val = input && input.value;
+    if (!val)
+      return;
+    const state2 = getState();
+    const times = state2.settings.reminders.times;
+    if (!times.includes(val)) {
+      times.push(val);
+      times.sort();
+    }
+    saveState();
+    render();
+  }
+  function removeReminderTime(idx) {
+    const state2 = getState();
+    state2.settings.reminders.times.splice(idx, 1);
+    saveState();
+    render();
+  }
+  function savePin() {
+    const input = document.getElementById("editor-pin");
+    const val = (input && input.value || "").trim();
+    getState().settings.editor.pin = val;
+    saveState();
+    toast("\uD83D\uDD12 PIN guardado.");
+  }
+  function openPinPrompt(onSuccess) {
+    openModal("Introduce el PIN", `
+    <p class="muted small">El modo médico está protegido con un PIN.</p>
+    <input type="text" inputmode="numeric" maxlength="4" id="pin-input" class="pin-input" placeholder="••••" />
+    <div class="row-btns">
+      <button class="btn ghost" data-action="close-modal">Cancelar</button>
+      <button class="btn primary" id="pin-ok">Entrar</button>
+    </div>`);
+    const ok = document.getElementById("pin-ok");
+    const inp = document.getElementById("pin-input");
+    if (inp)
+      inp.focus();
+    if (ok)
+      ok.addEventListener("click", () => {
+        if ((inp.value || "").trim() === getState().settings.editor.pin) {
+          closeModal();
+          onSuccess();
+        } else {
+          inp.classList.add("shake");
+          toast("PIN incorrecto.");
+        }
+      });
+  }
+  function importFromFile(input) {
+    const file = input.files && input.files[0];
+    if (!file)
+      return;
+    const reader = new FileReader;
+    reader.onload = () => {
+      try {
+        importState(reader.result.toString());
+        const state2 = getState();
+        seedLibrary(state2);
+        recompute(state2);
+        saveState();
+        applyReducedMotion();
+        route = "hoy";
+        render();
+        toast("✔ Datos importados correctamente.");
+      } catch (err) {
+        toast("No se pudo importar: archivo no válido.");
+      }
+    };
+    reader.readAsText(file);
+  }
+  function afterTaskChange(completedTask) {
+    const state2 = getState();
+    const events = applyEngine(state2);
+    saveState();
+    render();
+    if (completedTask)
+      toast(`${completedTask.icon || "✔"} +${completedTask.xp} XP · ${completedTask.title}`);
+    handleEvents(events);
+  }
+  function handleEvents(events) {
+    if (!events)
+      return;
+    if (events.leveledUp)
+      setTimeout(() => toast(`⬆️ ¡Subiste al nivel ${events.level}! Sigue así.`, "level"), 350);
+    for (const b of events.newBadges)
+      setTimeout(() => celebrateBadge(b), 600);
+    if (events.challengeCompletedNow)
+      setTimeout(() => toast(`\uD83C\uDFAF ¡Reto semanal completado! +${events.challenge.xp} XP`, "level"), 500);
+  }
+  document.addEventListener("toggle", (e) => {
+    const det = e.target;
+    if (det.tagName === "DETAILS" && det.dataset.lesson && det.open) {
+      const state2 = getState();
+      const id = det.dataset.lesson;
+      if (!state2.readLessons.includes(id)) {
+        state2.readLessons.push(id);
+        const events = applyEngine(state2);
+        saveState();
+        handleEvents(events);
+        det.classList.add("read");
+      }
+    }
+  }, true);
+  function openModal(title, html) {
+    const root = document.getElementById("modal-root");
+    root.innerHTML = `
+    <div class="modal-backdrop">
+      <div class="modal" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+        <div class="modal-head"><h3>${esc(title)}</h3><button class="modal-x" data-action="close-modal" aria-label="Cerrar">✕</button></div>
+        <div class="modal-body">${html}</div>
+      </div>
+    </div>`;
+    const backdrop = root.querySelector(".modal-backdrop");
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop)
+        closeModal();
+    });
+  }
+  function closeModal() {
+    document.getElementById("modal-root").innerHTML = "";
+  }
+  function openPillarInfo(pillarId) {
+    const p = getPillarById(getState(), pillarId);
+    if (!p)
+      return;
+    openModal(`${p.emoji} ${p.name}`, `<p><strong>${esc(p.tagline || "")}</strong></p><p>${esc(p.why || "")}</p>`);
+  }
+  function confirmDelete(what, onConfirm) {
+    openModal("Confirmar", `
+    <p>¿Seguro que quieres eliminar esta ${esc(what)}? Esta acción no se puede deshacer.</p>
+    <div class="row-btns">
+      <button class="btn ghost" data-action="close-modal">Cancelar</button>
+      <button class="btn danger" id="do-del">Eliminar</button>
+    </div>`);
+    const btn = document.getElementById("do-del");
+    if (btn)
+      btn.addEventListener("click", () => {
+        closeModal();
+        onConfirm();
+      });
+  }
+  function confirmReset() {
+    openModal("Reiniciar programa", `
+    <p>Esto borrará TODO: progreso, tareas personalizadas, recursos, publicaciones y medallas de este dispositivo. No se puede deshacer.</p>
+    <div class="row-btns">
+      <button class="btn ghost" data-action="close-modal">Cancelar</button>
+      <button class="btn danger" id="do-reset">Sí, reiniciar</button>
+    </div>`);
+    const btn = document.getElementById("do-reset");
+    if (btn)
+      btn.addEventListener("click", () => {
+        resetState();
+        seedLibrary(getState());
+        saveState();
+        route = "hoy";
+        editorUnlocked = false;
+        closeModal();
+        render();
+        toast("Programa reiniciado.");
+      });
+  }
+  function doExport() {
+    const blob = new Blob([exportState()], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `prehabilita-datos-${todayKey()}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    toast("⬇️ Copia de seguridad descargada.");
+  }
+  function toast(msg, kind = "xp") {
+    const layer = document.getElementById("toast-layer");
+    const el = document.createElement("div");
+    el.className = `toast ${kind}`;
+    el.textContent = msg;
+    layer.appendChild(el);
+    requestAnimationFrame(() => el.classList.add("show"));
+    setTimeout(() => {
+      el.classList.remove("show");
+      setTimeout(() => el.remove(), 300);
+    }, 2600);
+  }
+  function celebrateBadge(b) {
+    const root = document.getElementById("modal-root");
+    root.innerHTML = `
+    <div class="modal-backdrop badge-pop">
+      <div class="modal badge-modal">
+        <div class="confetti">\uD83C\uDF89</div>
+        <div class="big-emoji">${b.emoji}</div>
+        <h2>¡Medalla desbloqueada!</h2>
+        <h3>${esc(b.name)}</h3>
+        <p class="muted">${esc(b.desc)}</p>
+        <button class="btn primary" data-action="close-modal">¡Genial!</button>
+      </div>
+    </div>`;
+    const backdrop = root.querySelector(".modal-backdrop");
+    backdrop.addEventListener("click", (e) => {
+      if (e.target === backdrop || e.target.closest('[data-action="close-modal"]'))
+        closeModal();
+    });
+  }
+  function startReminderLoop() {
+    checkReminders();
+    setInterval(checkReminders, 30000);
+  }
+  function checkReminders() {
+    const state2 = getState();
+    const rem = state2.settings.reminders;
+    if (!rem.enabled)
+      return;
+    if (!("Notification" in window) || Notification.permission !== "granted")
+      return;
+    const now = new Date;
+    const hhmm = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const dayK = todayKey();
+    for (const tm of rem.times) {
+      const key = `${dayK} ${tm}`;
+      if (tm === hhmm && !rem.notified[key]) {
+        rem.notified[key] = true;
+        saveState();
+        fireReminder();
+      }
+    }
+  }
+  function fireReminder() {
+    const state2 = getState();
+    const tasks = getTasks(state2);
+    const goal = getDailyGoal(state2);
+    const log = state2.logs[todayKey()] || { tasks: {} };
+    const xp = dayXp(log, tasks);
+    const doneN = tasksDoneCount(log, tasks);
+    const pending = tasks.length - doneN;
+    let body;
+    if (xp >= goal)
+      body = "¡Ya has completado tu objetivo de hoy! \uD83C\uDF89 ¿Sumamos algo extra?";
+    else
+      body = `Te quedan ${pending} tareas (${Math.max(0, goal - xp)} XP) para completar tu día. ¡Tú puedes! \uD83D\uDCAA`;
+    try {
+      new Notification("PreHabilita · tu prehabilitación te espera", { body, tag: "prehabilita-reminder" });
+    } catch (_) {}
+  }
+  function registerServiceWorker() {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    }
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", init);
+  } else {
+    init();
+  }
+})();
+
+  </script>
+</body>
+</html>
