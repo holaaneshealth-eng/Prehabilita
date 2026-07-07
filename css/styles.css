@@ -341,3 +341,76 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
 .pin-input { font: inherit; font-size: 1.6rem; letter-spacing: 8px; text-align: center; padding: 12px; border: 1.5px solid #cbd5e1; border-radius: 10px; width: 100%; margin: 8px 0; }
 .pin-input.shake { animation: shake .3s; border-color: var(--danger); }
 @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
+
+
+/* ================= Ampliación: fragilidad, cuidador, accesibilidad, juego ================= */
+
+/* ---------- Accesibilidad ---------- */
+html.large-text { font-size: 19px; }
+body.high-contrast { --ink: #000; --muted: #1f2937; }
+body.high-contrast .card { border: 1.5px solid #0f172a; }
+body.high-contrast .task-desc, body.high-contrast .muted, body.high-contrast small { color: #1f2937 !important; }
+body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
+
+/* ---------- Botón escuchar (TTS) ---------- */
+.speak-btn { margin-top: 10px; font-size: .85rem; padding: 8px 14px; }
+
+/* ---------- Para el cuidador ---------- */
+.ctips { display: flex; flex-direction: column; gap: 14px; }
+.ctip { display: flex; gap: 12px; align-items: flex-start; }
+.ctip-ico { font-size: 1.5rem; flex-shrink: 0; }
+.ctip strong { display: block; }
+.alarm-card { background: #fef2f2; border-left: 5px solid var(--danger); }
+.alarm-card h3 { color: var(--danger); }
+.alarm-list { margin: 8px 0 0 1.1rem; }
+.alarm-list li { padding: 5px 0; font-size: .9rem; }
+
+/* ---------- Cribado FRAIL ---------- */
+.frail-result { text-align: center; border-top: 5px solid var(--fc); }
+.frail-emoji { font-size: 2.6rem; }
+.frail-score { font-size: 1.8rem; font-weight: 800; color: var(--fc); }
+.frail-score small { font-size: .9rem; color: var(--muted); font-weight: 600; }
+.frail-label { font-weight: 800; margin-bottom: 8px; }
+.frail-q { padding: 12px 0; border-top: 1px solid #f1f5f9; }
+.frail-q:first-of-type { border-top: 0; }
+.frail-opts { display: flex; gap: 20px; margin-top: 8px; }
+.fopt { display: flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; }
+.fopt input { width: 20px; height: 20px; }
+
+/* ---------- Medicación ---------- */
+.med-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #f1f5f9; }
+.med-row:first-child { border-top: 0; }
+.print-doc { background: #fff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 18px; margin-top: 12px; }
+.print-doc h2 { font-size: 1.2rem; margin-bottom: 8px; }
+.print-doc h3 { font-size: .95rem; margin: 14px 0 4px; color: var(--accent); }
+.med-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.med-table th, .med-table td { border: 1px solid #e2e8f0; padding: 7px 8px; text-align: left; font-size: .85rem; }
+.med-table th { background: #f8fafc; }
+.doc-foot { margin-top: 16px; font-size: .72rem; color: var(--muted); }
+
+/* ---------- Juego de memoria ---------- */
+.game-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.mini-exit { padding: 6px 14px; }
+.mgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.mcard {
+  aspect-ratio: 1; border: 0; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff;
+  font-size: 2rem; display: grid; place-items: center; transition: transform .15s, background .2s;
+}
+.mcard.up { background: #fff; border: 2px solid var(--accent-2); }
+.mcard.matched { background: var(--accent-soft); opacity: .65; }
+.mcard:active { transform: scale(.94); }
+.mcard:disabled { cursor: default; }
+.game-done { text-align: center; }
+.game-done .big-emoji { font-size: 3rem; }
+
+/* ---------- Impresión (guardar como PDF) ---------- */
+@media print {
+  .app-header, .bottom-nav, .toast-layer, .no-print, .section-label { display: none !important; }
+  #modal-root { display: none !important; }
+  body { background: #fff; }
+  #app { max-width: none; }
+  .content { padding: 0; }
+  .print-doc { border: 0; padding: 0; margin: 0; }
+  .med-table th, .med-table td { border: 1px solid #333; }
+}

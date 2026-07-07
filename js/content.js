@@ -40,6 +40,14 @@ export const PILLARS = [
     why: 'Menor ansiedad preoperatoria se asocia con menos dolor percibido, menor necesidad de analgésicos y mejor recuperación.',
   },
   {
+    id: 'cognitivo',
+    name: 'Salud cognitiva',
+    emoji: '🧠',
+    color: '#6366f1',
+    tagline: 'Mantén tu mente activa y protégida.',
+    why: 'Mantener la mente activa y descansar bien ayuda a prevenir la confusión aguda (delírium) tras la cirugía, una complicación frecuente en personas mayores o frágiles.',
+  },
+  {
     id: 'habitos',
     name: 'Hábitos saludables',
     emoji: '🚭',
@@ -72,6 +80,8 @@ export const TASKS = [
     title: 'Rutina de fuerza', desc: 'Sentadillas a una silla, puntillas y elevaciones de brazos: 2 series de 10.' },
   { id: 'movilidad', pillar: 'fisico', type: 'check', xp: 10, icon: '🤸',
     title: 'Movilidad y estiramientos', desc: '5 minutos de estiramientos suaves de piernas, espalda y hombros.' },
+  { id: 'equilibrio', pillar: 'fisico', type: 'check', xp: 15, icon: '🧍',
+    title: 'Equilibrio (con apoyo)', desc: 'Junto a una silla o encimera y, a ser posible, acompañado: mantén el equilibrio sobre una pierna 10-20 s por lado. Ten SIEMPRE un punto de apoyo cerca para evitar caídas.' },
 
   // --- Respiratorio ---
   { id: 'inspiratorio', pillar: 'respiratorio', type: 'counter', unit: 'reps', target: 30, xp: 25, icon: '🫁',
@@ -96,6 +106,12 @@ export const TASKS = [
     title: 'Higiene del sueño', desc: 'Sin pantallas 30 min antes de dormir; apunta a 7-8 h de sueño.' },
   { id: 'animo', pillar: 'mental', type: 'check', xp: 10, icon: '📓',
     title: 'Registro de ánimo', desc: 'Anota cómo te sientes hoy y una cosa por la que estés agradecido.' },
+
+  // --- Salud cognitiva ---
+  { id: 'gimnasia-mental', pillar: 'cognitivo', type: 'check', xp: 15, icon: '🧩',
+    title: 'Gimnasia mental', desc: 'Dedica 10-15 min a un pasatiempo que te haga pensar: el juego de memoria de la app, un crucigrama, sudoku, cartas o sopa de letras.' },
+  { id: 'lectura-conversa', pillar: 'cognitivo', type: 'check', xp: 10, icon: '📗',
+    title: 'Lectura o conversación', desc: 'Lee un rato o mantén una conversación estimulante. Mantener la mente activa ayuda a prevenir la confusión tras la cirugía.' },
 
   // --- Hábitos ---
   { id: 'no-tabaco', pillar: 'habitos', type: 'check', xp: 30, icon: '🚭',
@@ -169,8 +185,12 @@ export const BADGES = [
     check: (s) => (s.stats.counterTotals['caminar'] || 0) >= 300 },
   { id: 'humo-cero', name: 'Humo cero', emoji: '🚭', desc: '7 días seguidos sin tabaco.',
     check: (s) => (s.stats.taskCounts['no-tabaco'] || 0) >= 7 },
-  { id: 'sabio', name: 'Bien informado', emoji: '🧠', desc: 'Lee 5 lecciones educativas.',
+  { id: 'sabio', name: 'Bien informado', emoji: '📚', desc: 'Lee 5 lecciones educativas.',
     check: (s) => (s.stats.lessonsRead || 0) >= 5 },
+  { id: 'mente-agil', name: 'Mente ágil', emoji: '🧠', desc: 'Completa 10 sesiones de gimnasia mental.',
+    check: (s) => (s.stats.taskCounts['gimnasia-mental'] || 0) >= 10 },
+  { id: 'memoria-maestra', name: 'Maestro de la memoria', emoji: '🃏', desc: 'Gana una partida del juego de memoria.',
+    check: (s) => (s.games && s.games.memory && s.games.memory.wins > 0) },
   { id: 'hidratado', name: 'Bien hidratado', emoji: '💧', desc: 'Alcanza tu meta de hidratación 5 días.',
     check: (s) => (s.stats.hydrationGoalDays || 0) >= 5 },
   { id: 'listo', name: '¡Listo para el quirófano!', emoji: '🎉', desc: 'Completa 21 días de programa.',
@@ -273,6 +293,79 @@ Practicar esto a diario reduce la ansiedad y puede disminuir la percepción de d
 
 Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta de aire desproporcionada, para y consulta con tu equipo médico. Adapta siempre la intensidad a lo que tu profesional te haya autorizado.`,
   },
+  {
+    id: 'post-silla',
+    title: 'Ejercicios seguros en silla (para empezar sin riesgo)',
+    category: 'fisico',
+    cover: '',
+    author: 'Equipo de prehabilitación',
+    date: '2026-01-05',
+    body:
+`Si te cansas rápido, tienes poca fuerza o miedo a caerte, empieza por aquí. Son ejercicios muy seguros que puedes hacer sentado o con apoyo. Hazlos, si puedes, acompañado de un familiar.
+
+SENTADO EN UNA SILLA FIRME (sin ruedas):
+• Levantar y estirar cada pierna: 10 veces por pierna.
+• Marcha sentado (levantar rodillas alternando): 1-2 minutos.
+• Abrir y cerrar los brazos, y elevarlos por encima de la cabeza: 10 veces.
+
+DE PIE, CON LAS MANOS APOYADAS EN EL RESPALDO:
+• Levantarse y sentarse de la silla sin usar las manos: empieza con 5 y sube poco a poco.
+• Ponerte de puntillas: 10 veces.
+• Flexiones contra la pared: 10 veces.
+
+Reglas de oro: nunca hagas equilibrio sin un apoyo cerca, para si te mareas o te falta el aire, e hidrátate. La constancia importa mucho más que la intensidad.`,
+  },
+  {
+    id: 'post-delirium',
+    title: 'Prevenir la confusión tras la cirugía (delírium)',
+    category: 'cognitivo',
+    cover: '',
+    author: 'Equipo de prehabilitación',
+    date: '2026-01-06',
+    body:
+`El delírium es un estado de confusión aguda que puede aparecer en los días posteriores a una cirugía, sobre todo en personas mayores o frágiles. Es frecuente y casi siempre temporal, pero conviene prevenirlo porque asusta mucho y puede retrasar la recuperación.
+
+QUÉ AYUDA A PREVENIRLO (antes y después):
+• Mantener la mente activa: lectura, pasatiempos, el juego de memoria de la app, conversación.
+• Dormir bien y respetar el ritmo día/noche.
+• Llevar gafas y audífonos si los usas (ver y oír bien reduce la desorientación).
+• Hidratarse y comer adecuadamente.
+• Revisar con tu médico los fármacos que pueden favorecerlo.
+
+PARA LA FAMILIA, tras la operación: hablarle con calma, recordarle dónde está y qué día es, traer objetos familiares y acompañarle. Si notáis confusión, desorientación o cambios bruscos de comportamiento, avisad al personal sanitario: saben cómo manejarlo.`,
+  },
+  {
+    id: 'post-sno',
+    title: 'Cuando la comida no basta: suplementos nutricionales',
+    category: 'nutricion',
+    cover: '',
+    author: 'Equipo de prehabilitación',
+    date: '2026-01-07',
+    body:
+`La desnutrición "silenciosa" es muy común y debilita la cicatrización y las defensas. Muchas personas frágiles no llegan a sus necesidades de proteína solo con la dieta, sobre todo si tienen poco apetito.
+
+PRIMERO, LA COMIDA REAL. Prioriza proteínas de alto valor: huevos, pescado, carne magra, lácteos (yogur griego, queso, leche), legumbres. Reparte la proteína entre todas las comidas, incluido el desayuno.
+
+TRUCOS SI COMES POCO: enriquece los platos (leche en polvo, huevo, aceite de oliva, queso rallado), come poco y a menudo, y aprovecha los momentos de más apetito.
+
+SUPLEMENTOS NUTRICIONALES ORALES (SNO): son batidos o preparados ricos en proteínas y calorías. Pueden ser muy útiles, pero deben indicarlos tu médico o tu nutricionista, que elegirán el tipo y la cantidad adecuados a tu caso. Coméntalo en tu consulta si te cuesta comer.`,
+  },
+  {
+    id: 'post-anemia',
+    title: 'Anemia y medicación: dos cosas que revisar antes de operarte',
+    category: 'general',
+    cover: '',
+    author: 'Equipo de prehabilitación',
+    date: '2026-01-08',
+    body:
+`Dos aspectos médicos marcan una gran diferencia en cómo toleras la cirugía:
+
+ANEMIA (pocos glóbulos rojos o poco hierro). Llegar anémico a la cirugía aumenta el riesgo de necesitar transfusión y de complicaciones. A menudo se puede corregir en las semanas previas con hierro u otro tratamiento. Si te han dicho que tienes anemia o el hierro bajo, coméntalo cuanto antes en tu consulta.
+
+POLIFARMACIA (tomar muchos medicamentos). Algunos fármacos deben mantenerse y otros suspenderse antes de la operación (por ejemplo, ciertos anticoagulantes o antidiabéticos). Nunca los cambies por tu cuenta.
+
+LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista completa y actualizada de TODOS tus medicamentos (incluidos los de herbolario y los que compras sin receta) y de tus alergias. Puedes prepararla y descargarla desde la sección "Mi medicación y alergias" de esta app.`,
+  },
 ];
 
 /**
@@ -291,3 +384,63 @@ export const DEFAULT_RESOURCES = [
     url: 'https://www.youtube.com/results?search_query=ejercicios+en+casa+para+mayores+fuerza+suave',
     title: 'Ejercicios de fuerza suaves en casa', desc: 'Rutinas sencillas de fuerza sin material.' },
 ];
+
+
+/**
+ * Señales de alarma para el paciente y su cuidador.
+ * Educativo: ante cualquiera de ellas, contactar con el equipo médico o urgencias.
+ */
+export const ALARM_SIGNS = [
+  'Dolor en el pecho, palpitaciones o falta de aire en reposo.',
+  'Fiebre alta o escalofríos.',
+  'Mareo intenso, desmayo o caída.',
+  'Confusión nueva, desorientación o cambios bruscos de comportamiento.',
+  'Dolor que no cede o empeora de forma llamativa.',
+  'Sangrado, o herida enrojecida, caliente o con secreción.',
+  'Vómitos persistentes o incapacidad para beber líquidos.',
+  'Hinchazón o dolor en una pierna (sobre todo en una sola).',
+];
+
+/**
+ * Consejos para la persona cuidadora / familiar.
+ */
+export const CAREGIVER_TIPS = [
+  { icon: '🤝', title: 'Acompaña, no sustituyas', text: 'Anima a tu familiar a hacer sus tareas por sí mismo cuando sea seguro; tu papel es motivar y supervisar, no hacerlo por él/ella.' },
+  { icon: '🛟', title: 'Supervisa la seguridad', text: 'Quédate cerca durante los ejercicios de fuerza y equilibrio. Retira alfombras sueltas y asegura que haya un punto de apoyo firme.' },
+  { icon: '📆', title: 'Cread una rutina juntos', text: 'Un horario fijo para caminar, comer y dormir da estructura y facilita la constancia. Celebrad juntos los pequeños logros.' },
+  { icon: '🍽️', title: 'Cuida la alimentación', text: 'Vigila que come suficiente proteína y bebe líquidos. Si come poco, coméntalo con el equipo médico.' },
+  { icon: '🧠', title: 'Estimula la mente', text: 'Conversad, jugad al juego de memoria o a las cartas, y asegúrate de que lleva gafas y audífonos si los usa.' },
+  { icon: '📋', title: 'Prepara la consulta', text: 'Ayúdale a tener lista la lista de medicación y alergias, y anotad juntos las dudas para el anestesiólogo.' },
+];
+
+/**
+ * Escala FRAIL de cribado de fragilidad (Morley et al.).
+ * 5 ítems; cada "Sí" suma 1 punto. 0 = robusto, 1-2 = prefrágil, 3-5 = frágil.
+ * Herramienta orientativa de cribado, NO diagnóstica.
+ */
+export const FRAIL_QUESTIONS = [
+  { id: 'fatiga', q: '¿Se ha sentido cansado/a la MAYOR parte del tiempo en las últimas 4 semanas?' },
+  { id: 'resistencia', q: '¿Tiene dificultad para subir un piso de escaleras (unos 10 escalones) sin ayuda ni descansar?' },
+  { id: 'deambulacion', q: '¿Tiene dificultad para caminar unos 100-200 metros (una manzana) sin ayuda?' },
+  { id: 'enfermedades', q: '¿Le ha dicho un médico que tiene 5 o más enfermedades crónicas (p. ej. hipertensión, diabetes, cáncer, EPOC, cardiopatía, artritis, ictus, enfermedad renal)?' },
+  { id: 'peso', q: '¿Ha perdido más de un 5% de su peso (unos 3-4 kg) en el último año sin proponérselo?' },
+];
+
+/** Interpreta la puntuación FRAIL (0-5). */
+export function frailResult(score) {
+  if (score <= 0) return {
+    level: 'robusto', label: 'Robusto', emoji: '💪', color: '#22c55e',
+    message: 'Tu reserva es buena. La prehabilitación te ayudará a mantenerte fuerte y llegar en tu mejor forma a la cirugía.',
+  };
+  if (score <= 2) return {
+    level: 'prefragil', label: 'Prefragilidad', emoji: '🌱', color: '#f59e0b',
+    message: 'Estás en un punto en el que la prehabilitación tiene un impacto enorme. Empezar hoy mismo puede marcar una gran diferencia en tu recuperación.',
+  };
+  return {
+    level: 'fragil', label: 'Fragilidad', emoji: '🤗', color: '#ef4444',
+    message: 'Tu reserva es valiosa y hay mucho que ganar. Trabaja con calma, prioriza la seguridad y el acompañamiento, y comparte este resultado con tu equipo médico para adaptar tu plan.',
+  };
+}
+
+/** Emojis para el minijuego de memoria (parejas). */
+export const MEMORY_EMOJIS = ['🫁', '💪', '🥗', '🧘', '🚶', '💧', '😴', '🧠', '🍎', '🏆', '⭐', '🌿'];

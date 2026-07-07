@@ -1,7 +1,10 @@
 // ui.js
 // Renderizado de vistas (funciones puras que devuelven HTML).
 
-import { PREOP_CHECKLIST, DISCLAIMER, ERAS_NOTE } from './content.js';
+import {
+  PREOP_CHECKLIST, DISCLAIMER, ERAS_NOTE,
+  ALARM_SIGNS, CAREGIVER_TIPS, FRAIL_QUESTIONS, frailResult,
+} from './content.js';
 import { todayKey, daysBetween } from './state.js';
 import {
   levelInfo, dayXp, isDayComplete, tasksDoneCount, taskIsDone, getWeeklyChallenge,
@@ -377,9 +380,10 @@ export function renderLearn(state) {
 
   const read = new Set(state.readLessons);
   const lessons = getLessons().map((l) => `
-    <details class="card lesson ${read.has(l.id) ? 'read' : ''}" data-lesson="${l.id}">
+    <details class="card lesson ${read.has(l.id) ? 'read' : ''}" data-lesson="${l.id}" data-speak-scope>
       <summary>${read.has(l.id) ? '✅' : '📖'} ${esc(l.title)}</summary>
-      <p>${esc(l.body)}</p>
+      <p class="speakable">${esc(l.body)}</p>
+      <button class="btn ghost speak-btn" data-action="speak">🔊 Escuchar</button>
     </details>`).join('');
 
   const checklist = PREOP_CHECKLIST.map((c) => `<li>☐ ${esc(c)}</li>`).join('');
@@ -406,12 +410,13 @@ export function renderPost(state, id) {
   const pillar = getPillarById(state, p.category);
   return `
     <button class="btn ghost back-btn" data-action="nav" data-view="aprende">← Volver</button>
-    <article class="card post-full">
+    <article class="card post-full" data-speak-scope>
       ${p.cover ? `<div class="post-cover-full" style="background-image:url('${esc(p.cover)}')"></div>` : ''}
       <span class="post-tag">${pillar ? pillar.emoji + ' ' + esc(pillar.name) : esc(p.category || 'general')}</span>
       <h2>${esc(p.title)}</h2>
       <div class="post-meta muted small">${esc(p.date || '')}${p.author ? ' · ' + esc(p.author) : ''}</div>
-      <div class="post-body">${formatBody(p.body)}</div>
+      <button class="btn ghost speak-btn" data-action="speak">🔊 Escuchar</button>
+      <div class="post-body speakable">${formatBody(p.body)}</div>
     </article>`;
 }
 
@@ -419,10 +424,14 @@ export function renderPost(state, id) {
 
 export function renderMore(state) {
   const items = [
+    { view: 'fragilidad', icon: '🧭', label: 'Cribado de fragilidad', sub: 'Test rápido (escala FRAIL)' },
+    { view: 'medicacion', icon: '💊', label: 'Mi medicación y alergias', sub: 'Prepara tu lista para el anestesista' },
+    { view: 'cuidador', icon: '🤝', label: 'Para el cuidador / familiar', sub: 'Apoyo seguro y señales de alarma' },
+    { view: 'juego', icon: '🧩', label: 'Juego de memoria', sub: 'Gimnasia mental divertida' },
     { view: 'plan', icon: '📋', label: 'Tu plan completo', sub: 'Todas las tareas por pilar' },
     { view: 'logros', icon: '🏅', label: 'Medallas', sub: `${state.badges.length} desbloqueadas` },
     { view: 'editor', icon: '🩺', label: 'Modo médico', sub: 'Crear tareas, vídeos y publicaciones' },
-    { view: 'editor', icon: '🔔', label: 'Recordatorios', sub: state.settings.reminders.enabled ? 'Activados' : 'Desactivados', tab: 'ajustes' },
+    { view: 'editor', icon: '⚙️', label: 'Ajustes y accesibilidad', sub: 'Recordatorios, texto grande, contraste', tab: 'ajustes' },
   ];
   const menu = items.map((i) => `
     <button class="more-item" data-action="nav" data-view="${i.view}" ${i.tab ? `data-tab="${i.tab}"` : ''}>
@@ -481,7 +490,11 @@ export function renderNav(route) {
     { id: 'aprende', icon: '📚', label: 'Aprende' },
     { id: 'mas', icon: '⋯', label: 'Más' },
   ];
-  const activeSet = { hoy: 'hoy', recursos: 'recursos', progreso: 'progreso', aprende: 'aprende', post: 'aprende', mas: 'mas', plan: 'mas', logros: 'mas', editor: 'mas' };
+  const activeSet = {
+    hoy: 'hoy', recursos: 'recursos', progreso: 'progreso', aprende: 'aprende', post: 'aprende',
+    mas: 'mas', plan: 'mas', logros: 'mas', editor: 'mas',
+    fragilidad: 'mas', medicacion: 'mas', cuidador: 'mas', juego: 'mas',
+  };
   return `<nav class="bottom-nav">${items.map((i) => `
     <button class="nav-item ${activeSet[route] === i.id ? 'active' : ''}" data-action="nav" data-view="${i.id}">
       <span class="nav-ico">${i.icon}</span><span class="nav-lbl">${i.label}</span>
@@ -524,4 +537,173 @@ export function renderOnboarding() {
       <button type="submit" class="btn primary big">Empezar mi programa 🚀</button>
     </form>
   </div>`;
+}
+
+
+/* ---------- Vista: PARA EL CUIDADOR ---------- */
+
+export function renderCaregiver() {
+  const tips = CAREGIVER_TIPS.map((t) => `
+    <div class="ctip">
+      <span class="ctip-ico">${t.icon}</span>
+      <div><strong>${esc(t.title)}</strong><p class="muted small">${esc(t.text)}</p></div>
+    </div>`).join('');
+  const alarms = ALARM_SIGNS.map((a) => `<li>${esc(a)}</li>`).join('');
+  return `
+    <div class="section-label">🤝 Para el cuidador / familiar</div>
+    <section class="card speak-scope" data-speak-scope>
+      <p class="speakable">El acompañamiento marca una gran diferencia. Tu apoyo motiva, da seguridad y mejora los resultados. La mayoría de las personas frágiles no siguen el programa completamente solas: tu papel es clave.</p>
+      <button class="btn ghost speak-btn" data-action="speak">🔊 Escuchar</button>
+    </section>
+    <section class="card">
+      <h3>Cómo acompañar de forma segura</h3>
+      <div class="ctips">${tips}</div>
+    </section>
+    <section class="card alarm-card">
+      <h3>🚨 Señales de alarma</h3>
+      <p class="small">Ante cualquiera de estas señales, contacta con tu equipo médico o llama a urgencias (112):</p>
+      <ul class="alarm-list">${alarms}</ul>
+    </section>
+    <section class="card disclaimer-card">
+      <h3>ⓘ Aviso médico</h3>
+      <p class="small">${esc(DISCLAIMER)}</p>
+    </section>`;
+}
+
+/* ---------- Vista: CRIBADO DE FRAGILIDAD (FRAIL) ---------- */
+
+export function renderFrailty(state) {
+  const fr = state.frail || { score: null, answers: {} };
+  let resultCard = '';
+  if (fr.score != null) {
+    const r = frailResult(fr.score);
+    resultCard = `
+      <section class="card frail-result" style="--fc:${r.color}">
+        <div class="frail-emoji">${r.emoji}</div>
+        <div class="frail-score">${fr.score} <small>/ 5</small></div>
+        <div class="frail-label">${esc(r.label)}</div>
+        <p>${esc(r.message)}</p>
+        <p class="muted small">Resultado del ${esc(fr.date || '')}. Es un cribado orientativo, no un diagnóstico. Compártelo con tu equipo médico.</p>
+      </section>`;
+  }
+  const qs = FRAIL_QUESTIONS.map((q, i) => {
+    const cur = fr.answers ? fr.answers[q.id] : undefined;
+    return `
+      <div class="frail-q">
+        <p><strong>${i + 1}.</strong> ${esc(q.q)}</p>
+        <div class="frail-opts">
+          <label class="fopt"><input type="radio" name="${q.id}" value="1" ${cur === 1 ? 'checked' : ''}/> Sí</label>
+          <label class="fopt"><input type="radio" name="${q.id}" value="0" ${cur === 0 ? 'checked' : ''}/> No</label>
+        </div>
+      </div>`;
+  }).join('');
+  return `
+    <div class="section-label">🧭 Cribado de fragilidad (escala FRAIL)</div>
+    ${resultCard}
+    <form id="form-frail" class="card">
+      <p class="muted small">Responde con sinceridad; solo lleva un minuto. Puedes hacerlo con tu cuidador.</p>
+      ${qs}
+      <button type="submit" class="btn primary block">Ver mi resultado</button>
+    </form>
+    <section class="card disclaimer-card">
+      <h3>ⓘ Importante</h3>
+      <p class="small">La escala FRAIL es una herramienta de cribado orientativa; no sustituye la valoración de tu equipo médico. Sea cual sea tu resultado, la prehabilitación te beneficia.</p>
+    </section>`;
+}
+
+/* ---------- Vista: MI MEDICACIÓN Y ALERGIAS ---------- */
+
+export function renderMeds(state) {
+  const m = state.medList || { meds: [], allergies: '', notes: '' };
+  const rows = m.meds.length ? m.meds.map((x, i) => `
+    <div class="med-row">
+      <div><strong>${esc(x.name)}</strong> <small class="muted">${esc(x.dose || '')} ${esc(x.freq || '')}</small></div>
+      <button class="mini-btn danger" data-action="del-med" data-idx="${i}" aria-label="Eliminar">🗑️</button>
+    </div>`).join('') : '<p class="muted small">Aún no has añadido medicamentos.</p>';
+  const docRows = m.meds.length
+    ? m.meds.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.dose || '')}</td><td>${esc(x.freq || '')}</td></tr>`).join('')
+    : '<tr><td colspan="3">— sin medicación registrada —</td></tr>';
+
+  return `
+    <div class="section-label">💊 Mi medicación y alergias</div>
+    <div class="no-print">
+      <section class="card">
+        <p class="muted small">Prepara tu lista para la consulta de preanestesia. Incluye TODO: recetados, sin receta y productos de herbolario. Al terminar podrás guardarla en PDF.</p>
+      </section>
+      <section class="card">
+        <h3>Añadir medicamento</h3>
+        <form id="form-med" class="stack-form">
+          <label>Nombre <input name="name" type="text" required placeholder="Ej.: Omeprazol" /></label>
+          <div class="two-col">
+            <label>Dosis <input name="dose" type="text" placeholder="20 mg" /></label>
+            <label>Frecuencia <input name="freq" type="text" placeholder="1 al día" /></label>
+          </div>
+          <button type="submit" class="btn primary block">➕ Añadir a la lista</button>
+        </form>
+      </section>
+      <section class="card">
+        <h3>Tus medicamentos</h3>
+        <div class="med-list">${rows}</div>
+      </section>
+      <section class="card">
+        <h3>Alergias y notas</h3>
+        <form id="form-med-extra" class="stack-form">
+          <label>Alergias <textarea name="allergies" rows="2" placeholder="Medicamentos, alimentos, látex...">${esc(m.allergies || '')}</textarea></label>
+          <label>Otras notas (enfermedades, anticoagulantes, marcapasos...) <textarea name="notes" rows="2">${esc(m.notes || '')}</textarea></label>
+          <button type="submit" class="btn ghost block">Guardar cambios</button>
+        </form>
+      </section>
+      <button class="btn primary block" data-action="print-meds">🖨️ Imprimir / Guardar como PDF</button>
+      <p class="muted small">Se abrirá el diálogo de impresión; elige "Guardar como PDF" para tenerlo en tu móvil o imprimirlo.</p>
+    </div>
+
+    <section class="print-doc">
+      <h2>Lista de medicación y alergias</h2>
+      <p><strong>Paciente:</strong> ${esc(state.profile.name || '')}</p>
+      <p><strong>Cirugía:</strong> ${esc(state.profile.surgeryType || '—')} &nbsp;·&nbsp; <strong>Fecha prevista:</strong> ${esc(state.profile.surgeryDate || '—')}</p>
+      <h3>Medicación habitual</h3>
+      <table class="med-table"><thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th></tr></thead><tbody>${docRows}</tbody></table>
+      <h3>Alergias</h3><p>${esc(m.allergies || '—')}</p>
+      <h3>Otras notas</h3><p>${esc(m.notes || '—')}</p>
+      <p class="doc-foot">Documento generado con PreHabilita para la consulta de preanestesia.</p>
+    </section>`;
+}
+
+/* ---------- Vista: JUEGO DE MEMORIA ---------- */
+
+export function renderMemoryGame(state, game) {
+  const best = state.games && state.games.memory ? state.games.memory.bestMoves : null;
+  if (!game) {
+    return `
+      <div class="section-label">🧩 Juego de memoria</div>
+      <section class="card">
+        <p>Encuentra todas las parejas de cartas. Ejercita tu memoria y tu concentración: una forma divertida de prehabilitación cognitiva que ayuda a prevenir la confusión tras la cirugía.</p>
+        ${best != null ? `<p class="muted small">🏆 Tu mejor marca: <strong>${best} intentos</strong>.</p>` : ''}
+        <p class="muted small">Elige la dificultad:</p>
+        <div class="row-btns">
+          <button class="btn primary" data-action="memory-start" data-pairs="6">Fácil · 6 parejas</button>
+          <button class="btn ghost" data-action="memory-start" data-pairs="8">Difícil · 8 parejas</button>
+        </div>
+      </section>`;
+  }
+  const cards = game.cards.map((c, i) => {
+    const shown = c.matched || game.flipped.includes(i);
+    return `<button class="mcard ${shown ? 'up' : ''} ${c.matched ? 'matched' : ''}" data-action="flip-card" data-idx="${i}" ${c.matched || game.locked ? 'disabled' : ''} aria-label="carta">${shown ? c.emoji : '❓'}</button>`;
+  }).join('');
+  const isBest = game.done && state.games.memory.bestMoves === game.moves;
+  const doneCard = game.done ? `
+    <section class="card game-done">
+      <div class="big-emoji">🎉</div>
+      <h3>¡Completado en ${game.moves} intentos!</h3>
+      ${isBest ? '<p class="badge-ok">🏆 ¡Nueva mejor marca!</p>' : ''}
+      <p class="muted small">+15 XP · has completado tu gimnasia mental de hoy.</p>
+      <button class="btn primary block" data-action="memory-start" data-pairs="${game.cards.length / 2}">Jugar otra vez</button>
+    </section>` : '';
+  return `
+    <div class="section-label">🧩 Juego de memoria</div>
+    <section class="card">
+      <div class="game-head"><span>Intentos: <strong>${game.moves}</strong></span><button class="btn ghost mini-exit" data-action="memory-exit">Salir</button></div>
+      <div class="mgrid">${cards}</div>
+    </section>
+    ${doneCard}`;
 }

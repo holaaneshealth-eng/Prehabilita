@@ -352,6 +352,79 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
 .pin-input.shake { animation: shake .3s; border-color: var(--danger); }
 @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
 
+
+/* ================= Ampliación: fragilidad, cuidador, accesibilidad, juego ================= */
+
+/* ---------- Accesibilidad ---------- */
+html.large-text { font-size: 19px; }
+body.high-contrast { --ink: #000; --muted: #1f2937; }
+body.high-contrast .card { border: 1.5px solid #0f172a; }
+body.high-contrast .task-desc, body.high-contrast .muted, body.high-contrast small { color: #1f2937 !important; }
+body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
+
+/* ---------- Botón escuchar (TTS) ---------- */
+.speak-btn { margin-top: 10px; font-size: .85rem; padding: 8px 14px; }
+
+/* ---------- Para el cuidador ---------- */
+.ctips { display: flex; flex-direction: column; gap: 14px; }
+.ctip { display: flex; gap: 12px; align-items: flex-start; }
+.ctip-ico { font-size: 1.5rem; flex-shrink: 0; }
+.ctip strong { display: block; }
+.alarm-card { background: #fef2f2; border-left: 5px solid var(--danger); }
+.alarm-card h3 { color: var(--danger); }
+.alarm-list { margin: 8px 0 0 1.1rem; }
+.alarm-list li { padding: 5px 0; font-size: .9rem; }
+
+/* ---------- Cribado FRAIL ---------- */
+.frail-result { text-align: center; border-top: 5px solid var(--fc); }
+.frail-emoji { font-size: 2.6rem; }
+.frail-score { font-size: 1.8rem; font-weight: 800; color: var(--fc); }
+.frail-score small { font-size: .9rem; color: var(--muted); font-weight: 600; }
+.frail-label { font-weight: 800; margin-bottom: 8px; }
+.frail-q { padding: 12px 0; border-top: 1px solid #f1f5f9; }
+.frail-q:first-of-type { border-top: 0; }
+.frail-opts { display: flex; gap: 20px; margin-top: 8px; }
+.fopt { display: flex; align-items: center; gap: 8px; font-weight: 700; cursor: pointer; }
+.fopt input { width: 20px; height: 20px; }
+
+/* ---------- Medicación ---------- */
+.med-row { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 10px 0; border-top: 1px solid #f1f5f9; }
+.med-row:first-child { border-top: 0; }
+.print-doc { background: #fff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 18px; margin-top: 12px; }
+.print-doc h2 { font-size: 1.2rem; margin-bottom: 8px; }
+.print-doc h3 { font-size: .95rem; margin: 14px 0 4px; color: var(--accent); }
+.med-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.med-table th, .med-table td { border: 1px solid #e2e8f0; padding: 7px 8px; text-align: left; font-size: .85rem; }
+.med-table th { background: #f8fafc; }
+.doc-foot { margin-top: 16px; font-size: .72rem; color: var(--muted); }
+
+/* ---------- Juego de memoria ---------- */
+.game-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.mini-exit { padding: 6px 14px; }
+.mgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.mcard {
+  aspect-ratio: 1; border: 0; border-radius: 12px; cursor: pointer;
+  background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff;
+  font-size: 2rem; display: grid; place-items: center; transition: transform .15s, background .2s;
+}
+.mcard.up { background: #fff; border: 2px solid var(--accent-2); }
+.mcard.matched { background: var(--accent-soft); opacity: .65; }
+.mcard:active { transform: scale(.94); }
+.mcard:disabled { cursor: default; }
+.game-done { text-align: center; }
+.game-done .big-emoji { font-size: 3rem; }
+
+/* ---------- Impresión (guardar como PDF) ---------- */
+@media print {
+  .app-header, .bottom-nav, .toast-layer, .no-print, .section-label { display: none !important; }
+  #modal-root { display: none !important; }
+  body { background: #fff; }
+  #app { max-width: none; }
+  .content { padding: 0; }
+  .print-doc { border: 0; padding: 0; margin: 0; }
+  .med-table th, .med-table td { border: 1px solid #333; }
+}
+
   </style>
 </head>
 <body>
@@ -416,6 +489,9 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
       readPosts: [],
       badges: [],
       challengeAwards: {},
+      medList: { meds: [], allergies: "", notes: "" },
+      frail: { score: null, date: null, answers: {} },
+      games: { memory: { wins: 0, bestMoves: null } },
       library: {
         seeded: false,
         tasks: [],
@@ -425,6 +501,8 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
       },
       settings: {
         reducedMotion: false,
+        largeText: false,
+        highContrast: false,
         dailyGoal: 60,
         reminders: {
           enabled: false,
@@ -538,6 +616,14 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
       why: "Menor ansiedad preoperatoria se asocia con menos dolor percibido, menor necesidad de analgésicos y mejor recuperación."
     },
     {
+      id: "cognitivo",
+      name: "Salud cognitiva",
+      emoji: "\uD83E\uDDE0",
+      color: "#6366f1",
+      tagline: "Mantén tu mente activa y protégida.",
+      why: "Mantener la mente activa y descansar bien ayuda a prevenir la confusión aguda (delírium) tras la cirugía, una complicación frecuente en personas mayores o frágiles."
+    },
+    {
       id: "habitos",
       name: "Hábitos saludables",
       emoji: "\uD83D\uDEAD",
@@ -583,6 +669,15 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
       icon: "\uD83E\uDD38",
       title: "Movilidad y estiramientos",
       desc: "5 minutos de estiramientos suaves de piernas, espalda y hombros."
+    },
+    {
+      id: "equilibrio",
+      pillar: "fisico",
+      type: "check",
+      xp: 15,
+      icon: "\uD83E\uDDCD",
+      title: "Equilibrio (con apoyo)",
+      desc: "Junto a una silla o encimera y, a ser posible, acompañado: mantén el equilibrio sobre una pierna 10-20 s por lado. Ten SIEMPRE un punto de apoyo cerca para evitar caídas."
     },
     {
       id: "inspiratorio",
@@ -668,6 +763,24 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
       icon: "\uD83D\uDCD3",
       title: "Registro de ánimo",
       desc: "Anota cómo te sientes hoy y una cosa por la que estés agradecido."
+    },
+    {
+      id: "gimnasia-mental",
+      pillar: "cognitivo",
+      type: "check",
+      xp: 15,
+      icon: "\uD83E\uDDE9",
+      title: "Gimnasia mental",
+      desc: "Dedica 10-15 min a un pasatiempo que te haga pensar: el juego de memoria de la app, un crucigrama, sudoku, cartas o sopa de letras."
+    },
+    {
+      id: "lectura-conversa",
+      pillar: "cognitivo",
+      type: "check",
+      xp: 10,
+      icon: "\uD83D\uDCD7",
+      title: "Lectura o conversación",
+      desc: "Lee un rato o mantén una conversación estimulante. Mantener la mente activa ayuda a prevenir la confusión tras la cirugía."
     },
     {
       id: "no-tabaco",
@@ -795,9 +908,23 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
     {
       id: "sabio",
       name: "Bien informado",
-      emoji: "\uD83E\uDDE0",
+      emoji: "\uD83D\uDCDA",
       desc: "Lee 5 lecciones educativas.",
       check: (s) => (s.stats.lessonsRead || 0) >= 5
+    },
+    {
+      id: "mente-agil",
+      name: "Mente ágil",
+      emoji: "\uD83E\uDDE0",
+      desc: "Completa 10 sesiones de gimnasia mental.",
+      check: (s) => (s.stats.taskCounts["gimnasia-mental"] || 0) >= 10
+    },
+    {
+      id: "memoria-maestra",
+      name: "Maestro de la memoria",
+      emoji: "\uD83C\uDCCF",
+      desc: "Gana una partida del juego de memoria.",
+      check: (s) => s.games && s.games.memory && s.games.memory.wins > 0
     },
     {
       id: "hidratado",
@@ -884,6 +1011,75 @@ Practicar esto a diario reduce la ansiedad y puede disminuir la percepción de d
 • Respiración: ejercicios inspiratorios diarios.
 
 Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta de aire desproporcionada, para y consulta con tu equipo médico. Adapta siempre la intensidad a lo que tu profesional te haya autorizado.`
+    },
+    {
+      id: "post-silla",
+      title: "Ejercicios seguros en silla (para empezar sin riesgo)",
+      category: "fisico",
+      cover: "",
+      author: "Equipo de prehabilitación",
+      date: "2026-01-05",
+      body: `Si te cansas rápido, tienes poca fuerza o miedo a caerte, empieza por aquí. Son ejercicios muy seguros que puedes hacer sentado o con apoyo. Hazlos, si puedes, acompañado de un familiar.
+
+SENTADO EN UNA SILLA FIRME (sin ruedas):
+• Levantar y estirar cada pierna: 10 veces por pierna.
+• Marcha sentado (levantar rodillas alternando): 1-2 minutos.
+• Abrir y cerrar los brazos, y elevarlos por encima de la cabeza: 10 veces.
+
+DE PIE, CON LAS MANOS APOYADAS EN EL RESPALDO:
+• Levantarse y sentarse de la silla sin usar las manos: empieza con 5 y sube poco a poco.
+• Ponerte de puntillas: 10 veces.
+• Flexiones contra la pared: 10 veces.
+
+Reglas de oro: nunca hagas equilibrio sin un apoyo cerca, para si te mareas o te falta el aire, e hidrátate. La constancia importa mucho más que la intensidad.`
+    },
+    {
+      id: "post-delirium",
+      title: "Prevenir la confusión tras la cirugía (delírium)",
+      category: "cognitivo",
+      cover: "",
+      author: "Equipo de prehabilitación",
+      date: "2026-01-06",
+      body: `El delírium es un estado de confusión aguda que puede aparecer en los días posteriores a una cirugía, sobre todo en personas mayores o frágiles. Es frecuente y casi siempre temporal, pero conviene prevenirlo porque asusta mucho y puede retrasar la recuperación.
+
+QUÉ AYUDA A PREVENIRLO (antes y después):
+• Mantener la mente activa: lectura, pasatiempos, el juego de memoria de la app, conversación.
+• Dormir bien y respetar el ritmo día/noche.
+• Llevar gafas y audífonos si los usas (ver y oír bien reduce la desorientación).
+• Hidratarse y comer adecuadamente.
+• Revisar con tu médico los fármacos que pueden favorecerlo.
+
+PARA LA FAMILIA, tras la operación: hablarle con calma, recordarle dónde está y qué día es, traer objetos familiares y acompañarle. Si notáis confusión, desorientación o cambios bruscos de comportamiento, avisad al personal sanitario: saben cómo manejarlo.`
+    },
+    {
+      id: "post-sno",
+      title: "Cuando la comida no basta: suplementos nutricionales",
+      category: "nutricion",
+      cover: "",
+      author: "Equipo de prehabilitación",
+      date: "2026-01-07",
+      body: `La desnutrición "silenciosa" es muy común y debilita la cicatrización y las defensas. Muchas personas frágiles no llegan a sus necesidades de proteína solo con la dieta, sobre todo si tienen poco apetito.
+
+PRIMERO, LA COMIDA REAL. Prioriza proteínas de alto valor: huevos, pescado, carne magra, lácteos (yogur griego, queso, leche), legumbres. Reparte la proteína entre todas las comidas, incluido el desayuno.
+
+TRUCOS SI COMES POCO: enriquece los platos (leche en polvo, huevo, aceite de oliva, queso rallado), come poco y a menudo, y aprovecha los momentos de más apetito.
+
+SUPLEMENTOS NUTRICIONALES ORALES (SNO): son batidos o preparados ricos en proteínas y calorías. Pueden ser muy útiles, pero deben indicarlos tu médico o tu nutricionista, que elegirán el tipo y la cantidad adecuados a tu caso. Coméntalo en tu consulta si te cuesta comer.`
+    },
+    {
+      id: "post-anemia",
+      title: "Anemia y medicación: dos cosas que revisar antes de operarte",
+      category: "general",
+      cover: "",
+      author: "Equipo de prehabilitación",
+      date: "2026-01-08",
+      body: `Dos aspectos médicos marcan una gran diferencia en cómo toleras la cirugía:
+
+ANEMIA (pocos glóbulos rojos o poco hierro). Llegar anémico a la cirugía aumenta el riesgo de necesitar transfusión y de complicaciones. A menudo se puede corregir en las semanas previas con hierro u otro tratamiento. Si te han dicho que tienes anemia o el hierro bajo, coméntalo cuanto antes en tu consulta.
+
+POLIFARMACIA (tomar muchos medicamentos). Algunos fármacos deben mantenerse y otros suspenderse antes de la operación (por ejemplo, ciertos anticoagulantes o antidiabéticos). Nunca los cambies por tu cuenta.
+
+LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista completa y actualizada de TODOS tus medicamentos (incluidos los de herbolario y los que compras sin receta) y de tus alergias. Puedes prepararla y descargarla desde la sección "Mi medicación y alergias" de esta app.`
     }
   ];
   var DEFAULT_RESOURCES = [
@@ -912,6 +1108,57 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
       desc: "Rutinas sencillas de fuerza sin material."
     }
   ];
+  var ALARM_SIGNS = [
+    "Dolor en el pecho, palpitaciones o falta de aire en reposo.",
+    "Fiebre alta o escalofríos.",
+    "Mareo intenso, desmayo o caída.",
+    "Confusión nueva, desorientación o cambios bruscos de comportamiento.",
+    "Dolor que no cede o empeora de forma llamativa.",
+    "Sangrado, o herida enrojecida, caliente o con secreción.",
+    "Vómitos persistentes o incapacidad para beber líquidos.",
+    "Hinchazón o dolor en una pierna (sobre todo en una sola)."
+  ];
+  var CAREGIVER_TIPS = [
+    { icon: "\uD83E\uDD1D", title: "Acompaña, no sustituyas", text: "Anima a tu familiar a hacer sus tareas por sí mismo cuando sea seguro; tu papel es motivar y supervisar, no hacerlo por él/ella." },
+    { icon: "\uD83D\uDEDF", title: "Supervisa la seguridad", text: "Quédate cerca durante los ejercicios de fuerza y equilibrio. Retira alfombras sueltas y asegura que haya un punto de apoyo firme." },
+    { icon: "\uD83D\uDCC6", title: "Cread una rutina juntos", text: "Un horario fijo para caminar, comer y dormir da estructura y facilita la constancia. Celebrad juntos los pequeños logros." },
+    { icon: "\uD83C\uDF7D️", title: "Cuida la alimentación", text: "Vigila que come suficiente proteína y bebe líquidos. Si come poco, coméntalo con el equipo médico." },
+    { icon: "\uD83E\uDDE0", title: "Estimula la mente", text: "Conversad, jugad al juego de memoria o a las cartas, y asegúrate de que lleva gafas y audífonos si los usa." },
+    { icon: "\uD83D\uDCCB", title: "Prepara la consulta", text: "Ayúdale a tener lista la lista de medicación y alergias, y anotad juntos las dudas para el anestesiólogo." }
+  ];
+  var FRAIL_QUESTIONS = [
+    { id: "fatiga", q: "¿Se ha sentido cansado/a la MAYOR parte del tiempo en las últimas 4 semanas?" },
+    { id: "resistencia", q: "¿Tiene dificultad para subir un piso de escaleras (unos 10 escalones) sin ayuda ni descansar?" },
+    { id: "deambulacion", q: "¿Tiene dificultad para caminar unos 100-200 metros (una manzana) sin ayuda?" },
+    { id: "enfermedades", q: "¿Le ha dicho un médico que tiene 5 o más enfermedades crónicas (p. ej. hipertensión, diabetes, cáncer, EPOC, cardiopatía, artritis, ictus, enfermedad renal)?" },
+    { id: "peso", q: "¿Ha perdido más de un 5% de su peso (unos 3-4 kg) en el último año sin proponérselo?" }
+  ];
+  function frailResult(score) {
+    if (score <= 0)
+      return {
+        level: "robusto",
+        label: "Robusto",
+        emoji: "\uD83D\uDCAA",
+        color: "#22c55e",
+        message: "Tu reserva es buena. La prehabilitación te ayudará a mantenerte fuerte y llegar en tu mejor forma a la cirugía."
+      };
+    if (score <= 2)
+      return {
+        level: "prefragil",
+        label: "Prefragilidad",
+        emoji: "\uD83C\uDF31",
+        color: "#f59e0b",
+        message: "Estás en un punto en el que la prehabilitación tiene un impacto enorme. Empezar hoy mismo puede marcar una gran diferencia en tu recuperación."
+      };
+    return {
+      level: "fragil",
+      label: "Fragilidad",
+      emoji: "\uD83E\uDD17",
+      color: "#ef4444",
+      message: "Tu reserva es valiosa y hay mucho que ganar. Trabaja con calma, prioriza la seguridad y el acompañamiento, y comparte este resultado con tu equipo médico para adaptar tu plan."
+    };
+  }
+  var MEMORY_EMOJIS = ["\uD83E\uDEC1", "\uD83D\uDCAA", "\uD83E\uDD57", "\uD83E\uDDD8", "\uD83D\uDEB6", "\uD83D\uDCA7", "\uD83D\uDE34", "\uD83E\uDDE0", "\uD83C\uDF4E", "\uD83C\uDFC6", "⭐", "\uD83C\uDF3F"];
 
   // js/data.js
   function uid(prefix = "id") {
@@ -1488,9 +1735,10 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
     </button>`).join("") : '<p class="muted small">Aún no hay publicaciones. Créalas desde el Modo médico.</p>';
     const read = new Set(state2.readLessons);
     const lessons = getLessons().map((l) => `
-    <details class="card lesson ${read.has(l.id) ? "read" : ""}" data-lesson="${l.id}">
+    <details class="card lesson ${read.has(l.id) ? "read" : ""}" data-lesson="${l.id}" data-speak-scope>
       <summary>${read.has(l.id) ? "✅" : "\uD83D\uDCD6"} ${esc(l.title)}</summary>
-      <p>${esc(l.body)}</p>
+      <p class="speakable">${esc(l.body)}</p>
+      <button class="btn ghost speak-btn" data-action="speak">\uD83D\uDD0A Escuchar</button>
     </details>`).join("");
     const checklist = PREOP_CHECKLIST.map((c) => `<li>☐ ${esc(c)}</li>`).join("");
     return `
@@ -1515,20 +1763,25 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
     const pillar = getPillarById(state2, p.category);
     return `
     <button class="btn ghost back-btn" data-action="nav" data-view="aprende">← Volver</button>
-    <article class="card post-full">
+    <article class="card post-full" data-speak-scope>
       ${p.cover ? `<div class="post-cover-full" style="background-image:url('${esc(p.cover)}')"></div>` : ""}
       <span class="post-tag">${pillar ? pillar.emoji + " " + esc(pillar.name) : esc(p.category || "general")}</span>
       <h2>${esc(p.title)}</h2>
       <div class="post-meta muted small">${esc(p.date || "")}${p.author ? " · " + esc(p.author) : ""}</div>
-      <div class="post-body">${formatBody(p.body)}</div>
+      <button class="btn ghost speak-btn" data-action="speak">\uD83D\uDD0A Escuchar</button>
+      <div class="post-body speakable">${formatBody(p.body)}</div>
     </article>`;
   }
   function renderMore(state2) {
     const items = [
+      { view: "fragilidad", icon: "\uD83E\uDDED", label: "Cribado de fragilidad", sub: "Test rápido (escala FRAIL)" },
+      { view: "medicacion", icon: "\uD83D\uDC8A", label: "Mi medicación y alergias", sub: "Prepara tu lista para el anestesista" },
+      { view: "cuidador", icon: "\uD83E\uDD1D", label: "Para el cuidador / familiar", sub: "Apoyo seguro y señales de alarma" },
+      { view: "juego", icon: "\uD83E\uDDE9", label: "Juego de memoria", sub: "Gimnasia mental divertida" },
       { view: "plan", icon: "\uD83D\uDCCB", label: "Tu plan completo", sub: "Todas las tareas por pilar" },
       { view: "logros", icon: "\uD83C\uDFC5", label: "Medallas", sub: `${state2.badges.length} desbloqueadas` },
       { view: "editor", icon: "\uD83E\uDE7A", label: "Modo médico", sub: "Crear tareas, vídeos y publicaciones" },
-      { view: "editor", icon: "\uD83D\uDD14", label: "Recordatorios", sub: state2.settings.reminders.enabled ? "Activados" : "Desactivados", tab: "ajustes" }
+      { view: "editor", icon: "⚙️", label: "Ajustes y accesibilidad", sub: "Recordatorios, texto grande, contraste", tab: "ajustes" }
     ];
     const menu = items.map((i) => `
     <button class="more-item" data-action="nav" data-view="${i.view}" ${i.tab ? `data-tab="${i.tab}"` : ""}>
@@ -1582,7 +1835,21 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
       { id: "aprende", icon: "\uD83D\uDCDA", label: "Aprende" },
       { id: "mas", icon: "⋯", label: "Más" }
     ];
-    const activeSet = { hoy: "hoy", recursos: "recursos", progreso: "progreso", aprende: "aprende", post: "aprende", mas: "mas", plan: "mas", logros: "mas", editor: "mas" };
+    const activeSet = {
+      hoy: "hoy",
+      recursos: "recursos",
+      progreso: "progreso",
+      aprende: "aprende",
+      post: "aprende",
+      mas: "mas",
+      plan: "mas",
+      logros: "mas",
+      editor: "mas",
+      fragilidad: "mas",
+      medicacion: "mas",
+      cuidador: "mas",
+      juego: "mas"
+    };
     return `<nav class="bottom-nav">${items.map((i) => `
     <button class="nav-item ${activeSet[route] === i.id ? "active" : ""}" data-action="nav" data-view="${i.id}">
       <span class="nav-ico">${i.icon}</span><span class="nav-lbl">${i.label}</span>
@@ -1622,6 +1889,159 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
       <button type="submit" class="btn primary big">Empezar mi programa \uD83D\uDE80</button>
     </form>
   </div>`;
+  }
+  function renderCaregiver() {
+    const tips = CAREGIVER_TIPS.map((t) => `
+    <div class="ctip">
+      <span class="ctip-ico">${t.icon}</span>
+      <div><strong>${esc(t.title)}</strong><p class="muted small">${esc(t.text)}</p></div>
+    </div>`).join("");
+    const alarms = ALARM_SIGNS.map((a) => `<li>${esc(a)}</li>`).join("");
+    return `
+    <div class="section-label">\uD83E\uDD1D Para el cuidador / familiar</div>
+    <section class="card speak-scope" data-speak-scope>
+      <p class="speakable">El acompañamiento marca una gran diferencia. Tu apoyo motiva, da seguridad y mejora los resultados. La mayoría de las personas frágiles no siguen el programa completamente solas: tu papel es clave.</p>
+      <button class="btn ghost speak-btn" data-action="speak">\uD83D\uDD0A Escuchar</button>
+    </section>
+    <section class="card">
+      <h3>Cómo acompañar de forma segura</h3>
+      <div class="ctips">${tips}</div>
+    </section>
+    <section class="card alarm-card">
+      <h3>\uD83D\uDEA8 Señales de alarma</h3>
+      <p class="small">Ante cualquiera de estas señales, contacta con tu equipo médico o llama a urgencias (112):</p>
+      <ul class="alarm-list">${alarms}</ul>
+    </section>
+    <section class="card disclaimer-card">
+      <h3>ⓘ Aviso médico</h3>
+      <p class="small">${esc(DISCLAIMER)}</p>
+    </section>`;
+  }
+  function renderFrailty(state2) {
+    const fr = state2.frail || { score: null, answers: {} };
+    let resultCard = "";
+    if (fr.score != null) {
+      const r = frailResult(fr.score);
+      resultCard = `
+      <section class="card frail-result" style="--fc:${r.color}">
+        <div class="frail-emoji">${r.emoji}</div>
+        <div class="frail-score">${fr.score} <small>/ 5</small></div>
+        <div class="frail-label">${esc(r.label)}</div>
+        <p>${esc(r.message)}</p>
+        <p class="muted small">Resultado del ${esc(fr.date || "")}. Es un cribado orientativo, no un diagnóstico. Compártelo con tu equipo médico.</p>
+      </section>`;
+    }
+    const qs = FRAIL_QUESTIONS.map((q, i) => {
+      const cur = fr.answers ? fr.answers[q.id] : undefined;
+      return `
+      <div class="frail-q">
+        <p><strong>${i + 1}.</strong> ${esc(q.q)}</p>
+        <div class="frail-opts">
+          <label class="fopt"><input type="radio" name="${q.id}" value="1" ${cur === 1 ? "checked" : ""}/> Sí</label>
+          <label class="fopt"><input type="radio" name="${q.id}" value="0" ${cur === 0 ? "checked" : ""}/> No</label>
+        </div>
+      </div>`;
+    }).join("");
+    return `
+    <div class="section-label">\uD83E\uDDED Cribado de fragilidad (escala FRAIL)</div>
+    ${resultCard}
+    <form id="form-frail" class="card">
+      <p class="muted small">Responde con sinceridad; solo lleva un minuto. Puedes hacerlo con tu cuidador.</p>
+      ${qs}
+      <button type="submit" class="btn primary block">Ver mi resultado</button>
+    </form>
+    <section class="card disclaimer-card">
+      <h3>ⓘ Importante</h3>
+      <p class="small">La escala FRAIL es una herramienta de cribado orientativa; no sustituye la valoración de tu equipo médico. Sea cual sea tu resultado, la prehabilitación te beneficia.</p>
+    </section>`;
+  }
+  function renderMeds(state2) {
+    const m = state2.medList || { meds: [], allergies: "", notes: "" };
+    const rows = m.meds.length ? m.meds.map((x, i) => `
+    <div class="med-row">
+      <div><strong>${esc(x.name)}</strong> <small class="muted">${esc(x.dose || "")} ${esc(x.freq || "")}</small></div>
+      <button class="mini-btn danger" data-action="del-med" data-idx="${i}" aria-label="Eliminar">\uD83D\uDDD1️</button>
+    </div>`).join("") : '<p class="muted small">Aún no has añadido medicamentos.</p>';
+    const docRows = m.meds.length ? m.meds.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.dose || "")}</td><td>${esc(x.freq || "")}</td></tr>`).join("") : '<tr><td colspan="3">— sin medicación registrada —</td></tr>';
+    return `
+    <div class="section-label">\uD83D\uDC8A Mi medicación y alergias</div>
+    <div class="no-print">
+      <section class="card">
+        <p class="muted small">Prepara tu lista para la consulta de preanestesia. Incluye TODO: recetados, sin receta y productos de herbolario. Al terminar podrás guardarla en PDF.</p>
+      </section>
+      <section class="card">
+        <h3>Añadir medicamento</h3>
+        <form id="form-med" class="stack-form">
+          <label>Nombre <input name="name" type="text" required placeholder="Ej.: Omeprazol" /></label>
+          <div class="two-col">
+            <label>Dosis <input name="dose" type="text" placeholder="20 mg" /></label>
+            <label>Frecuencia <input name="freq" type="text" placeholder="1 al día" /></label>
+          </div>
+          <button type="submit" class="btn primary block">➕ Añadir a la lista</button>
+        </form>
+      </section>
+      <section class="card">
+        <h3>Tus medicamentos</h3>
+        <div class="med-list">${rows}</div>
+      </section>
+      <section class="card">
+        <h3>Alergias y notas</h3>
+        <form id="form-med-extra" class="stack-form">
+          <label>Alergias <textarea name="allergies" rows="2" placeholder="Medicamentos, alimentos, látex...">${esc(m.allergies || "")}</textarea></label>
+          <label>Otras notas (enfermedades, anticoagulantes, marcapasos...) <textarea name="notes" rows="2">${esc(m.notes || "")}</textarea></label>
+          <button type="submit" class="btn ghost block">Guardar cambios</button>
+        </form>
+      </section>
+      <button class="btn primary block" data-action="print-meds">\uD83D\uDDA8️ Imprimir / Guardar como PDF</button>
+      <p class="muted small">Se abrirá el diálogo de impresión; elige "Guardar como PDF" para tenerlo en tu móvil o imprimirlo.</p>
+    </div>
+
+    <section class="print-doc">
+      <h2>Lista de medicación y alergias</h2>
+      <p><strong>Paciente:</strong> ${esc(state2.profile.name || "")}</p>
+      <p><strong>Cirugía:</strong> ${esc(state2.profile.surgeryType || "—")} &nbsp;·&nbsp; <strong>Fecha prevista:</strong> ${esc(state2.profile.surgeryDate || "—")}</p>
+      <h3>Medicación habitual</h3>
+      <table class="med-table"><thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th></tr></thead><tbody>${docRows}</tbody></table>
+      <h3>Alergias</h3><p>${esc(m.allergies || "—")}</p>
+      <h3>Otras notas</h3><p>${esc(m.notes || "—")}</p>
+      <p class="doc-foot">Documento generado con PreHabilita para la consulta de preanestesia.</p>
+    </section>`;
+  }
+  function renderMemoryGame(state2, game) {
+    const best = state2.games && state2.games.memory ? state2.games.memory.bestMoves : null;
+    if (!game) {
+      return `
+      <div class="section-label">\uD83E\uDDE9 Juego de memoria</div>
+      <section class="card">
+        <p>Encuentra todas las parejas de cartas. Ejercita tu memoria y tu concentración: una forma divertida de prehabilitación cognitiva que ayuda a prevenir la confusión tras la cirugía.</p>
+        ${best != null ? `<p class="muted small">\uD83C\uDFC6 Tu mejor marca: <strong>${best} intentos</strong>.</p>` : ""}
+        <p class="muted small">Elige la dificultad:</p>
+        <div class="row-btns">
+          <button class="btn primary" data-action="memory-start" data-pairs="6">Fácil · 6 parejas</button>
+          <button class="btn ghost" data-action="memory-start" data-pairs="8">Difícil · 8 parejas</button>
+        </div>
+      </section>`;
+    }
+    const cards = game.cards.map((c, i) => {
+      const shown = c.matched || game.flipped.includes(i);
+      return `<button class="mcard ${shown ? "up" : ""} ${c.matched ? "matched" : ""}" data-action="flip-card" data-idx="${i}" ${c.matched || game.locked ? "disabled" : ""} aria-label="carta">${shown ? c.emoji : "❓"}</button>`;
+    }).join("");
+    const isBest = game.done && state2.games.memory.bestMoves === game.moves;
+    const doneCard = game.done ? `
+    <section class="card game-done">
+      <div class="big-emoji">\uD83C\uDF89</div>
+      <h3>¡Completado en ${game.moves} intentos!</h3>
+      ${isBest ? '<p class="badge-ok">\uD83C\uDFC6 ¡Nueva mejor marca!</p>' : ""}
+      <p class="muted small">+15 XP · has completado tu gimnasia mental de hoy.</p>
+      <button class="btn primary block" data-action="memory-start" data-pairs="${game.cards.length / 2}">Jugar otra vez</button>
+    </section>` : "";
+    return `
+    <div class="section-label">\uD83E\uDDE9 Juego de memoria</div>
+    <section class="card">
+      <div class="game-head"><span>Intentos: <strong>${game.moves}</strong></span><button class="btn ghost mini-exit" data-action="memory-exit">Salir</button></div>
+      <div class="mgrid">${cards}</div>
+    </section>
+    ${doneCard}`;
   }
 
   // js/editor.js
@@ -1844,6 +2264,15 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
 
     <section class="card">
       <h3>♿ Accesibilidad</h3>
+      <p class="muted small">Pensado para personas mayores o con dificultades visuales.</p>
+      <label class="switch-row">
+        <span>Texto grande</span>
+        <input type="checkbox" data-action="toggle-large-text" ${s.largeText ? "checked" : ""} />
+      </label>
+      <label class="switch-row">
+        <span>Alto contraste</span>
+        <input type="checkbox" data-action="toggle-contrast" ${s.highContrast ? "checked" : ""} />
+      </label>
       <label class="switch-row">
         <span>Reducir animaciones</span>
         <input type="checkbox" data-action="toggle-motion" ${s.reducedMotion ? "checked" : ""} />
@@ -1936,13 +2365,14 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
   var editorTab = "tareas";
   var currentPostId = null;
   var editorUnlocked = false;
+  var memoryGame = null;
   function init() {
     loadState();
     const state2 = getState();
     seedLibrary(state2);
     recompute(state2);
     saveState();
-    applyReducedMotion();
+    applyDisplaySettings();
     render();
     const app = document.getElementById("app");
     app.addEventListener("click", onClick);
@@ -1955,8 +2385,11 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
     registerServiceWorker();
     startReminderLoop();
   }
-  function applyReducedMotion() {
-    document.body.classList.toggle("reduce-motion", !!getState().settings.reducedMotion);
+  function applyDisplaySettings() {
+    const s = getState().settings;
+    document.body.classList.toggle("reduce-motion", !!s.reducedMotion);
+    document.body.classList.toggle("high-contrast", !!s.highContrast);
+    document.documentElement.classList.toggle("large-text", !!s.largeText);
   }
   function render() {
     const state2 = getState();
@@ -1993,6 +2426,18 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
       case "editor":
         body = renderEditor(state2, editorTab);
         break;
+      case "fragilidad":
+        body = renderFrailty(state2);
+        break;
+      case "medicacion":
+        body = renderMeds(state2);
+        break;
+      case "cuidador":
+        body = renderCaregiver();
+        break;
+      case "juego":
+        body = renderMemoryGame(state2, memoryGame);
+        break;
       default:
         body = renderToday(state2);
     }
@@ -2003,6 +2448,8 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
   `;
   }
   function navigate(view, tab) {
+    if (window.speechSynthesis)
+      window.speechSynthesis.cancel();
     if (view === "editor") {
       if (tab)
         editorTab = tab;
@@ -2080,6 +2527,25 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
         break;
       case "close-modal":
         closeModal();
+        break;
+      case "speak":
+        speakFrom(el);
+        break;
+      case "print-meds":
+        window.print();
+        break;
+      case "del-med":
+        delMed(Number(el.dataset.idx));
+        break;
+      case "memory-start":
+        startMemory(Number(el.dataset.pairs));
+        break;
+      case "memory-exit":
+        memoryGame = null;
+        render();
+        break;
+      case "flip-card":
+        flipCard(Number(el.dataset.idx));
         break;
       case "open-post":
         openPost(el.dataset.id);
@@ -2160,7 +2626,19 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
         case "toggle-motion":
           state2.settings.reducedMotion = el.checked;
           saveState();
-          applyReducedMotion();
+          applyDisplaySettings();
+          render();
+          return;
+        case "toggle-large-text":
+          state2.settings.largeText = el.checked;
+          saveState();
+          applyDisplaySettings();
+          render();
+          return;
+        case "toggle-contrast":
+          state2.settings.highContrast = el.checked;
+          saveState();
+          applyDisplaySettings();
           render();
           return;
       }
@@ -2182,6 +2660,12 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
       return submitResource(form);
     if (form.id === "form-post")
       return submitPost(form);
+    if (form.id === "form-frail")
+      return submitFrail(form);
+    if (form.id === "form-med")
+      return submitMed(form);
+    if (form.id === "form-med-extra")
+      return submitMedExtra(form);
   }
   function submitOnboarding(form) {
     const fd = new FormData(form);
@@ -2430,7 +2914,7 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
         seedLibrary(state2);
         recompute(state2);
         saveState();
-        applyReducedMotion();
+        applyDisplaySettings();
         route = "hoy";
         render();
         toast("✔ Datos importados correctamente.");
@@ -2613,6 +3097,141 @@ Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta
     try {
       new Notification("PreHabilita · tu prehabilitación te espera", { body, tag: "prehabilita-reminder" });
     } catch (_) {}
+  }
+  function speakFrom(el) {
+    const synth = window.speechSynthesis;
+    if (!synth) {
+      toast("Tu navegador no permite lectura por voz.");
+      return;
+    }
+    if (synth.speaking || synth.pending) {
+      synth.cancel();
+      toast("Lectura detenida.");
+      return;
+    }
+    const scope = el.closest("[data-speak-scope]") || el.parentElement;
+    const target = scope && scope.querySelector(".speakable") || scope;
+    const text = (target.innerText || target.textContent || "").trim();
+    if (!text)
+      return;
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "es-ES";
+    u.rate = 0.95;
+    synth.speak(u);
+    toast("\uD83D\uDD0A Leyendo… (toca de nuevo para parar)");
+  }
+  function submitFrail(form) {
+    const fd = new FormData(form);
+    const state2 = getState();
+    let score = 0;
+    const answers = {};
+    for (const q of FRAIL_QUESTIONS) {
+      const v = fd.get(q.id);
+      if (v == null) {
+        toast("Responde a todas las preguntas, por favor.");
+        return;
+      }
+      const n = Number(v);
+      answers[q.id] = n;
+      score += n;
+    }
+    state2.frail = { score, date: todayKey(), answers };
+    saveState();
+    render();
+    window.scrollTo(0, 0);
+    toast("✔ Cribado guardado. Compártelo con tu equipo médico.");
+  }
+  function submitMed(form) {
+    const fd = new FormData(form);
+    const state2 = getState();
+    const name = (fd.get("name") || "").toString().trim();
+    if (!name)
+      return;
+    state2.medList.meds.push({
+      name,
+      dose: (fd.get("dose") || "").toString().trim(),
+      freq: (fd.get("freq") || "").toString().trim()
+    });
+    saveState();
+    render();
+    toast("✔ Medicamento añadido.");
+  }
+  function delMed(idx) {
+    const state2 = getState();
+    state2.medList.meds.splice(idx, 1);
+    saveState();
+    render();
+  }
+  function submitMedExtra(form) {
+    const fd = new FormData(form);
+    const state2 = getState();
+    state2.medList.allergies = (fd.get("allergies") || "").toString().trim();
+    state2.medList.notes = (fd.get("notes") || "").toString().trim();
+    saveState();
+    render();
+    toast("✔ Guardado.");
+  }
+  function startMemory(pairs) {
+    const n = Math.max(2, Math.min(MEMORY_EMOJIS.length, pairs || 6));
+    const chosen = MEMORY_EMOJIS.slice(0, n);
+    const deck = [...chosen, ...chosen].map((e) => ({ emoji: e, matched: false }));
+    for (let i = deck.length - 1;i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [deck[i], deck[j]] = [deck[j], deck[i]];
+    }
+    memoryGame = { cards: deck, flipped: [], moves: 0, locked: false, done: false };
+    route = "juego";
+    render();
+    window.scrollTo(0, 0);
+  }
+  function flipCard(idx) {
+    const g = memoryGame;
+    if (!g || g.locked || g.done)
+      return;
+    const card = g.cards[idx];
+    if (!card || card.matched || g.flipped.includes(idx))
+      return;
+    g.flipped.push(idx);
+    if (g.flipped.length < 2) {
+      render();
+      return;
+    }
+    g.moves++;
+    const [a, b] = g.flipped;
+    if (g.cards[a].emoji === g.cards[b].emoji) {
+      g.cards[a].matched = true;
+      g.cards[b].matched = true;
+      g.flipped = [];
+      if (g.cards.every((c) => c.matched))
+        finishMemory();
+      render();
+    } else {
+      g.locked = true;
+      render();
+      setTimeout(() => {
+        g.flipped = [];
+        g.locked = false;
+        render();
+      }, 900);
+    }
+  }
+  function finishMemory() {
+    const g = memoryGame;
+    g.done = true;
+    const state2 = getState();
+    state2.games = state2.games || { memory: { wins: 0, bestMoves: null } };
+    const mem = state2.games.memory;
+    mem.wins = (mem.wins || 0) + 1;
+    if (mem.bestMoves == null || g.moves < mem.bestMoves)
+      mem.bestMoves = g.moves;
+    const log = getDayLog();
+    const wasDone = log.tasks["gimnasia-mental"] === true;
+    log.tasks["gimnasia-mental"] = true;
+    const events = applyEngine(state2);
+    saveState();
+    if (!wasDone)
+      setTimeout(() => toast("\uD83E\uDDE9 +15 XP · gimnasia mental completada"), 200);
+    handleEvents(events);
   }
   function registerServiceWorker() {
     if ("serviceWorker" in navigator) {

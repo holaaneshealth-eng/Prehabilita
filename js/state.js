@@ -50,6 +50,13 @@ function defaultState() {
     badges: [],            // ids de medallas desbloqueadas
     challengeAwards: {},
 
+    // Lista de medicación y alergias (para la consulta de preanestesia).
+    medList: { meds: [], allergies: '', notes: '' },
+    // Último resultado del cribado de fragilidad (escala FRAIL).
+    frail: { score: null, date: null, answers: {} },
+    // Datos de minijuegos.
+    games: { memory: { wins: 0, bestMoves: null } },
+
     // Contenido editable desde la propia interfaz (gestor de contenidos).
     library: {
       seeded: false,
@@ -61,6 +68,8 @@ function defaultState() {
 
     settings: {
       reducedMotion: false,
+      largeText: false,
+      highContrast: false,
       dailyGoal: 60,
       reminders: {
         enabled: false,

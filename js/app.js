@@ -5,7 +5,7 @@ import {
   loadState, saveState, getState, resetState, getDayLog, todayKey,
   exportState, importState,
 } from './state.js';
-import { BADGES, DISCLAIMER } from './content.js';
+import { BADGES, DISCLAIMER, FRAIL_QUESTIONS, MEMORY_EMOJIS } from './content.js';
 import {
   seedLibrary, getTasks, getTaskById, getAllTasksForEditor, getPillarById,
   getResources, getPosts, getDailyGoal, uid,
@@ -19,6 +19,7 @@ let route = 'hoy';
 let editorTab = 'tareas';
 let currentPostId = null;
 let editorUnlocked = false;
+let memoryGame = null;
 
 /* ---------- Arranque ---------- */
 
@@ -28,7 +29,7 @@ function init() {
   seedLibrary(state);
   recompute(state);
   saveState();
-  applyReducedMotion();
+  applyDisplaySettings();
   render();
 
   const app = document.getElementById('app');
@@ -46,8 +47,12 @@ function init() {
   startReminderLoop();
 }
 
-function applyReducedMotion() {
-  document.body.classList.toggle('reduce-motion', !!getState().settings.reducedMotion);
+function applyDisplaySettings() {
+  const s = getState().settings;
+  document.body.classList.toggle('reduce-motion', !!s.reducedMotion);
+  document.body.classList.toggle('high-contrast', !!s.highContrast);
+  // El texto grande se aplica a <html> para que escale todas las medidas rem.
+  document.documentElement.classList.toggle('large-text', !!s.largeText);
 }
 
 /* ---------- Render principal ---------- */
@@ -73,6 +78,10 @@ function render() {
     case 'plan': body = ui.renderPlan(state); break;
     case 'logros': body = ui.renderBadges(state, BADGES); break;
     case 'editor': body = editor.renderEditor(state, editorTab); break;
+    case 'fragilidad': body = ui.renderFrailty(state); break;
+    case 'medicacion': body = ui.renderMeds(state); break;
+    case 'cuidador': body = ui.renderCaregiver(); break;
+    case 'juego': body = ui.renderMemoryGame(state, memoryGame); break;
     default: body = ui.renderToday(state);
   }
 
@@ -86,6 +95,7 @@ function render() {
 /* ---------- Navegación ---------- */
 
 function navigate(view, tab) {
+  if (window.speechSynthesis) window.speechSynthesis.cancel();
   if (view === 'editor') {
     if (tab) editorTab = tab;
     if (!enterEditorGuard()) return;
@@ -155,6 +165,18 @@ function onClick(e) {
     case 'reset': confirmReset(); break;
     case 'close-modal': closeModal(); break;
 
+    /* ----- Accesibilidad / voz ----- */
+    case 'speak': speakFrom(el); break;
+
+    /* ----- Medicación ----- */
+    case 'print-meds': window.print(); break;
+    case 'del-med': delMed(Number(el.dataset.idx)); break;
+
+    /* ----- Juego de memoria ----- */
+    case 'memory-start': startMemory(Number(el.dataset.pairs)); break;
+    case 'memory-exit': memoryGame = null; render(); break;
+    case 'flip-card': flipCard(Number(el.dataset.idx)); break;
+
     /* ----- Blog ----- */
     case 'open-post': openPost(el.dataset.id); break;
     case 'edit-profile': openModal('Editar mis datos', ui.profileFormHtml(state)); break;
@@ -212,7 +234,13 @@ function onChange(e) {
         saveState(); render(); return;
       case 'toggle-motion':
         state.settings.reducedMotion = el.checked;
-        saveState(); applyReducedMotion(); render(); return;
+        saveState(); applyDisplaySettings(); render(); return;
+      case 'toggle-large-text':
+        state.settings.largeText = el.checked;
+        saveState(); applyDisplaySettings(); render(); return;
+      case 'toggle-contrast':
+        state.settings.highContrast = el.checked;
+        saveState(); applyDisplaySettings(); render(); return;
     }
   }
   if (e.target.id === 'import-file') importFromFile(e.target);
@@ -230,6 +258,9 @@ function onSubmit(e) {
   if (form.id === 'form-task') return submitTask(form);
   if (form.id === 'form-resource') return submitResource(form);
   if (form.id === 'form-post') return submitPost(form);
+  if (form.id === 'form-frail') return submitFrail(form);
+  if (form.id === 'form-med') return submitMed(form);
+  if (form.id === 'form-med-extra') return submitMedExtra(form);
 }
 
 function submitOnboarding(form) {
@@ -485,7 +516,7 @@ function importFromFile(input) {
       seedLibrary(state);
       recompute(state);
       saveState();
-      applyReducedMotion();
+      applyDisplaySettings();
       route = 'hoy';
       render();
       toast('✔ Datos importados correctamente.');
@@ -674,6 +705,136 @@ function fireReminder() {
   try {
     new Notification('PreHabilita · tu prehabilitación te espera', { body, tag: 'prehabilita-reminder' });
   } catch (_) { /* algunos navegadores requieren SW para notificar */ }
+}
+
+/* ---------- Lectura por voz (Web Speech API) ---------- */
+
+function speakFrom(el) {
+  const synth = window.speechSynthesis;
+  if (!synth) { toast('Tu navegador no permite lectura por voz.'); return; }
+  if (synth.speaking || synth.pending) { synth.cancel(); toast('Lectura detenida.'); return; }
+  const scope = el.closest('[data-speak-scope]') || el.parentElement;
+  const target = (scope && scope.querySelector('.speakable')) || scope;
+  const text = (target.innerText || target.textContent || '').trim();
+  if (!text) return;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'es-ES';
+  u.rate = 0.95;
+  synth.speak(u);
+  toast('🔊 Leyendo… (toca de nuevo para parar)');
+}
+
+/* ---------- Cribado de fragilidad (FRAIL) ---------- */
+
+function submitFrail(form) {
+  const fd = new FormData(form);
+  const state = getState();
+  let score = 0;
+  const answers = {};
+  for (const q of FRAIL_QUESTIONS) {
+    const v = fd.get(q.id);
+    if (v == null) { toast('Responde a todas las preguntas, por favor.'); return; }
+    const n = Number(v);
+    answers[q.id] = n;
+    score += n;
+  }
+  state.frail = { score, date: todayKey(), answers };
+  saveState();
+  render();
+  window.scrollTo(0, 0);
+  toast('✔ Cribado guardado. Compártelo con tu equipo médico.');
+}
+
+/* ---------- Medicación y alergias ---------- */
+
+function submitMed(form) {
+  const fd = new FormData(form);
+  const state = getState();
+  const name = (fd.get('name') || '').toString().trim();
+  if (!name) return;
+  state.medList.meds.push({
+    name,
+    dose: (fd.get('dose') || '').toString().trim(),
+    freq: (fd.get('freq') || '').toString().trim(),
+  });
+  saveState();
+  render();
+  toast('✔ Medicamento añadido.');
+}
+
+function delMed(idx) {
+  const state = getState();
+  state.medList.meds.splice(idx, 1);
+  saveState();
+  render();
+}
+
+function submitMedExtra(form) {
+  const fd = new FormData(form);
+  const state = getState();
+  state.medList.allergies = (fd.get('allergies') || '').toString().trim();
+  state.medList.notes = (fd.get('notes') || '').toString().trim();
+  saveState();
+  render();
+  toast('✔ Guardado.');
+}
+
+/* ---------- Juego de memoria ---------- */
+
+function startMemory(pairs) {
+  const n = Math.max(2, Math.min(MEMORY_EMOJIS.length, pairs || 6));
+  const chosen = MEMORY_EMOJIS.slice(0, n);
+  const deck = [...chosen, ...chosen].map((e) => ({ emoji: e, matched: false }));
+  for (let i = deck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [deck[i], deck[j]] = [deck[j], deck[i]];
+  }
+  memoryGame = { cards: deck, flipped: [], moves: 0, locked: false, done: false };
+  route = 'juego';
+  render();
+  window.scrollTo(0, 0);
+}
+
+function flipCard(idx) {
+  const g = memoryGame;
+  if (!g || g.locked || g.done) return;
+  const card = g.cards[idx];
+  if (!card || card.matched || g.flipped.includes(idx)) return;
+  g.flipped.push(idx);
+
+  if (g.flipped.length < 2) { render(); return; }
+
+  g.moves++;
+  const [a, b] = g.flipped;
+  if (g.cards[a].emoji === g.cards[b].emoji) {
+    g.cards[a].matched = true;
+    g.cards[b].matched = true;
+    g.flipped = [];
+    if (g.cards.every((c) => c.matched)) finishMemory();
+    render();
+  } else {
+    g.locked = true;
+    render();
+    setTimeout(() => { g.flipped = []; g.locked = false; render(); }, 900);
+  }
+}
+
+function finishMemory() {
+  const g = memoryGame;
+  g.done = true;
+  const state = getState();
+  state.games = state.games || { memory: { wins: 0, bestMoves: null } };
+  const mem = state.games.memory;
+  mem.wins = (mem.wins || 0) + 1;
+  if (mem.bestMoves == null || g.moves < mem.bestMoves) mem.bestMoves = g.moves;
+  // Completa la tarea de gimnasia mental del día (si aún no lo estaba).
+  const log = getDayLog();
+  const wasDone = log.tasks['gimnasia-mental'] === true;
+  log.tasks['gimnasia-mental'] = true;
+  const events = applyEngine(state);
+  saveState();
+  if (!wasDone) setTimeout(() => toast('🧩 +15 XP · gimnasia mental completada'), 200);
+  handleEvents(events);
 }
 
 /* ---------- Service Worker (PWA / offline) ---------- */

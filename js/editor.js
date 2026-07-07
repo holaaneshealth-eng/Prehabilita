@@ -250,6 +250,15 @@ function renderSettingsTab(state) {
 
     <section class="card">
       <h3>♿ Accesibilidad</h3>
+      <p class="muted small">Pensado para personas mayores o con dificultades visuales.</p>
+      <label class="switch-row">
+        <span>Texto grande</span>
+        <input type="checkbox" data-action="toggle-large-text" ${s.largeText ? 'checked' : ''} />
+      </label>
+      <label class="switch-row">
+        <span>Alto contraste</span>
+        <input type="checkbox" data-action="toggle-contrast" ${s.highContrast ? 'checked' : ''} />
+      </label>
       <label class="switch-row">
         <span>Reducir animaciones</span>
         <input type="checkbox" data-action="toggle-motion" ${s.reducedMotion ? 'checked' : ''} />
