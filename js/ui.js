@@ -1,11 +1,11 @@
 // ui.js
-// Renderizado de vistas (funciones puras que devuelven HTML).
+// Renderizado de vistas (funciones puras que devuelven HTML). Bilingüe vía i18n.
 
 import {
-  PREOP_CHECKLIST, DISCLAIMER, ERAS_NOTE,
-  ALARM_SIGNS, CAREGIVER_TIPS, FRAIL_QUESTIONS, frailResult,
+  PREOP_CHECKLIST, PREOP_CHECKLIST_EN, DISCLAIMER, DISCLAIMER_EN, ERAS_NOTE, ERAS_NOTE_EN,
+  ALARM_SIGNS, ALARM_SIGNS_EN, CAREGIVER_TIPS, FRAIL_QUESTIONS, frailResult, getPhase,
 } from './content.js';
-import { todayKey, daysBetween } from './state.js';
+import { todayKey, daysBetween, listProfiles, getActiveProfileId } from './state.js';
 import {
   levelInfo, dayXp, isDayComplete, tasksDoneCount, taskIsDone, getWeeklyChallenge,
 } from './gamification.js';
@@ -13,6 +13,7 @@ import {
   getTasks, getPillars, getPillarById, getLessons, getPosts, getPostById,
   getResources, getDailyGoal, parseYouTubeId, youTubeEmbedUrl,
 } from './data.js';
+import { t, tr, getLang, LANGS } from './i18n.js';
 
 export function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => (
@@ -20,19 +21,20 @@ export function esc(s) {
   ));
 }
 
-/** Convierte texto plano (con saltos de línea) en HTML seguro. */
 export function formatBody(body) {
   return esc(body).replace(/\n/g, '<br>');
 }
 
-/** Días restantes hasta la cirugía (o null si no hay fecha). */
+function disc() { return getLang() === 'en' ? DISCLAIMER_EN : DISCLAIMER; }
+function erasNote() { return getLang() === 'en' ? ERAS_NOTE_EN : ERAS_NOTE; }
+
 export function daysToSurgery(state) {
   const d = state.profile.surgeryDate;
   if (!d) return null;
   return daysBetween(d, todayKey());
 }
 
-/* ---------- Componentes reutilizables ---------- */
+/* ---------- Componentes ---------- */
 
 function progressBar(pct, color = 'var(--accent)') {
   const p = Math.max(0, Math.min(100, Math.round(pct)));
@@ -50,13 +52,13 @@ export function renderHeader(state) {
   const dts = daysToSurgery(state);
   let countdown = '';
   if (dts === null) {
-    countdown = `<div class="countdown neutral"><strong>—</strong><small>fecha sin definir</small></div>`;
+    countdown = `<div class="countdown neutral"><strong>—</strong><small>${t('date_unset')}</small></div>`;
   } else if (dts > 0) {
-    countdown = `<div class="countdown"><strong>${dts}</strong><small>día${dts === 1 ? '' : 's'} para tu cirugía</small></div>`;
+    countdown = `<div class="countdown"><strong>${dts}</strong><small>${t('days_to_surgery', { s: dts === 1 ? '' : (getLang() === 'en' ? 's' : 's') })}</small></div>`;
   } else if (dts === 0) {
-    countdown = `<div class="countdown today"><strong>Hoy</strong><small>¡es el día!</small></div>`;
+    countdown = `<div class="countdown today"><strong>${t('today')}</strong><small>${t('its_the_day')}</small></div>`;
   } else {
-    countdown = `<div class="countdown neutral"><strong>+${Math.abs(dts)}</strong><small>días post-cirugía</small></div>`;
+    countdown = `<div class="countdown neutral"><strong>+${Math.abs(dts)}</strong><small>${t('post_surgery')}</small></div>`;
   }
 
   return `
@@ -66,20 +68,34 @@ export function renderHeader(state) {
         <span class="brand-logo">🫁</span>
         <div>
           <div class="brand-name">PreHabilita</div>
-          <div class="brand-sub">Hola, ${esc(state.profile.name || 'paciente')} 👋</div>
+          <div class="brand-sub">${t('greeting', { name: esc(state.profile.name || t('patient_default')) })}</div>
         </div>
       </div>
       ${countdown}
     </div>
     <div class="level-row">
-      <div class="level-badge">Nv ${li.level}</div>
+      <div class="level-badge">${t('level_abbr')} ${li.level}</div>
       <div class="level-bar">
         ${progressBar(li.progress * 100)}
         <div class="level-xp">${li.into} / ${li.span} XP</div>
       </div>
-      <div class="streak" title="Racha de días">🔥 ${state.stats.streak}</div>
+      <div class="streak" title="${t('streak_title')}">🔥 ${state.stats.streak}</div>
     </div>
   </header>`;
+}
+
+/* ---------- Banner de fase (plan adaptativo) ---------- */
+
+function phaseBanner(state) {
+  const dts = daysToSurgery(state);
+  const ph = getPhase(dts);
+  return `
+    <section class="card phase-banner" style="--pc:${ph.color}">
+      <div class="phase-head"><span class="phase-emoji">${ph.emoji}</span>
+        <div><small class="muted">${t('phase_label')}</small><strong class="phase-title">${esc(tr(ph, 'title'))}</strong></div>
+      </div>
+      <p class="phase-focus">${esc(tr(ph, 'focus'))}</p>
+    </section>`;
 }
 
 /* ---------- Vista: HOY ---------- */
@@ -99,35 +115,35 @@ export function renderToday(state) {
     <section class="card daily-goal ${complete ? 'is-complete' : ''}">
       <div class="daily-goal-head">
         <div>
-          <h2>Tu día de hoy</h2>
-          <p class="muted">${complete ? '¡Objetivo diario logrado! 🎉' : `Suma ${Math.max(0, goal - xp)} XP más para completar el día`}</p>
+          <h2>${t('today_title')}</h2>
+          <p class="muted">${complete ? t('goal_reached') : t('add_more_xp', { n: Math.max(0, goal - xp) })}</p>
         </div>
-        <div class="daily-ring">${doneN}<small>tareas</small></div>
+        <div class="daily-ring">${doneN}<small>${t('tasks_word')}</small></div>
       </div>
       ${progressBar(goalPct)}
       <div class="daily-goal-foot">
-        <span>${xp} / ${goal} XP diarios</span>
-        ${complete ? '<span class="badge-ok">✔ Día completo</span>' : ''}
+        <span>${t('daily_xp', { a: xp, b: goal })}</span>
+        ${complete ? `<span class="badge-ok">${t('day_complete')}</span>` : ''}
       </div>
     </section>`;
 
   const challengeCard = `
     <section class="card challenge">
-      <div class="challenge-head"><span>🎯 ${esc(wc.challenge.title)}</span><span class="challenge-xp">+${wc.challenge.xp} XP</span></div>
+      <div class="challenge-head"><span>🎯 ${esc(tr(wc.challenge, 'title'))}</span><span class="challenge-xp">+${wc.challenge.xp} XP</span></div>
       ${progressBar((wc.progress / wc.target) * 100, '#f59e0b')}
-      <div class="muted small">${wc.progress} / ${wc.target} ${esc(wc.challenge.unit)} ${wc.done ? '· ¡completado! ✅' : ''}</div>
+      <div class="muted small">${wc.progress} / ${wc.target} ${esc(tr(wc.challenge, 'unit'))} ${wc.done ? '· ' + t('completed_excl') + ' ✅' : ''}</div>
     </section>`;
 
   const groups = pillars.map((p) => {
-    const pt = tasks.filter((t) => t.pillar === p.id);
+    const pt = tasks.filter((x) => x.pillar === p.id);
     if (pt.length === 0) return '';
-    const items = pt.map((t) => renderTaskItem(t, dayLog)).join('');
-    const doneInPillar = pt.filter((t) => taskIsDone(t, dayLog)).length;
+    const items = pt.map((x) => renderTaskItem(x, dayLog)).join('');
+    const doneInPillar = pt.filter((x) => taskIsDone(x, dayLog)).length;
     return `
       <section class="card pillar-group" style="--pc:${p.color}">
         <button class="pillar-head" data-action="open-pillar" data-pillar="${p.id}">
           <span class="pillar-emoji">${p.emoji}</span>
-          <span class="pillar-title">${esc(p.name)}</span>
+          <span class="pillar-title">${esc(tr(p, 'name'))}</span>
           <span class="pillar-count">${doneInPillar}/${pt.length}</span>
         </button>
         <div class="task-list">${items}</div>
@@ -135,46 +151,47 @@ export function renderToday(state) {
   }).join('');
 
   return `
+    ${phaseBanner(state)}
     ${dailyCard}
     ${challengeCard}
-    <div class="section-label">Tareas de hoy</div>
+    <div class="section-label">${t('tasks_today')}</div>
     ${groups}
     ${moodCard(dayLog)}
-    <p class="disclaimer-mini" data-action="show-disclaimer">ⓘ Aviso médico importante</p>
+    <p class="disclaimer-mini" data-action="show-disclaimer">${t('disclaimer_link')}</p>
   `;
 }
 
-function renderTaskItem(t, dayLog) {
-  const v = dayLog.tasks[t.id];
-  const done = taskIsDone(t, dayLog);
-  if (t.type === 'check') {
+function renderTaskItem(tk, dayLog) {
+  const v = dayLog.tasks[tk.id];
+  const done = taskIsDone(tk, dayLog);
+  const title = tr(tk, 'title');
+  const desc = tr(tk, 'desc');
+  if (tk.type === 'check') {
     return `
       <div class="task ${done ? 'done' : ''}">
-        <button class="task-check" data-action="toggle-task" data-task="${t.id}" aria-pressed="${done}" aria-label="Marcar ${esc(t.title)}">
-          ${done ? '✔' : ''}
-        </button>
+        <button class="task-check" data-action="toggle-task" data-task="${tk.id}" aria-pressed="${done}" aria-label="${esc(title)}">${done ? '✔' : ''}</button>
         <div class="task-body">
-          <div class="task-title">${esc(t.icon || '')} ${esc(t.title)}</div>
-          <div class="task-desc">${esc(t.desc || '')}</div>
+          <div class="task-title">${esc(tk.icon || '')} ${esc(title)}</div>
+          <div class="task-desc">${esc(desc)}</div>
         </div>
-        <div class="task-xp">+${t.xp}</div>
+        <div class="task-xp">+${tk.xp}</div>
       </div>`;
   }
   const cur = typeof v === 'number' ? v : 0;
-  const pct = Math.min(100, (cur / t.target) * 100);
+  const pct = Math.min(100, (cur / tk.target) * 100);
   return `
     <div class="task counter ${done ? 'done' : ''}">
       <div class="task-body">
-        <div class="task-title">${esc(t.icon || '')} ${esc(t.title)} ${done ? '✔' : ''}</div>
-        <div class="task-desc">${esc(t.desc || '')}</div>
+        <div class="task-title">${esc(tk.icon || '')} ${esc(title)} ${done ? '✔' : ''}</div>
+        <div class="task-desc">${esc(desc)}</div>
         <div class="counter-row">
-          <button class="stepper" data-action="counter-dec" data-task="${t.id}" aria-label="Restar">−</button>
-          <div class="counter-val">${cur} <small>/ ${t.target} ${esc(t.unit || '')}</small></div>
-          <button class="stepper" data-action="counter-inc" data-task="${t.id}" aria-label="Sumar">+</button>
+          <button class="stepper" data-action="counter-dec" data-task="${tk.id}" aria-label="−">−</button>
+          <div class="counter-val">${cur} <small>/ ${tk.target} ${esc(tr(tk, 'unit'))}</small></div>
+          <button class="stepper" data-action="counter-inc" data-task="${tk.id}" aria-label="+">+</button>
         </div>
         ${progressBar(pct)}
       </div>
-      <div class="task-xp">+${t.xp}</div>
+      <div class="task-xp">+${tk.xp}</div>
     </div>`;
 }
 
@@ -182,13 +199,9 @@ function moodCard(dayLog) {
   const moods = ['😣', '😕', '😐', '🙂', '😄'];
   const cur = dayLog.mood;
   const btns = moods.map((m, i) => `
-    <button class="mood-btn ${cur === i + 1 ? 'sel' : ''}" data-action="set-mood" data-mood="${i + 1}" aria-label="Ánimo ${i + 1} de 5">${m}</button>
+    <button class="mood-btn ${cur === i + 1 ? 'sel' : ''}" data-action="set-mood" data-mood="${i + 1}" aria-label="${i + 1}/5">${m}</button>
   `).join('');
-  return `
-    <section class="card mood">
-      <h3>¿Cómo te sientes hoy?</h3>
-      <div class="mood-row">${btns}</div>
-    </section>`;
+  return `<section class="card mood"><h3>${t('mood_question')}</h3><div class="mood-row">${btns}</div></section>`;
 }
 
 /* ---------- Vista: PLAN ---------- */
@@ -196,27 +209,24 @@ function moodCard(dayLog) {
 export function renderPlan(state) {
   const tasks = getTasks(state);
   const cards = getPillars(state).map((p) => {
-    const pt = tasks.filter((t) => t.pillar === p.id);
+    const pt = tasks.filter((x) => x.pillar === p.id);
     if (pt.length === 0) return '';
     return `
       <section class="card plan-pillar" style="--pc:${p.color}">
         <div class="plan-pillar-head">
           <span class="pillar-emoji">${p.emoji}</span>
-          <div>
-            <h3>${esc(p.name)}</h3>
-            <p class="muted small">${esc(p.tagline || '')}</p>
-          </div>
+          <div><h3>${esc(tr(p, 'name'))}</h3><p class="muted small">${esc(tr(p, 'tagline'))}</p></div>
         </div>
-        ${p.why ? `<p class="why">💡 ${esc(p.why)}</p>` : ''}
+        ${tr(p, 'why') ? `<p class="why">💡 ${esc(tr(p, 'why'))}</p>` : ''}
         <ul class="plan-tasks">
-          ${pt.map((t) => `<li><span>${esc(t.icon || '•')}</span><div><strong>${esc(t.title)}</strong><br><small class="muted">${esc(t.desc || '')}</small></div><span class="xp-tag">+${t.xp}</span></li>`).join('')}
+          ${pt.map((x) => `<li><span>${esc(x.icon || '•')}</span><div><strong>${esc(tr(x, 'title'))}</strong><br><small class="muted">${esc(tr(x, 'desc'))}</small></div><span class="xp-tag">+${x.xp}</span></li>`).join('')}
         </ul>
       </section>`;
   }).join('');
-  return `<div class="section-label">Tu programa de prehabilitación</div>${cards}`;
+  return `<div class="section-label">${t('plan_title')}</div>${phaseBanner(state)}${cards}`;
 }
 
-/* ---------- Vista: PROGRESO (con gráficas) ---------- */
+/* ---------- Vista: PROGRESO ---------- */
 
 export function renderProgress(state, charts) {
   const li = levelInfo(state.stats.xp);
@@ -225,15 +235,14 @@ export function renderProgress(state, charts) {
 
   const chips = `
     <div class="chips">
-      ${statChip('⭐', li.level, 'Nivel')}
-      ${statChip('✨', state.stats.xp, 'XP total')}
-      ${statChip('🔥', state.stats.streak, 'Racha actual')}
-      ${statChip('🏅', state.stats.bestStreak, 'Mejor racha')}
-      ${statChip('📅', state.stats.daysCompleted, 'Días completos')}
-      ${statChip('🎖️', state.badges.length, 'Medallas')}
+      ${statChip('⭐', li.level, t('st_level'))}
+      ${statChip('✨', state.stats.xp, t('st_xp'))}
+      ${statChip('🔥', state.stats.streak, t('st_streak'))}
+      ${statChip('🏅', state.stats.bestStreak, t('st_best'))}
+      ${statChip('📅', state.stats.daysCompleted, t('st_days'))}
+      ${statChip('🎖️', state.badges.length, t('st_medals'))}
     </div>`;
 
-  // Datos para la gráfica de líneas: XP diaria últimos 14 días
   const lineData = [];
   for (let i = 13; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i);
@@ -241,34 +250,24 @@ export function renderProgress(state, charts) {
     const log = state.logs[key];
     lineData.push({ label: key.slice(8) + '/' + key.slice(5, 7), value: log ? dayXp(log, tasks) : 0 });
   }
-  const lineCard = `
-    <section class="card">
-      <h3>📈 XP diaria (últimos 14 días)</h3>
-      ${charts.lineChart(lineData, { color: '#0f766e' })}
-    </section>`;
+  const lineCard = `<section class="card"><h3>${t('chart_xp')}</h3>${charts.lineChart(lineData, { color: '#0f766e' })}</section>`;
 
-  // Adherencia por pilar (últimos 7 días)
   const pillars = getPillars(state);
   const barData = pillars.map((p) => {
-    const pt = tasks.filter((t) => t.pillar === p.id);
+    const pt = tasks.filter((x) => x.pillar === p.id);
     if (pt.length === 0) return null;
     let done = 0, possible = 0;
     for (let i = 6; i >= 0; i--) {
       const d = new Date(); d.setDate(d.getDate() - i);
       const log = state.logs[todayKey(d)];
       possible += pt.length;
-      if (log) done += pt.filter((t) => taskIsDone(t, log)).length;
+      if (log) done += pt.filter((x) => taskIsDone(x, log)).length;
     }
     const pctv = possible ? Math.round((done / possible) * 100) : 0;
     return { label: p.emoji, value: pctv, color: p.color, sub: pctv + '%' };
   }).filter(Boolean);
-  const barCard = `
-    <section class="card">
-      <h3>📊 Adherencia por pilar (7 días)</h3>
-      ${charts.barChart(barData)}
-    </section>`;
+  const barCard = `<section class="card"><h3>${t('chart_adh')}</h3>${charts.barChart(barData)}</section>`;
 
-  // Mapa de constancia 21 días
   const cells = [];
   for (let i = 20; i >= 0; i--) {
     const d = new Date(); d.setDate(d.getDate() - i);
@@ -278,24 +277,18 @@ export function renderProgress(state, charts) {
     const lvl = xp === 0 ? 0 : xp >= goal ? 3 : xp >= goal / 2 ? 2 : 1;
     cells.push(`<div class="heat l${lvl}" title="${key}: ${xp} XP"></div>`);
   }
-  const heat = `
-    <section class="card">
-      <h3>Constancia (últimos 21 días)</h3>
-      <div class="heatmap">${cells.join('')}</div>
-      <div class="heat-legend"><span>Menos</span><i class="heat l0"></i><i class="heat l1"></i><i class="heat l2"></i><i class="heat l3"></i><span>Más</span></div>
-    </section>`;
+  const heat = `<section class="card"><h3>${t('consistency')}</h3><div class="heatmap">${cells.join('')}</div>
+    <div class="heat-legend"><span>${t('less')}</span><i class="heat l0"></i><i class="heat l1"></i><i class="heat l2"></i><i class="heat l3"></i><span>${t('more')}</span></div></section>`;
 
-  // Ánimo reciente
-  const moodLogs = Object.entries(state.logs)
-    .filter(([, l]) => l.mood)
-    .sort((a, b) => a[0].localeCompare(b[0]))
-    .slice(-7);
+  const moodLogs = Object.entries(state.logs).filter(([, l]) => l.mood).sort((a, b) => a[0].localeCompare(b[0])).slice(-7);
   const moodEmoji = ['', '😣', '😕', '😐', '🙂', '😄'];
   const moodRow = moodLogs.length
-    ? `<section class="card"><h3>Ánimo reciente</h3><div class="mood-history">${moodLogs.map(([k, l]) => `<div class="mh"><span>${moodEmoji[l.mood]}</span><small>${k.slice(5)}</small></div>`).join('')}</div></section>`
+    ? `<section class="card"><h3>${t('recent_mood')}</h3><div class="mood-history">${moodLogs.map(([k, l]) => `<div class="mh"><span>${moodEmoji[l.mood]}</span><small>${k.slice(5)}</small></div>`).join('')}</div></section>`
     : '';
 
-  return `${chips}${lineCard}${barCard}${heat}${moodRow}`;
+  const reportBtn = `<button class="btn ghost block" data-action="nav" data-view="report">${t('report_btn')}</button>`;
+
+  return `${chips}${lineCard}${barCard}${heat}${moodRow}${reportBtn}`;
 }
 
 /* ---------- Vista: LOGROS ---------- */
@@ -304,16 +297,13 @@ export function renderBadges(state, BADGES) {
   const unlocked = new Set(state.badges);
   const grid = BADGES.map((b) => {
     const has = unlocked.has(b.id);
-    return `
-      <div class="badge ${has ? 'unlocked' : 'locked'}">
-        <div class="badge-emoji">${has ? b.emoji : '🔒'}</div>
-        <div class="badge-name">${esc(b.name)}</div>
-        <div class="badge-desc">${esc(b.desc)}</div>
-      </div>`;
+    return `<div class="badge ${has ? 'unlocked' : 'locked'}">
+      <div class="badge-emoji">${has ? b.emoji : '🔒'}</div>
+      <div class="badge-name">${esc(tr(b, 'name'))}</div>
+      <div class="badge-desc">${esc(tr(b, 'desc'))}</div>
+    </div>`;
   }).join('');
-  return `
-    <div class="section-label">Medallas · ${state.badges.length}/${BADGES.length}</div>
-    <div class="badge-grid">${grid}</div>`;
+  return `<div class="section-label">${t('medals_title')} · ${state.badges.length}/${BADGES.length}</div><div class="badge-grid">${grid}</div>`;
 }
 
 /* ---------- Vista: RECURSOS ---------- */
@@ -322,49 +312,42 @@ export function renderResources(state) {
   const resources = getResources(state);
   if (resources.length === 0) {
     return `
-      <div class="section-label">Biblioteca de recursos</div>
+      <div class="section-label">${t('res_library')}</div>
       <section class="card empty-state">
         <div class="empty-emoji">🎬</div>
-        <p>Aún no hay vídeos ni enlaces.</p>
-        <p class="muted small">Entra en <strong>Más → Modo médico → Recursos</strong> para añadir vídeos de YouTube (mindfulness, nutrición, ejercicio…) o cualquier enlace.</p>
-        <button class="btn primary" data-action="nav" data-view="editor" data-tab="recursos">➕ Añadir recursos</button>
+        <p>${t('res_empty_1')}</p>
+        <p class="muted small">${t('res_empty_2')}</p>
+        <button class="btn primary" data-action="nav" data-view="editor" data-tab="recursos">${t('res_add')}</button>
       </section>`;
   }
-
   const byPillar = getPillars(state).map((p) => {
     const rs = resources.filter((r) => r.pillar === p.id);
     if (rs.length === 0) return '';
-    const cards = rs.map((r) => renderResourceCard(r)).join('');
-    return `<div class="section-label" style="color:${p.color}">${p.emoji} ${esc(p.name)}</div>${cards}`;
+    return `<div class="section-label" style="color:${p.color}">${p.emoji} ${esc(tr(p, 'name'))}</div>${rs.map(renderResourceCard).join('')}`;
   }).join('');
-
-  // Recursos sin pilar reconocido
   const known = new Set(getPillars(state).map((p) => p.id));
   const others = resources.filter((r) => !known.has(r.pillar));
-  const otherHtml = others.length ? `<div class="section-label">Otros</div>${others.map(renderResourceCard).join('')}` : '';
-
-  return `<div class="section-label">🎬 Biblioteca de recursos</div>${byPillar}${otherHtml}`;
+  const otherHtml = others.length ? `<div class="section-label">${t('res_other')}</div>${others.map(renderResourceCard).join('')}` : '';
+  return `<div class="section-label">${t('res_library')}</div>${byPillar}${otherHtml}`;
 }
 
 function renderResourceCard(r) {
   const ytId = parseYouTubeId(r.url);
   if (ytId) {
-    return `
-      <section class="card resource">
-        <div class="resource-title">▶️ ${esc(r.title)}</div>
-        ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ''}
-        <div class="video"><iframe src="${youTubeEmbedUrl(ytId)}" title="${esc(r.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-      </section>`;
-  }
-  return `
-    <section class="card resource">
-      <div class="resource-title">🔗 ${esc(r.title)}</div>
+    return `<section class="card resource">
+      <div class="resource-title">▶️ ${esc(r.title)}</div>
       ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ''}
-      <a class="btn ghost block" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">Abrir recurso ↗</a>
+      <div class="video"><iframe src="${youTubeEmbedUrl(ytId)}" title="${esc(r.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
     </section>`;
+  }
+  return `<section class="card resource">
+    <div class="resource-title">🔗 ${esc(r.title)}</div>
+    ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ''}
+    <a class="btn ghost block" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${t('res_open')}</a>
+  </section>`;
 }
 
-/* ---------- Vista: APRENDE (blog + lecciones) ---------- */
+/* ---------- Vista: APRENDE ---------- */
 
 export function renderLearn(state) {
   const posts = getPosts(state);
@@ -372,50 +355,45 @@ export function renderLearn(state) {
   const postCards = posts.length ? posts.map((p) => `
     <button class="post-card ${readPosts.has(p.id) ? 'read' : ''}" data-action="open-post" data-id="${p.id}">
       ${p.cover ? `<div class="post-cover" style="background-image:url('${esc(p.cover)}')"></div>` : `<div class="post-cover ph">📝</div>`}
-      <div class="post-info">
-        <strong>${esc(p.title)}</strong>
-        <small class="muted">${esc(p.date || '')} · ${esc(p.category || 'general')}</small>
-      </div>
-    </button>`).join('') : '<p class="muted small">Aún no hay publicaciones. Créalas desde el Modo médico.</p>';
+      <div class="post-info"><strong>${esc(p.title)}</strong><small class="muted">${esc(p.date || '')} · ${esc(p.category || 'general')}</small></div>
+    </button>`).join('') : `<p class="muted small">${t('learn_no_posts')}</p>`;
 
   const read = new Set(state.readLessons);
   const lessons = getLessons().map((l) => `
     <details class="card lesson ${read.has(l.id) ? 'read' : ''}" data-lesson="${l.id}" data-speak-scope>
-      <summary>${read.has(l.id) ? '✅' : '📖'} ${esc(l.title)}</summary>
-      <p class="speakable">${esc(l.body)}</p>
-      <button class="btn ghost speak-btn" data-action="speak">🔊 Escuchar</button>
+      <summary>${read.has(l.id) ? '✅' : '📖'} ${esc(tr(l, 'title'))}</summary>
+      <p class="speakable">${esc(tr(l, 'body'))}</p>
+      <button class="btn ghost speak-btn" data-action="speak">${t('listen')}</button>
     </details>`).join('');
 
-  const checklist = PREOP_CHECKLIST.map((c) => `<li>☐ ${esc(c)}</li>`).join('');
+  const preop = getLang() === 'en' ? PREOP_CHECKLIST_EN : PREOP_CHECKLIST;
+  const checklist = preop.map((c) => `<li>☐ ${esc(c)}</li>`).join('');
 
   return `
-    <div class="section-label">📰 Publicaciones</div>
+    <div class="section-label">${t('learn_posts')}</div>
     <div class="post-list">${postCards}</div>
-    <div class="section-label">💡 Píldoras rápidas</div>
+    <div class="section-label">${t('learn_pills')}</div>
     ${lessons}
     <section class="card">
-      <h3>✅ Preparativos preoperatorios</h3>
+      <h3>${t('preop_title')}</h3>
       <ul class="preop">${checklist}</ul>
-      <p class="muted small">Sigue siempre las instrucciones concretas de tu centro; esta lista es orientativa.</p>
+      <p class="muted small">${t('preop_note')}</p>
     </section>
-    <section class="card disclaimer-card">
-      <h3>ⓘ Aviso médico</h3>
-      <p class="small">${esc(DISCLAIMER)}</p>
-    </section>`;
+    <section class="card disclaimer-card"><h3>${t('med_notice')}</h3><p class="small">${esc(disc())}</p></section>`;
 }
 
 export function renderPost(state, id) {
   const p = getPostById(state, id);
-  if (!p) return `<p class="muted">Publicación no encontrada.</p>`;
+  if (!p) return `<p class="muted">${t('post_not_found')}</p>`;
   const pillar = getPillarById(state, p.category);
   return `
-    <button class="btn ghost back-btn" data-action="nav" data-view="aprende">← Volver</button>
+    <button class="btn ghost back-btn" data-action="nav" data-view="aprende">${t('back')}</button>
     <article class="card post-full" data-speak-scope>
       ${p.cover ? `<div class="post-cover-full" style="background-image:url('${esc(p.cover)}')"></div>` : ''}
-      <span class="post-tag">${pillar ? pillar.emoji + ' ' + esc(pillar.name) : esc(p.category || 'general')}</span>
+      <span class="post-tag">${pillar ? pillar.emoji + ' ' + esc(tr(pillar, 'name')) : esc(p.category || 'general')}</span>
       <h2>${esc(p.title)}</h2>
       <div class="post-meta muted small">${esc(p.date || '')}${p.author ? ' · ' + esc(p.author) : ''}</div>
-      <button class="btn ghost speak-btn" data-action="speak">🔊 Escuchar</button>
+      <button class="btn ghost speak-btn" data-action="speak">${t('listen')}</button>
       <div class="post-body speakable">${formatBody(p.body)}</div>
     </article>`;
 }
@@ -424,14 +402,16 @@ export function renderPost(state, id) {
 
 export function renderMore(state) {
   const items = [
-    { view: 'fragilidad', icon: '🧭', label: 'Cribado de fragilidad', sub: 'Test rápido (escala FRAIL)' },
-    { view: 'medicacion', icon: '💊', label: 'Mi medicación y alergias', sub: 'Prepara tu lista para el anestesista' },
-    { view: 'cuidador', icon: '🤝', label: 'Para el cuidador / familiar', sub: 'Apoyo seguro y señales de alarma' },
-    { view: 'juego', icon: '🧩', label: 'Juego de memoria', sub: 'Gimnasia mental divertida' },
-    { view: 'plan', icon: '📋', label: 'Tu plan completo', sub: 'Todas las tareas por pilar' },
-    { view: 'logros', icon: '🏅', label: 'Medallas', sub: `${state.badges.length} desbloqueadas` },
-    { view: 'editor', icon: '🩺', label: 'Modo médico', sub: 'Crear tareas, vídeos y publicaciones' },
-    { view: 'editor', icon: '⚙️', label: 'Ajustes y accesibilidad', sub: 'Recordatorios, texto grande, contraste', tab: 'ajustes' },
+    { view: 'fragilidad', icon: '🧭', label: t('m_frail'), sub: t('m_frail_sub') },
+    { view: 'medicacion', icon: '💊', label: t('m_meds'), sub: t('m_meds_sub') },
+    { view: 'cuidador', icon: '🤝', label: t('m_care'), sub: t('m_care_sub') },
+    { view: 'juego', icon: '🧩', label: t('m_game'), sub: t('m_game_sub') },
+    { view: 'report', icon: '📄', label: t('m_report'), sub: t('m_report_sub') },
+    { view: 'plan', icon: '📋', label: t('m_plan'), sub: t('m_plan_sub') },
+    { view: 'logros', icon: '🏅', label: t('m_badges'), sub: t('m_badges_sub', { n: state.badges.length }) },
+    { view: 'perfiles', icon: '👥', label: t('m_profiles'), sub: t('m_profiles_sub') },
+    { view: 'editor', icon: '🩺', label: t('m_editor'), sub: t('m_editor_sub') },
+    { view: 'editor', icon: '⚙️', label: t('m_settings'), sub: t('m_settings_sub'), tab: 'ajustes' },
   ];
   const menu = items.map((i) => `
     <button class="more-item" data-action="nav" data-view="${i.view}" ${i.tab ? `data-tab="${i.tab}"` : ''}>
@@ -441,42 +421,32 @@ export function renderMore(state) {
     </button>`).join('');
 
   return `
-    <div class="section-label">Más opciones</div>
+    <div class="section-label">${t('more_options')}</div>
     <section class="card more-menu">${menu}</section>
     <section class="card">
-      <h3>👤 Tus datos personales</h3>
-      <p class="muted small">${esc(state.profile.surgeryType || 'Cirugía sin especificar')}${state.profile.surgeryDate ? ' · ' + esc(state.profile.surgeryDate) : ''}</p>
-      <button class="btn ghost block" data-action="edit-profile">✏️ Editar mis datos</button>
+      <h3>${t('personal_data')}</h3>
+      <p class="muted small">${esc(state.profile.surgeryType || t('surgery_unset'))}${state.profile.surgeryDate ? ' · ' + esc(state.profile.surgeryDate) : ''}</p>
+      <button class="btn ghost block" data-action="edit-profile">${t('edit_my_data')}</button>
     </section>
-    <section class="card disclaimer-card">
-      <h3>ⓘ Aviso médico</h3>
-      <p class="small">${esc(DISCLAIMER)}</p>
-    </section>`;
+    <section class="card disclaimer-card"><h3>${t('med_notice')}</h3><p class="small">${esc(disc())}</p></section>`;
 }
 
 export function profileFormHtml(state) {
   const p = state.profile;
-  const today = todayKey();
   return `
   <form id="form-profile" class="stack-form">
-    <label>Nombre
-      <input name="name" type="text" required value="${esc(p.name || '')}" />
-    </label>
-    <label>Tipo de cirugía
-      <input name="surgeryType" type="text" value="${esc(p.surgeryType || '')}" placeholder="Ej.: cirugía abdominal mayor" />
-    </label>
-    <label>Fecha prevista de la cirugía
-      <input name="surgeryDate" type="date" value="${esc(p.surgeryDate || '')}" />
-    </label>
-    <label>Nivel de actividad
+    <label>${t('f_name')}<input name="name" type="text" required value="${esc(p.name || '')}" /></label>
+    <label>${t('f_surgery_type')}<input name="surgeryType" type="text" value="${esc(p.surgeryType || '')}" placeholder="${t('onb_surgery_ph')}" /></label>
+    <label>${t('f_surgery_date')}<input name="surgeryDate" type="date" value="${esc(p.surgeryDate || '')}" /></label>
+    <label>${t('f_activity')}
       <select name="activityLevel">
-        <option value="bajo" ${p.activityLevel === 'bajo' ? 'selected' : ''}>Bajo</option>
-        <option value="medio" ${p.activityLevel === 'medio' ? 'selected' : ''}>Medio</option>
-        <option value="alto" ${p.activityLevel === 'alto' ? 'selected' : ''}>Alto</option>
+        <option value="bajo" ${p.activityLevel === 'bajo' ? 'selected' : ''}>${t('act_low')}</option>
+        <option value="medio" ${p.activityLevel === 'medio' ? 'selected' : ''}>${t('act_med')}</option>
+        <option value="alto" ${p.activityLevel === 'alto' ? 'selected' : ''}>${t('act_high')}</option>
       </select>
     </label>
-    <label class="check-inline"><input name="smoker" type="checkbox" ${p.smoker ? 'checked' : ''} /> Actualmente fumo</label>
-    <button type="submit" class="btn primary block">Guardar</button>
+    <label class="check-inline"><input name="smoker" type="checkbox" ${p.smoker ? 'checked' : ''} /> ${t('smoker')}</label>
+    <button type="submit" class="btn primary block">${t('save')}</button>
   </form>`;
 }
 
@@ -484,16 +454,16 @@ export function profileFormHtml(state) {
 
 export function renderNav(route) {
   const items = [
-    { id: 'hoy', icon: '🏠', label: 'Hoy' },
-    { id: 'recursos', icon: '🎬', label: 'Recursos' },
-    { id: 'progreso', icon: '📈', label: 'Progreso' },
-    { id: 'aprende', icon: '📚', label: 'Aprende' },
-    { id: 'mas', icon: '⋯', label: 'Más' },
+    { id: 'hoy', icon: '🏠', label: t('nav_hoy') },
+    { id: 'recursos', icon: '🎬', label: t('nav_recursos') },
+    { id: 'progreso', icon: '📈', label: t('nav_progreso') },
+    { id: 'aprende', icon: '📚', label: t('nav_aprende') },
+    { id: 'mas', icon: '⋯', label: t('nav_mas') },
   ];
   const activeSet = {
     hoy: 'hoy', recursos: 'recursos', progreso: 'progreso', aprende: 'aprende', post: 'aprende',
     mas: 'mas', plan: 'mas', logros: 'mas', editor: 'mas',
-    fragilidad: 'mas', medicacion: 'mas', cuidador: 'mas', juego: 'mas',
+    fragilidad: 'mas', medicacion: 'mas', cuidador: 'mas', juego: 'mas', report: 'mas', perfiles: 'mas',
   };
   return `<nav class="bottom-nav">${items.map((i) => `
     <button class="nav-item ${activeSet[route] === i.id ? 'active' : ''}" data-action="nav" data-view="${i.id}">
@@ -510,67 +480,52 @@ export function renderOnboarding() {
     <div class="onb-hero">
       <div class="onb-logo">🫁</div>
       <h1>PreHabilita</h1>
-      <p>Prepárate en casa para tu cirugía. Entrena tu cuerpo y tu mente, gana puntos y llega en tu mejor forma al quirófano.</p>
+      <p>${t('onb_tagline')}</p>
     </div>
     <form id="onb-form" class="card onb-form">
-      <label>¿Cómo te llamas?
-        <input name="name" type="text" required placeholder="Tu nombre" autocomplete="given-name" />
-      </label>
-      <label>Tipo de cirugía (opcional)
-        <input name="surgeryType" type="text" placeholder="Ej.: cirugía abdominal mayor" />
-      </label>
-      <label>Fecha prevista de la cirugía
-        <input name="surgeryDate" type="date" min="${today}" />
-      </label>
-      <label>Nivel de actividad actual
+      <label>${t('onb_name_q')}<input name="name" type="text" required placeholder="${t('onb_name_ph')}" autocomplete="given-name" /></label>
+      <label>${t('onb_surgery_opt')}<input name="surgeryType" type="text" placeholder="${t('onb_surgery_ph')}" /></label>
+      <label>${t('f_surgery_date')}<input name="surgeryDate" type="date" min="${today}" /></label>
+      <label>${t('onb_activity_now')}
         <select name="activityLevel">
-          <option value="bajo">Bajo · me muevo poco</option>
-          <option value="medio" selected>Medio · algo de actividad</option>
-          <option value="alto">Alto · activo con frecuencia</option>
+          <option value="bajo">${t('act_low_o')}</option>
+          <option value="medio" selected>${t('act_med_o')}</option>
+          <option value="alto">${t('act_high_o')}</option>
         </select>
       </label>
-      <label class="check-inline">
-        <input name="smoker" type="checkbox" /> Actualmente fumo
-      </label>
-      <p class="disclaimer-mini">${esc(ERAS_NOTE)}</p>
-      <p class="disclaimer-mini">${esc(DISCLAIMER)}</p>
-      <button type="submit" class="btn primary big">Empezar mi programa 🚀</button>
+      <label class="check-inline"><input name="smoker" type="checkbox" /> ${t('smoker')}</label>
+      <p class="disclaimer-mini">${esc(erasNote())}</p>
+      <p class="disclaimer-mini">${esc(disc())}</p>
+      <button type="submit" class="btn primary big">${t('onb_start')}</button>
     </form>
   </div>`;
 }
 
-
 /* ---------- Vista: PARA EL CUIDADOR ---------- */
 
 export function renderCaregiver() {
-  const tips = CAREGIVER_TIPS.map((t) => `
-    <div class="ctip">
-      <span class="ctip-ico">${t.icon}</span>
-      <div><strong>${esc(t.title)}</strong><p class="muted small">${esc(t.text)}</p></div>
+  const tips = CAREGIVER_TIPS.map((tp) => `
+    <div class="ctip"><span class="ctip-ico">${tp.icon}</span>
+      <div><strong>${esc(tr(tp, 'title'))}</strong><p class="muted small">${esc(tr(tp, 'text'))}</p></div>
     </div>`).join('');
-  const alarms = ALARM_SIGNS.map((a) => `<li>${esc(a)}</li>`).join('');
+  const alarmsArr = getLang() === 'en' ? ALARM_SIGNS_EN : ALARM_SIGNS;
+  const alarms = alarmsArr.map((a) => `<li>${esc(a)}</li>`).join('');
   return `
-    <div class="section-label">🤝 Para el cuidador / familiar</div>
+    <div class="section-label">${t('care_title')}</div>
     <section class="card speak-scope" data-speak-scope>
-      <p class="speakable">El acompañamiento marca una gran diferencia. Tu apoyo motiva, da seguridad y mejora los resultados. La mayoría de las personas frágiles no siguen el programa completamente solas: tu papel es clave.</p>
-      <button class="btn ghost speak-btn" data-action="speak">🔊 Escuchar</button>
+      <p class="speakable">${t('care_intro')}</p>
+      <button class="btn ghost speak-btn" data-action="speak">${t('listen')}</button>
     </section>
-    <section class="card">
-      <h3>Cómo acompañar de forma segura</h3>
-      <div class="ctips">${tips}</div>
-    </section>
+    <section class="card"><h3>${t('care_how')}</h3><div class="ctips">${tips}</div></section>
     <section class="card alarm-card">
-      <h3>🚨 Señales de alarma</h3>
-      <p class="small">Ante cualquiera de estas señales, contacta con tu equipo médico o llama a urgencias (112):</p>
+      <h3>${t('alarm_title')}</h3>
+      <p class="small">${t('alarm_note')}</p>
       <ul class="alarm-list">${alarms}</ul>
     </section>
-    <section class="card disclaimer-card">
-      <h3>ⓘ Aviso médico</h3>
-      <p class="small">${esc(DISCLAIMER)}</p>
-    </section>`;
+    <section class="card disclaimer-card"><h3>${t('med_notice')}</h3><p class="small">${esc(disc())}</p></section>`;
 }
 
-/* ---------- Vista: CRIBADO DE FRAGILIDAD (FRAIL) ---------- */
+/* ---------- Vista: CRIBADO DE FRAGILIDAD ---------- */
 
 export function renderFrailty(state) {
   const fr = state.frail || { score: null, answers: {} };
@@ -581,91 +536,174 @@ export function renderFrailty(state) {
       <section class="card frail-result" style="--fc:${r.color}">
         <div class="frail-emoji">${r.emoji}</div>
         <div class="frail-score">${fr.score} <small>/ 5</small></div>
-        <div class="frail-label">${esc(r.label)}</div>
-        <p>${esc(r.message)}</p>
-        <p class="muted small">Resultado del ${esc(fr.date || '')}. Es un cribado orientativo, no un diagnóstico. Compártelo con tu equipo médico.</p>
+        <div class="frail-label">${esc(tr(r, 'label'))}</div>
+        <p>${esc(tr(r, 'message'))}</p>
+        <p class="muted small">${t('frail_result_note', { date: esc(fr.date || '') })}</p>
       </section>`;
   }
   const qs = FRAIL_QUESTIONS.map((q, i) => {
     const cur = fr.answers ? fr.answers[q.id] : undefined;
-    return `
-      <div class="frail-q">
-        <p><strong>${i + 1}.</strong> ${esc(q.q)}</p>
+    return `<div class="frail-q">
+        <p><strong>${i + 1}.</strong> ${esc(tr(q, 'q'))}</p>
         <div class="frail-opts">
-          <label class="fopt"><input type="radio" name="${q.id}" value="1" ${cur === 1 ? 'checked' : ''}/> Sí</label>
-          <label class="fopt"><input type="radio" name="${q.id}" value="0" ${cur === 0 ? 'checked' : ''}/> No</label>
+          <label class="fopt"><input type="radio" name="${q.id}" value="1" ${cur === 1 ? 'checked' : ''}/> ${t('yes')}</label>
+          <label class="fopt"><input type="radio" name="${q.id}" value="0" ${cur === 0 ? 'checked' : ''}/> ${t('no')}</label>
         </div>
       </div>`;
   }).join('');
   return `
-    <div class="section-label">🧭 Cribado de fragilidad (escala FRAIL)</div>
+    <div class="section-label">${t('frail_title')}</div>
     ${resultCard}
     <form id="form-frail" class="card">
-      <p class="muted small">Responde con sinceridad; solo lleva un minuto. Puedes hacerlo con tu cuidador.</p>
+      <p class="muted small">${t('frail_intro')}</p>
       ${qs}
-      <button type="submit" class="btn primary block">Ver mi resultado</button>
+      <button type="submit" class="btn primary block">${t('frail_see')}</button>
     </form>
-    <section class="card disclaimer-card">
-      <h3>ⓘ Importante</h3>
-      <p class="small">La escala FRAIL es una herramienta de cribado orientativa; no sustituye la valoración de tu equipo médico. Sea cual sea tu resultado, la prehabilitación te beneficia.</p>
-    </section>`;
+    <section class="card disclaimer-card"><h3>${t('frail_important')}</h3><p class="small">${t('frail_disc')}</p></section>`;
 }
 
-/* ---------- Vista: MI MEDICACIÓN Y ALERGIAS ---------- */
+/* ---------- Vista: MEDICACIÓN ---------- */
 
 export function renderMeds(state) {
   const m = state.medList || { meds: [], allergies: '', notes: '' };
   const rows = m.meds.length ? m.meds.map((x, i) => `
     <div class="med-row">
       <div><strong>${esc(x.name)}</strong> <small class="muted">${esc(x.dose || '')} ${esc(x.freq || '')}</small></div>
-      <button class="mini-btn danger" data-action="del-med" data-idx="${i}" aria-label="Eliminar">🗑️</button>
-    </div>`).join('') : '<p class="muted small">Aún no has añadido medicamentos.</p>';
+      <button class="mini-btn danger" data-action="del-med" data-idx="${i}" aria-label="🗑️">🗑️</button>
+    </div>`).join('') : `<p class="muted small">${t('meds_none')}</p>`;
   const docRows = m.meds.length
     ? m.meds.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.dose || '')}</td><td>${esc(x.freq || '')}</td></tr>`).join('')
-    : '<tr><td colspan="3">— sin medicación registrada —</td></tr>';
+    : `<tr><td colspan="3">${t('meds_doc_none')}</td></tr>`;
 
   return `
-    <div class="section-label">💊 Mi medicación y alergias</div>
+    <div class="section-label">${t('meds_title')}</div>
     <div class="no-print">
+      <section class="card"><p class="muted small">${t('meds_intro')}</p></section>
       <section class="card">
-        <p class="muted small">Prepara tu lista para la consulta de preanestesia. Incluye TODO: recetados, sin receta y productos de herbolario. Al terminar podrás guardarla en PDF.</p>
-      </section>
-      <section class="card">
-        <h3>Añadir medicamento</h3>
+        <h3>${t('meds_add')}</h3>
         <form id="form-med" class="stack-form">
-          <label>Nombre <input name="name" type="text" required placeholder="Ej.: Omeprazol" /></label>
+          <label>${t('meds_name')} <input name="name" type="text" required placeholder="Omeprazol" /></label>
           <div class="two-col">
-            <label>Dosis <input name="dose" type="text" placeholder="20 mg" /></label>
-            <label>Frecuencia <input name="freq" type="text" placeholder="1 al día" /></label>
+            <label>${t('meds_dose')} <input name="dose" type="text" placeholder="20 mg" /></label>
+            <label>${t('meds_freq')} <input name="freq" type="text" placeholder="1/día" /></label>
           </div>
-          <button type="submit" class="btn primary block">➕ Añadir a la lista</button>
+          <button type="submit" class="btn primary block">${t('meds_add_btn')}</button>
         </form>
       </section>
+      <section class="card"><h3>${t('meds_yours')}</h3><div class="med-list">${rows}</div></section>
       <section class="card">
-        <h3>Tus medicamentos</h3>
-        <div class="med-list">${rows}</div>
-      </section>
-      <section class="card">
-        <h3>Alergias y notas</h3>
+        <h3>${t('meds_allergies_notes')}</h3>
         <form id="form-med-extra" class="stack-form">
-          <label>Alergias <textarea name="allergies" rows="2" placeholder="Medicamentos, alimentos, látex...">${esc(m.allergies || '')}</textarea></label>
-          <label>Otras notas (enfermedades, anticoagulantes, marcapasos...) <textarea name="notes" rows="2">${esc(m.notes || '')}</textarea></label>
-          <button type="submit" class="btn ghost block">Guardar cambios</button>
+          <label>${t('meds_allergies')} <textarea name="allergies" rows="2" placeholder="${t('meds_allergies_ph')}">${esc(m.allergies || '')}</textarea></label>
+          <label>${t('meds_other_notes')} <textarea name="notes" rows="2">${esc(m.notes || '')}</textarea></label>
+          <button type="submit" class="btn ghost block">${t('meds_save')}</button>
         </form>
       </section>
-      <button class="btn primary block" data-action="print-meds">🖨️ Imprimir / Guardar como PDF</button>
-      <p class="muted small">Se abrirá el diálogo de impresión; elige "Guardar como PDF" para tenerlo en tu móvil o imprimirlo.</p>
+      <button class="btn primary block" data-action="print-doc">${t('meds_print')}</button>
+      <p class="muted small">${t('meds_print_note')}</p>
     </div>
-
     <section class="print-doc">
-      <h2>Lista de medicación y alergias</h2>
-      <p><strong>Paciente:</strong> ${esc(state.profile.name || '')}</p>
-      <p><strong>Cirugía:</strong> ${esc(state.profile.surgeryType || '—')} &nbsp;·&nbsp; <strong>Fecha prevista:</strong> ${esc(state.profile.surgeryDate || '—')}</p>
-      <h3>Medicación habitual</h3>
-      <table class="med-table"><thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th></tr></thead><tbody>${docRows}</tbody></table>
-      <h3>Alergias</h3><p>${esc(m.allergies || '—')}</p>
-      <h3>Otras notas</h3><p>${esc(m.notes || '—')}</p>
-      <p class="doc-foot">Documento generado con PreHabilita para la consulta de preanestesia.</p>
+      <h2>${t('meds_doc_title')}</h2>
+      <p><strong>${t('meds_patient')}:</strong> ${esc(state.profile.name || '')}</p>
+      <p><strong>${t('meds_surgery')}:</strong> ${esc(state.profile.surgeryType || '—')} &nbsp;·&nbsp; <strong>${t('meds_date')}:</strong> ${esc(state.profile.surgeryDate || '—')}</p>
+      <h3>${t('meds_doc_meds')}</h3>
+      <table class="med-table"><thead><tr><th>${t('meds_name')}</th><th>${t('meds_dose')}</th><th>${t('meds_freq')}</th></tr></thead><tbody>${docRows}</tbody></table>
+      <h3>${t('meds_doc_allergies')}</h3><p>${esc(m.allergies || '—')}</p>
+      <h3>${t('meds_doc_notes')}</h3><p>${esc(m.notes || '—')}</p>
+      <p class="doc-foot">${t('meds_doc_foot')}</p>
+    </section>`;
+}
+
+/* ---------- Vista: INFORME DE PROGRESO (PDF) ---------- */
+
+export function renderReport(state) {
+  const li = levelInfo(state.stats.xp);
+  const tasks = getTasks(state);
+  const dts = daysToSurgery(state);
+  const pillars = getPillars(state);
+
+  const adhRows = pillars.map((p) => {
+    const pt = tasks.filter((x) => x.pillar === p.id);
+    if (pt.length === 0) return '';
+    let done = 0, possible = 0;
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(); d.setDate(d.getDate() - i);
+      const log = state.logs[todayKey(d)];
+      possible += pt.length;
+      if (log) done += pt.filter((x) => taskIsDone(x, log)).length;
+    }
+    const pctv = possible ? Math.round((done / possible) * 100) : 0;
+    return `<tr><td>${p.emoji} ${esc(tr(p, 'name'))}</td><td>${pctv}%</td></tr>`;
+  }).join('');
+
+  let frailLine = t('report_frail_none');
+  if (state.frail && state.frail.score != null) {
+    const r = frailResult(state.frail.score);
+    frailLine = `${state.frail.score}/5 · ${esc(tr(r, 'label'))} (${esc(state.frail.date || '')})`;
+  }
+
+  const earned = state.badges || [];
+  const badgeList = earned.length
+    ? earned.map((id) => `<span class="rep-badge">🏅 ${esc(id)}</span>`).join(' ')
+    : t('report_none');
+
+  const dtsLine = dts == null ? '—' : (dts > 0 ? dts : (dts === 0 ? t('today') : '—'));
+
+  return `
+    <div class="section-label">${t('report_title')}</div>
+    <div class="no-print">
+      <section class="card"><p class="muted small">${t('report_intro')}</p></section>
+      <button class="btn primary block" data-action="print-doc">${t('report_print')}</button>
+    </div>
+    <section class="print-doc">
+      <h2>${t('report_doc_title')}</h2>
+      <p class="muted small">${t('report_generated', { date: todayKey() })}</p>
+      <p><strong>${t('meds_patient')}:</strong> ${esc(state.profile.name || '')} &nbsp;·&nbsp; <strong>${t('meds_surgery')}:</strong> ${esc(state.profile.surgeryType || '—')}</p>
+      <p><strong>${t('report_days_to')}:</strong> ${dtsLine} &nbsp;·&nbsp; <strong>${t('meds_date')}:</strong> ${esc(state.profile.surgeryDate || '—')}</p>
+      <h3>${t('report_summary')}</h3>
+      <table class="med-table"><tbody>
+        <tr><td>${t('report_level')}</td><td>${li.level}</td></tr>
+        <tr><td>${t('report_xp')}</td><td>${state.stats.xp}</td></tr>
+        <tr><td>${t('report_streak')}</td><td>${state.stats.bestStreak}</td></tr>
+        <tr><td>${t('report_daysc')}</td><td>${state.stats.daysCompleted}</td></tr>
+      </tbody></table>
+      <h3>${t('report_adherence')}</h3>
+      <table class="med-table"><tbody>${adhRows}</tbody></table>
+      <h3>${t('report_frail')}</h3><p>${frailLine}</p>
+      <h3>${t('report_badges')} (${earned.length})</h3><p class="rep-badges">${badgeList}</p>
+      <p class="doc-foot">${t('report_foot')}</p>
+    </section>`;
+}
+
+/* ---------- Vista: PERFILES ---------- */
+
+export function renderProfiles(state) {
+  const profiles = listProfiles();
+  const activeId = getActiveProfileId();
+  const rows = profiles.map((p) => `
+    <div class="prof-row ${p.id === activeId ? 'active' : ''}">
+      <div class="prof-info">
+        <strong>${esc(p.name)}</strong>
+        ${p.id === activeId ? `<span class="prof-badge">${t('profiles_active')}</span>` : ''}
+      </div>
+      <div class="prof-actions">
+        ${p.id === activeId ? '' : `<button class="mini-btn" data-action="switch-profile" data-id="${p.id}" title="${t('profiles_switch')}">✅</button>`}
+        <button class="mini-btn" data-action="rename-profile" data-id="${p.id}" title="${t('profiles_rename')}">✏️</button>
+        ${profiles.length > 1 ? `<button class="mini-btn danger" data-action="delete-profile" data-id="${p.id}" title="${t('profiles_delete')}">🗑️</button>` : ''}
+      </div>
+    </div>`).join('');
+
+  return `
+    <div class="section-label">${t('profiles_title')}</div>
+    <section class="card"><p class="muted small">${t('profiles_intro')}</p></section>
+    <section class="card"><div class="prof-list">${rows}</div></section>
+    <section class="card">
+      <h3>${t('profiles_new')}</h3>
+      <form id="form-profile-new" class="stack-form">
+        <label>${t('profiles_new_name')}<input name="name" type="text" required placeholder="${t('patient_default')}" /></label>
+        <label class="check-inline"><input name="copy" type="checkbox" /> ${t('profiles_copy')}</label>
+        <button type="submit" class="btn primary block">${t('profiles_create')}</button>
+      </form>
     </section>`;
 }
 
@@ -675,34 +713,34 @@ export function renderMemoryGame(state, game) {
   const best = state.games && state.games.memory ? state.games.memory.bestMoves : null;
   if (!game) {
     return `
-      <div class="section-label">🧩 Juego de memoria</div>
+      <div class="section-label">${t('game_title')}</div>
       <section class="card">
-        <p>Encuentra todas las parejas de cartas. Ejercita tu memoria y tu concentración: una forma divertida de prehabilitación cognitiva que ayuda a prevenir la confusión tras la cirugía.</p>
-        ${best != null ? `<p class="muted small">🏆 Tu mejor marca: <strong>${best} intentos</strong>.</p>` : ''}
-        <p class="muted small">Elige la dificultad:</p>
+        <p>${t('game_intro')}</p>
+        ${best != null ? `<p class="muted small">${t('game_best', { n: best })}</p>` : ''}
+        <p class="muted small">${t('game_choose')}</p>
         <div class="row-btns">
-          <button class="btn primary" data-action="memory-start" data-pairs="6">Fácil · 6 parejas</button>
-          <button class="btn ghost" data-action="memory-start" data-pairs="8">Difícil · 8 parejas</button>
+          <button class="btn primary" data-action="memory-start" data-pairs="6">${t('game_easy')}</button>
+          <button class="btn ghost" data-action="memory-start" data-pairs="8">${t('game_hard')}</button>
         </div>
       </section>`;
   }
   const cards = game.cards.map((c, i) => {
     const shown = c.matched || game.flipped.includes(i);
-    return `<button class="mcard ${shown ? 'up' : ''} ${c.matched ? 'matched' : ''}" data-action="flip-card" data-idx="${i}" ${c.matched || game.locked ? 'disabled' : ''} aria-label="carta">${shown ? c.emoji : '❓'}</button>`;
+    return `<button class="mcard ${shown ? 'up' : ''} ${c.matched ? 'matched' : ''}" data-action="flip-card" data-idx="${i}" ${c.matched || game.locked ? 'disabled' : ''} aria-label="?">${shown ? c.emoji : '❓'}</button>`;
   }).join('');
   const isBest = game.done && state.games.memory.bestMoves === game.moves;
   const doneCard = game.done ? `
     <section class="card game-done">
       <div class="big-emoji">🎉</div>
-      <h3>¡Completado en ${game.moves} intentos!</h3>
-      ${isBest ? '<p class="badge-ok">🏆 ¡Nueva mejor marca!</p>' : ''}
-      <p class="muted small">+15 XP · has completado tu gimnasia mental de hoy.</p>
-      <button class="btn primary block" data-action="memory-start" data-pairs="${game.cards.length / 2}">Jugar otra vez</button>
+      <h3>${t('game_done', { n: game.moves })}</h3>
+      ${isBest ? `<p class="badge-ok">${t('game_newbest')}</p>` : ''}
+      <p class="muted small">${t('game_reward')}</p>
+      <button class="btn primary block" data-action="memory-start" data-pairs="${game.cards.length / 2}">${t('game_again')}</button>
     </section>` : '';
   return `
-    <div class="section-label">🧩 Juego de memoria</div>
+    <div class="section-label">${t('game_title')}</div>
     <section class="card">
-      <div class="game-head"><span>Intentos: <strong>${game.moves}</strong></span><button class="btn ghost mini-exit" data-action="memory-exit">Salir</button></div>
+      <div class="game-head"><span>${t('game_tries')}: <strong>${game.moves}</strong></span><button class="btn ghost mini-exit" data-action="memory-exit">${t('game_exit')}</button></div>
       <div class="mgrid">${cards}</div>
     </section>
     ${doneCard}`;

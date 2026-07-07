@@ -414,3 +414,36 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
   .print-doc { border: 0; padding: 0; margin: 0; }
   .med-table th, .med-table td { border: 1px solid #333; }
 }
+
+
+/* ================= Ampliación v3: fases, perfiles, informe, idioma ================= */
+
+/* ---------- Banner de fase (plan adaptativo) ---------- */
+.phase-banner { border-left: 5px solid var(--pc); }
+.phase-head { display: flex; align-items: center; gap: 10px; }
+.phase-emoji { font-size: 1.6rem; }
+.phase-title { display: block; font-size: 1.05rem; }
+.phase-focus { margin-top: 8px; font-size: .9rem; color: #334155; }
+
+/* ---------- Selector de idioma ---------- */
+.lang-select {
+  font: inherit; padding: 11px; border: 1.5px solid #cbd5e1; border-radius: 10px;
+  background: #fff; width: 100%; margin-top: 4px;
+}
+.lang-select:focus { outline: none; border-color: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* ---------- Perfiles ---------- */
+.prof-list { display: flex; flex-direction: column; }
+.prof-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0; border-top: 1px solid #f1f5f9; }
+.prof-row:first-child { border-top: 0; }
+.prof-row.active { }
+.prof-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.prof-badge { font-size: .68rem; font-weight: 800; background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 999px; }
+.prof-actions { display: flex; gap: 4px; }
+
+/* ---------- Informe: medallas ---------- */
+.rep-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.rep-badge { font-size: .78rem; background: #f1f5f9; padding: 3px 8px; border-radius: 999px; }
+
+/* Alto contraste: refuerzos extra para banners y chips */
+body.high-contrast .phase-focus { color: #111827; }

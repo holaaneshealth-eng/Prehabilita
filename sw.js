@@ -1,5 +1,5 @@
 // sw.js — Service Worker para funcionamiento offline (cache-first).
-const CACHE = 'prehabilita-v2';
+const CACHE = 'prehabilita-v3';
 const ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,7 @@ const ASSETS = [
   './js/data.js',
   './js/editor.js',
   './js/charts.js',
+  './js/i18n.js',
 ];
 
 self.addEventListener('install', (e) => {

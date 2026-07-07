@@ -1,31 +1,32 @@
 // editor.js
-// "Modo médico": gestor de contenidos y personalización desde la interfaz.
+// "Modo médico": gestor de contenidos y personalización desde la interfaz (bilingüe).
 
 import { esc } from './ui.js';
 import { getPillars, getAllTasksForEditor, getResources, getPosts, parseYouTubeId, getDailyGoal } from './data.js';
-import { ERAS_NOTE } from './content.js';
+import { ERAS_NOTE, ERAS_NOTE_EN } from './content.js';
+import { t, tr, getLang, LANGS } from './i18n.js';
+
+function L(es, en) { return getLang() === 'en' ? en : es; }
 
 function pillarOptions(state, selected) {
   return getPillars(state).map((p) =>
-    `<option value="${p.id}" ${p.id === selected ? 'selected' : ''}>${esc(p.emoji + ' ' + p.name)}</option>`
+    `<option value="${p.id}" ${p.id === selected ? 'selected' : ''}>${esc(p.emoji + ' ' + tr(p, 'name'))}</option>`
   ).join('');
 }
 
 function categoryOptions(state, selected) {
-  return `<option value="general" ${selected === 'general' ? 'selected' : ''}>📌 General</option>` + pillarOptions(state, selected);
+  return `<option value="general" ${selected === 'general' ? 'selected' : ''}>📌 ${L('General', 'General')}</option>` + pillarOptions(state, selected);
 }
-
-/* ---------- Vista principal del editor ---------- */
 
 export function renderEditor(state, tab = 'tareas') {
   const tabs = [
-    { id: 'tareas', label: '✅ Tareas' },
-    { id: 'recursos', label: '🎬 Recursos' },
-    { id: 'blog', label: '📝 Blog' },
-    { id: 'ajustes', label: '⚙️ Metas' },
+    { id: 'tareas', label: t('ed_tab_tasks') },
+    { id: 'recursos', label: t('ed_tab_res') },
+    { id: 'blog', label: t('ed_tab_blog') },
+    { id: 'ajustes', label: t('ed_tab_set') },
   ];
-  const tabBar = `<div class="editor-tabs">${tabs.map((t) =>
-    `<button class="etab ${t.id === tab ? 'active' : ''}" data-action="editor-tab" data-tab="${t.id}">${t.label}</button>`
+  const tabBar = `<div class="editor-tabs">${tabs.map((x) =>
+    `<button class="etab ${x.id === tab ? 'active' : ''}" data-action="editor-tab" data-tab="${x.id}">${x.label}</button>`
   ).join('')}</div>`;
 
   let body = '';
@@ -35,8 +36,8 @@ export function renderEditor(state, tab = 'tareas') {
   else body = renderSettingsTab(state);
 
   return `
-    <div class="section-label">🩺 Modo médico · gestión de contenidos</div>
-    <p class="muted small editor-intro">Aquí puedes ampliar y personalizar la app sin tocar código: crea tareas, añade vídeos y publicaciones, y ajusta las metas.</p>
+    <div class="section-label">${t('ed_title')}</div>
+    <p class="muted small editor-intro">${t('ed_intro')}</p>
     ${tabBar}
     <div class="editor-body">${body}</div>`;
 }
@@ -47,70 +48,72 @@ function renderTasksTab(state) {
   const pillars = getPillars(state);
   const all = getAllTasksForEditor(state);
   const groups = pillars.map((p) => {
-    const tasks = all.filter((t) => t.pillar === p.id);
+    const tasks = all.filter((x) => x.pillar === p.id);
     if (tasks.length === 0) return '';
-    const items = tasks.map((t) => `
-      <div class="etask ${t.disabled ? 'off' : ''}">
+    const items = tasks.map((x) => `
+      <div class="etask ${x.disabled ? 'off' : ''}">
         <div class="etask-main">
-          <span>${t.icon || '•'} ${esc(t.title)}</span>
-          <small class="muted">${t.type === 'counter' ? `meta ${t.target} ${esc(t.unit || '')} · ` : ''}+${t.xp} XP ${t.isDefault ? '' : '· personalizada'}</small>
+          <span>${x.icon || '•'} ${esc(tr(x, 'title'))}</span>
+          <small class="muted">${x.type === 'counter' ? `${L('meta', 'goal')} ${x.target} ${esc(tr(x, 'unit'))} · ` : ''}+${x.xp} XP ${x.isDefault ? '' : '· ' + L('personalizada', 'custom')}</small>
         </div>
         <div class="etask-actions">
-          <button class="mini-btn" data-action="edit-task" data-id="${t.id}">✏️</button>
-          <button class="mini-btn" data-action="toggle-task-active" data-id="${t.id}">${t.disabled ? '👁️' : '🚫'}</button>
-          ${t.isDefault ? '' : `<button class="mini-btn danger" data-action="delete-task" data-id="${t.id}">🗑️</button>`}
+          <button class="mini-btn" data-action="edit-task" data-id="${x.id}">✏️</button>
+          <button class="mini-btn" data-action="toggle-task-active" data-id="${x.id}">${x.disabled ? '👁️' : '🚫'}</button>
+          ${x.isDefault ? '' : `<button class="mini-btn danger" data-action="delete-task" data-id="${x.id}">🗑️</button>`}
         </div>
       </div>`).join('');
     return `<section class="card" style="--pc:${p.color}">
-      <div class="etask-group-head">${p.emoji} ${esc(p.name)}</div>
+      <div class="etask-group-head">${p.emoji} ${esc(tr(p, 'name'))}</div>
       ${items}
     </section>`;
   }).join('');
 
-  return `
-    <button class="btn primary block" data-action="new-task">➕ Añadir nueva tarea</button>
-    ${groups}`;
+  return `<button class="btn primary block" data-action="new-task">${t('ed_add_task')}</button>${groups}`;
 }
 
 export function taskFormHtml(state, task) {
   const isEdit = !!task;
   const isDefault = task ? task.isDefault : false;
-  const t = task || { type: 'check', xp: 15, target: 10, unit: '', icon: '', pillar: getPillars(state)[0].id };
+  const x = task || { type: 'check', xp: 15, target: 10, unit: '', icon: '', pillar: getPillars(state)[0].id };
+  // En tareas base mostramos el texto en el idioma activo (traducido); en personalizadas, el texto propio.
+  const titleVal = isDefault ? tr(x, 'title') : (x.title || '');
+  const descVal = isDefault ? tr(x, 'desc') : (x.desc || '');
+  const unitVal = isDefault ? tr(x, 'unit') : (x.unit || '');
   return `
   <form id="form-task" class="stack-form">
-    <input type="hidden" name="id" value="${isEdit ? esc(t.id) : ''}" />
+    <input type="hidden" name="id" value="${isEdit ? esc(x.id) : ''}" />
     <input type="hidden" name="isDefault" value="${isDefault ? '1' : ''}" />
-    <label>Título de la tarea
-      <input name="title" type="text" required value="${esc(t.title || '')}" placeholder="Ej.: Paseo por la mañana" />
+    <label>${L('Título de la tarea', 'Task title')}
+      <input name="title" type="text" required value="${esc(titleVal)}" placeholder="${L('Ej.: Paseo por la mañana', 'E.g.: Morning walk')}" />
     </label>
-    <label>Pilar / categoría
-      <select name="pillar" ${isDefault ? 'disabled' : ''}>${pillarOptions(state, t.pillar)}</select>
+    <label>${L('Pilar / categoría', 'Pillar / category')}
+      <select name="pillar" ${isDefault ? 'disabled' : ''}>${pillarOptions(state, x.pillar)}</select>
     </label>
-    <label>Icono (emoji, opcional)
-      <input name="icon" type="text" maxlength="4" value="${esc(t.icon || '')}" placeholder="🚶" />
+    <label>${L('Icono (emoji, opcional)', 'Icon (emoji, optional)')}
+      <input name="icon" type="text" maxlength="4" value="${esc(x.icon || '')}" placeholder="🚶" />
     </label>
-    <label>Tipo
+    <label>${L('Tipo', 'Type')}
       <select name="type" ${isDefault ? 'disabled' : ''}>
-        <option value="check" ${t.type === 'check' ? 'selected' : ''}>Casilla (hecho / no hecho)</option>
-        <option value="counter" ${t.type === 'counter' ? 'selected' : ''}>Contador (con meta)</option>
+        <option value="check" ${x.type === 'check' ? 'selected' : ''}>${L('Casilla (hecho / no hecho)', 'Checkbox (done / not done)')}</option>
+        <option value="counter" ${x.type === 'counter' ? 'selected' : ''}>${L('Contador (con meta)', 'Counter (with a goal)')}</option>
       </select>
     </label>
     <div class="two-col">
-      <label>Meta (si es contador)
-        <input name="target" type="number" min="1" value="${esc(t.target || 10)}" />
+      <label>${L('Meta (si es contador)', 'Goal (if counter)')}
+        <input name="target" type="number" min="1" value="${esc(x.target || 10)}" />
       </label>
-      <label>Unidad
-        <input name="unit" type="text" value="${esc(t.unit || '')}" placeholder="min, reps, vasos" />
+      <label>${L('Unidad', 'Unit')}
+        <input name="unit" type="text" value="${esc(unitVal)}" placeholder="${L('min, reps, vasos', 'min, reps, glasses')}" />
       </label>
     </div>
-    <label>Puntos (XP) al completar
-      <input name="xp" type="number" min="0" max="100" value="${esc(t.xp ?? 15)}" />
+    <label>${L('Puntos (XP) al completar', 'Points (XP) on completion')}
+      <input name="xp" type="number" min="0" max="100" value="${esc(x.xp ?? 15)}" />
     </label>
-    <label>Descripción
-      <textarea name="desc" rows="3" placeholder="Instrucciones para el paciente">${esc(t.desc || '')}</textarea>
+    <label>${L('Descripción', 'Description')}
+      <textarea name="desc" rows="3" placeholder="${L('Instrucciones para el paciente', 'Instructions for the patient')}">${esc(descVal)}</textarea>
     </label>
-    ${isDefault ? '<p class="muted small">Es una tarea del programa base: puedes personalizar sus textos, meta y puntos.</p>' : ''}
-    <button type="submit" class="btn primary block">${isEdit ? 'Guardar cambios' : 'Crear tarea'}</button>
+    ${isDefault ? `<p class="muted small">${L('Es una tarea del programa base: puedes personalizar sus textos, meta y puntos.', 'This is a base-program task: you can customize its text, goal and points.')}</p>` : ''}
+    <button type="submit" class="btn primary block">${isEdit ? t('save_changes') : L('Crear tarea', 'Create task')}</button>
   </form>`;
 }
 
@@ -129,12 +132,12 @@ function renderResourcesTab(state) {
           <button class="mini-btn danger" data-action="delete-resource" data-id="${r.id}">🗑️</button>
         </div>
       </div>`;
-  }).join('') : '<p class="muted small">Aún no hay recursos. Añade tu primer vídeo o enlace.</p>';
+  }).join('') : `<p class="muted small">${L('Aún no hay recursos. Añade tu primer vídeo o enlace.', 'No resources yet. Add your first video or link.')}</p>`;
 
   return `
-    <button class="btn primary block" data-action="new-resource">➕ Añadir vídeo o enlace</button>
+    <button class="btn primary block" data-action="new-resource">${t('ed_add_res')}</button>
     <section class="card">${list}</section>
-    <p class="muted small">Consejo: pega la dirección de un vídeo de YouTube (por ejemplo <em>youtube.com/watch?v=...</em>) y se mostrará incrustado dentro de la app.</p>`;
+    <p class="muted small">${L('Consejo: pega la dirección de un vídeo de YouTube y se mostrará incrustado dentro de la app.', 'Tip: paste a YouTube video URL and it will be embedded inside the app.')}</p>`;
 }
 
 export function resourceFormHtml(state, res) {
@@ -143,19 +146,19 @@ export function resourceFormHtml(state, res) {
   return `
   <form id="form-resource" class="stack-form">
     <input type="hidden" name="id" value="${isEdit ? esc(r.id) : ''}" />
-    <label>Título
-      <input name="title" type="text" required value="${esc(r.title || '')}" placeholder="Ej.: Meditación guiada 10 min" />
+    <label>${L('Título', 'Title')}
+      <input name="title" type="text" required value="${esc(r.title || '')}" placeholder="${L('Ej.: Meditación guiada 10 min', 'E.g.: Guided meditation 10 min')}" />
     </label>
-    <label>Dirección (URL de YouTube u otro enlace)
+    <label>${L('Dirección (URL de YouTube u otro enlace)', 'Address (YouTube URL or other link)')}
       <input name="url" type="url" required value="${esc(r.url || '')}" placeholder="https://www.youtube.com/watch?v=..." />
     </label>
-    <label>Pilar / categoría
+    <label>${L('Pilar / categoría', 'Pillar / category')}
       <select name="pillar">${pillarOptions(state, r.pillar)}</select>
     </label>
-    <label>Descripción (opcional)
-      <textarea name="desc" rows="2" placeholder="Breve descripción del recurso">${esc(r.desc || '')}</textarea>
+    <label>${L('Descripción (opcional)', 'Description (optional)')}
+      <textarea name="desc" rows="2" placeholder="${L('Breve descripción del recurso', 'Short description of the resource')}">${esc(r.desc || '')}</textarea>
     </label>
-    <button type="submit" class="btn primary block">${isEdit ? 'Guardar cambios' : 'Añadir recurso'}</button>
+    <button type="submit" class="btn primary block">${isEdit ? t('save_changes') : L('Añadir recurso', 'Add resource')}</button>
   </form>`;
 }
 
@@ -171,11 +174,9 @@ function renderBlogTab(state) {
         <button class="mini-btn" data-action="edit-post" data-id="${p.id}">✏️</button>
         <button class="mini-btn danger" data-action="delete-post" data-id="${p.id}">🗑️</button>
       </div>
-    </div>`).join('') : '<p class="muted small">Aún no hay publicaciones. Crea la primera entrada de tu blog.</p>';
+    </div>`).join('') : `<p class="muted small">${L('Aún no hay publicaciones. Crea la primera entrada de tu blog.', 'No articles yet. Create the first entry of your blog.')}</p>`;
 
-  return `
-    <button class="btn primary block" data-action="new-post">➕ Nueva publicación</button>
-    <section class="card">${list}</section>`;
+  return `<button class="btn primary block" data-action="new-post">${t('ed_new_post')}</button><section class="card">${list}</section>`;
 }
 
 export function postFormHtml(state, post) {
@@ -184,19 +185,19 @@ export function postFormHtml(state, post) {
   return `
   <form id="form-post" class="stack-form">
     <input type="hidden" name="id" value="${isEdit ? esc(p.id) : ''}" />
-    <label>Título
-      <input name="title" type="text" required value="${esc(p.title || '')}" placeholder="Título de la entrada" />
+    <label>${L('Título', 'Title')}
+      <input name="title" type="text" required value="${esc(p.title || '')}" placeholder="${L('Título de la entrada', 'Article title')}" />
     </label>
-    <label>Categoría
+    <label>${L('Categoría', 'Category')}
       <select name="category">${categoryOptions(state, p.category)}</select>
     </label>
-    <label>Imagen de portada (URL, opcional)
+    <label>${L('Imagen de portada (URL, opcional)', 'Cover image (URL, optional)')}
       <input name="cover" type="url" value="${esc(p.cover || '')}" placeholder="https://..." />
     </label>
-    <label>Contenido
-      <textarea name="body" rows="9" required placeholder="Escribe aquí tu contenido. Puedes usar saltos de línea y viñetas con •">${esc(p.body || '')}</textarea>
+    <label>${L('Contenido', 'Content')}
+      <textarea name="body" rows="9" required placeholder="${L('Escribe aquí tu contenido. Puedes usar saltos de línea y viñetas con •', 'Write your content here. You can use line breaks and bullets with •')}">${esc(p.body || '')}</textarea>
     </label>
-    <button type="submit" class="btn primary block">${isEdit ? 'Guardar cambios' : 'Publicar'}</button>
+    <button type="submit" class="btn primary block">${isEdit ? t('save_changes') : L('Publicar', 'Publish')}</button>
   </form>`;
 }
 
@@ -207,78 +208,70 @@ function renderSettingsTab(state) {
   const goal = getDailyGoal(state);
   const rem = s.reminders;
   const timesChips = (rem.times || []).map((tm, i) =>
-    `<span class="time-chip">${esc(tm)} <button data-action="remove-reminder-time" data-idx="${i}" aria-label="Quitar">✕</button></span>`
+    `<span class="time-chip">${esc(tm)} <button data-action="remove-reminder-time" data-idx="${i}" aria-label="✕">✕</button></span>`
   ).join('');
+  const langOptions = LANGS.map((l) => `<option value="${l.id}" ${s.lang === l.id ? 'selected' : ''}>${l.flag} ${l.label}</option>`).join('');
 
   return `
     <section class="card">
-      <h3>🎯 Meta diaria</h3>
-      <p class="muted small">Puntos (XP) que el paciente debe sumar para completar el día.</p>
+      <h3>${t('set_language')}</h3>
+      <p class="muted small">${t('set_language_note')}</p>
+      <select class="lang-select" data-action="set-lang">${langOptions}</select>
+    </section>
+
+    <section class="card">
+      <h3>${t('set_goal')}</h3>
+      <p class="muted small">${t('set_goal_note')}</p>
       <div class="goal-setter">
         <button class="stepper" data-action="goal-dec">−</button>
-        <div class="counter-val">${goal} <small>XP/día</small></div>
+        <div class="counter-val">${goal} <small>${t('set_goal_unit')}</small></div>
         <button class="stepper" data-action="goal-inc">+</button>
       </div>
     </section>
 
     <section class="card">
-      <h3>🔔 Recordatorios</h3>
-      <label class="switch-row">
-        <span>Activar recordatorios</span>
-        <input type="checkbox" data-action="toggle-reminders" ${rem.enabled ? 'checked' : ''} />
-      </label>
-      <p class="muted small">Recibirás un aviso a las horas indicadas mientras la app esté abierta o instalada. Requiere permiso de notificaciones del navegador.</p>
-      <div class="times-list">${timesChips || '<span class="muted small">Sin horas configuradas.</span>'}</div>
+      <h3>${t('set_reminders')}</h3>
+      <label class="switch-row"><span>${t('set_reminders_on')}</span>
+        <input type="checkbox" data-action="toggle-reminders" ${rem.enabled ? 'checked' : ''} /></label>
+      <p class="muted small">${t('set_reminders_note')}</p>
+      <div class="times-list">${timesChips || `<span class="muted small">${t('set_no_times')}</span>`}</div>
       <div class="add-time-row">
         <input type="time" id="new-reminder-time" value="09:00" />
-        <button class="btn ghost" data-action="add-reminder-time">➕ Añadir hora</button>
+        <button class="btn ghost" data-action="add-reminder-time">${t('set_add_time')}</button>
       </div>
     </section>
 
     <section class="card">
-      <h3>🔒 Protección del modo médico</h3>
-      <label class="switch-row">
-        <span>Pedir PIN para editar</span>
-        <input type="checkbox" data-action="toggle-pin" ${s.editor.pinEnabled ? 'checked' : ''} />
-      </label>
+      <h3>${t('set_pin_title')}</h3>
+      <label class="switch-row"><span>${t('set_pin_ask')}</span>
+        <input type="checkbox" data-action="toggle-pin" ${s.editor.pinEnabled ? 'checked' : ''} /></label>
       ${s.editor.pinEnabled ? `
-      <label>PIN (4 dígitos)
+      <label>PIN
         <input type="text" inputmode="numeric" maxlength="4" id="editor-pin" value="${esc(s.editor.pin || '')}" placeholder="0000" />
-        <button class="btn ghost" data-action="save-pin">Guardar PIN</button>
+        <button class="btn ghost" data-action="save-pin">${t('save')} PIN</button>
       </label>` : ''}
     </section>
 
     <section class="card">
-      <h3>♿ Accesibilidad</h3>
-      <p class="muted small">Pensado para personas mayores o con dificultades visuales.</p>
-      <label class="switch-row">
-        <span>Texto grande</span>
-        <input type="checkbox" data-action="toggle-large-text" ${s.largeText ? 'checked' : ''} />
-      </label>
-      <label class="switch-row">
-        <span>Alto contraste</span>
-        <input type="checkbox" data-action="toggle-contrast" ${s.highContrast ? 'checked' : ''} />
-      </label>
-      <label class="switch-row">
-        <span>Reducir animaciones</span>
-        <input type="checkbox" data-action="toggle-motion" ${s.reducedMotion ? 'checked' : ''} />
-      </label>
+      <h3>${t('set_access')}</h3>
+      <p class="muted small">${t('set_access_note')}</p>
+      <label class="switch-row"><span>${t('set_large')}</span><input type="checkbox" data-action="toggle-large-text" ${s.largeText ? 'checked' : ''} /></label>
+      <label class="switch-row"><span>${t('set_contrast')}</span><input type="checkbox" data-action="toggle-contrast" ${s.highContrast ? 'checked' : ''} /></label>
+      <label class="switch-row"><span>${t('set_motion')}</span><input type="checkbox" data-action="toggle-motion" ${s.reducedMotion ? 'checked' : ''} /></label>
     </section>
 
     <section class="card">
-      <h3>💾 Datos</h3>
-      <p class="muted small">Los datos se guardan solo en este dispositivo.</p>
+      <h3>${t('set_data')}</h3>
+      <p class="muted small">${t('set_data_note')}</p>
       <div class="row-btns">
-        <button class="btn ghost" data-action="export">⬇️ Exportar copia</button>
-        <label class="btn ghost file-btn">⬆️ Importar
-          <input type="file" id="import-file" accept="application/json" hidden />
-        </label>
-        <button class="btn danger ghost" data-action="reset">🗑️ Reiniciar todo</button>
+        <button class="btn ghost" data-action="export">${t('set_export')}</button>
+        <label class="btn ghost file-btn">${t('set_import')}<input type="file" id="import-file" accept="application/json" hidden /></label>
+        <button class="btn danger ghost" data-action="reset">${t('set_reset')}</button>
       </div>
     </section>
 
     <section class="card disclaimer-card">
-      <h3>ℹ️ Nota ERAS</h3>
-      <p class="small">${esc(ERAS_NOTE)}</p>
+      <h3>${t('set_eras')}</h3>
+      <p class="small">${esc(getLang() === 'en' ? ERAS_NOTE_EN : ERAS_NOTE)}</p>
     </section>`;
 }

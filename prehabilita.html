@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0f766e" />
-  <meta name="description" content="PreHabilita: programa domiciliario y autogestionado de prehabilitacion anestesica antes de una cirugia de alta complejidad, con incentivos de gamificacion." />
+  <meta name="description" content="PreHabilita: programa domiciliario y autogestionado de prehabilitacion anestesica, con gamificacion, multiidioma y perfiles." />
   <title>PreHabilita &middot; Prehabilitacion anestesica</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AB%81%3C/text%3E%3C/svg%3E" />
   <style>
@@ -425,12 +425,43 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
   .med-table th, .med-table td { border: 1px solid #333; }
 }
 
+
+/* ================= Ampliación v3: fases, perfiles, informe, idioma ================= */
+
+/* ---------- Banner de fase (plan adaptativo) ---------- */
+.phase-banner { border-left: 5px solid var(--pc); }
+.phase-head { display: flex; align-items: center; gap: 10px; }
+.phase-emoji { font-size: 1.6rem; }
+.phase-title { display: block; font-size: 1.05rem; }
+.phase-focus { margin-top: 8px; font-size: .9rem; color: #334155; }
+
+/* ---------- Selector de idioma ---------- */
+.lang-select {
+  font: inherit; padding: 11px; border: 1.5px solid #cbd5e1; border-radius: 10px;
+  background: #fff; width: 100%; margin-top: 4px;
+}
+.lang-select:focus { outline: none; border-color: var(--accent-2); box-shadow: 0 0 0 3px var(--accent-soft); }
+
+/* ---------- Perfiles ---------- */
+.prof-list { display: flex; flex-direction: column; }
+.prof-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 0; border-top: 1px solid #f1f5f9; }
+.prof-row:first-child { border-top: 0; }
+.prof-row.active { }
+.prof-info { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.prof-badge { font-size: .68rem; font-weight: 800; background: var(--accent-soft); color: var(--accent); padding: 2px 8px; border-radius: 999px; }
+.prof-actions { display: flex; gap: 4px; }
+
+/* ---------- Informe: medallas ---------- */
+.rep-badges { display: flex; flex-wrap: wrap; gap: 6px; }
+.rep-badge { font-size: .78rem; background: #f1f5f9; padding: 3px 8px; border-radius: 999px; }
+
+/* Alto contraste: refuerzos extra para banners y chips */
+body.high-contrast .phase-focus { color: #111827; }
+
   </style>
 </head>
 <body>
-  <div id="app">
-    <noscript><div class="noscript">Esta aplicacion necesita JavaScript activado para funcionar.</div></noscript>
-  </div>
+  <div id="app"><noscript><div class="noscript">Esta aplicacion necesita JavaScript activado para funcionar.</div></noscript></div>
   <div id="toast-layer" class="toast-layer" aria-live="polite" aria-atomic="true"></div>
   <div id="modal-root"></div>
   <script>
@@ -447,7 +478,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
   };
 
   // js/state.js
-  var STORAGE_KEY = "prehabilita.v1";
+  var INDEX_KEY = "prehabilita.index";
+  var DATA_PREFIX = "prehabilita.data.";
+  var LEGACY_KEY = "prehabilita.v1";
   function todayKey(d = new Date) {
     const y = d.getFullYear();
     const m = String(d.getMonth() + 1).padStart(2, "0");
@@ -461,7 +494,7 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
   }
   function defaultState() {
     return {
-      version: 2,
+      version: 3,
       onboarded: false,
       profile: {
         name: "",
@@ -492,50 +525,80 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       medList: { meds: [], allergies: "", notes: "" },
       frail: { score: null, date: null, answers: {} },
       games: { memory: { wins: 0, bestMoves: null } },
-      library: {
-        seeded: false,
-        tasks: [],
-        taskOverrides: {},
-        resources: [],
-        posts: []
-      },
+      library: { seeded: false, tasks: [], taskOverrides: {}, resources: [], posts: [] },
       settings: {
+        lang: "es",
         reducedMotion: false,
         largeText: false,
         highContrast: false,
         dailyGoal: 60,
-        reminders: {
-          enabled: false,
-          times: ["09:00"],
-          notified: {}
-        },
-        editor: {
-          pinEnabled: false,
-          pin: ""
-        }
+        reminders: { enabled: false, times: ["09:00"], notified: {} },
+        editor: { pinEnabled: false, pin: "" }
       }
     };
   }
   var state = defaultState();
-  function loadState() {
+  var index = { activeId: null, profiles: [] };
+  function uidProfile() {
+    return "p-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 5);
+  }
+  function readJSON(key) {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        state = deepMerge(defaultState(), parsed);
-      }
-    } catch (e) {
-      console.warn("No se pudo leer el estado guardado, se usa el estado por defecto.", e);
-      state = defaultState();
+      const raw = localStorage.getItem(key);
+      return raw ? JSON.parse(raw) : null;
+    } catch (_) {
+      return null;
     }
+  }
+  function writeJSON(key, val) {
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch (e) {
+      console.warn("No se pudo guardar", key, e);
+    }
+  }
+  function loadProfileData(id) {
+    const raw = readJSON(DATA_PREFIX + id);
+    return raw ? deepMerge(defaultState(), raw) : defaultState();
+  }
+  function loadState() {
+    index = readJSON(INDEX_KEY) || { activeId: null, profiles: [] };
+    if (!index.profiles || index.profiles.length === 0) {
+      const legacy = readJSON(LEGACY_KEY);
+      const id = uidProfile();
+      if (legacy) {
+        state = deepMerge(defaultState(), legacy);
+        const name = state.profile && state.profile.name || "Paciente 1";
+        index = { activeId: id, profiles: [{ id, name }] };
+        writeJSON(DATA_PREFIX + id, state);
+        writeJSON(INDEX_KEY, index);
+      } else {
+        state = defaultState();
+        index = { activeId: id, profiles: [{ id, name: "Paciente 1" }] };
+        writeJSON(DATA_PREFIX + id, state);
+        writeJSON(INDEX_KEY, index);
+        return state;
+      }
+      return state;
+    }
+    if (!index.activeId || !index.profiles.some((p) => p.id === index.activeId)) {
+      index.activeId = index.profiles[0].id;
+      writeJSON(INDEX_KEY, index);
+    }
+    state = loadProfileData(index.activeId);
     return state;
   }
   function saveState() {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-      console.warn("No se pudo guardar el estado.", e);
+    if (!index.activeId) {
+      index.activeId = uidProfile();
+      index.profiles = [{ id: index.activeId, name: state.profile.name || "Paciente 1" }];
     }
+    const entry = index.profiles.find((p) => p.id === index.activeId);
+    if (entry && state.profile && state.profile.name && entry.name !== state.profile.name) {
+      entry.name = state.profile.name;
+      writeJSON(INDEX_KEY, index);
+    }
+    writeJSON(DATA_PREFIX + index.activeId, state);
   }
   function getState() {
     return state;
@@ -546,10 +609,75 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
     return state;
   }
   function getDayLog(dayKey = todayKey()) {
-    if (!state.logs[dayKey]) {
+    if (!state.logs[dayKey])
       state.logs[dayKey] = { tasks: {}, done: false, xp: 0, mood: null };
-    }
     return state.logs[dayKey];
+  }
+  function listProfiles() {
+    return index.profiles.slice();
+  }
+  function getActiveProfileId() {
+    return index.activeId;
+  }
+  function switchProfile(id) {
+    if (id === index.activeId)
+      return state;
+    if (!index.profiles.some((p) => p.id === id))
+      return state;
+    saveState();
+    index.activeId = id;
+    writeJSON(INDEX_KEY, index);
+    state = loadProfileData(id);
+    return state;
+  }
+  function createProfile(name, copyContent) {
+    saveState();
+    const id = uidProfile();
+    const fresh = defaultState();
+    fresh.profile.name = name || "Nuevo paciente";
+    if (copyContent) {
+      fresh.library = JSON.parse(JSON.stringify(state.library));
+      fresh.library.seeded = true;
+      fresh.settings.lang = state.settings.lang;
+      fresh.settings.dailyGoal = state.settings.dailyGoal;
+      fresh.settings.largeText = state.settings.largeText;
+      fresh.settings.highContrast = state.settings.highContrast;
+      fresh.settings.reducedMotion = state.settings.reducedMotion;
+      fresh.settings.editor = JSON.parse(JSON.stringify(state.settings.editor));
+    } else {
+      fresh.settings.lang = state.settings.lang;
+    }
+    index.profiles.push({ id, name: fresh.profile.name });
+    index.activeId = id;
+    writeJSON(DATA_PREFIX + id, fresh);
+    writeJSON(INDEX_KEY, index);
+    state = fresh;
+    return state;
+  }
+  function renameProfile(id, name) {
+    const e = index.profiles.find((p) => p.id === id);
+    if (e) {
+      e.name = name;
+      writeJSON(INDEX_KEY, index);
+    }
+    if (id === index.activeId) {
+      state.profile.name = name;
+      saveState();
+    }
+  }
+  function deleteProfile(id) {
+    if (index.profiles.length <= 1)
+      return false;
+    index.profiles = index.profiles.filter((p) => p.id !== id);
+    try {
+      localStorage.removeItem(DATA_PREFIX + id);
+    } catch (_) {}
+    if (index.activeId === id) {
+      index.activeId = index.profiles[0].id;
+      state = loadProfileData(index.activeId);
+    }
+    writeJSON(INDEX_KEY, index);
+    return true;
   }
   function deepMerge(base, override) {
     if (Array.isArray(base))
@@ -557,15 +685,13 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
     if (typeof base === "object" && base !== null) {
       const out = { ...base };
       for (const k of Object.keys(base)) {
-        if (override && k in override) {
+        if (override && k in override)
           out[k] = deepMerge(base[k], override[k]);
-        }
       }
       if (override && typeof override === "object") {
-        for (const k of Object.keys(override)) {
+        for (const k of Object.keys(override))
           if (!(k in out))
             out[k] = override[k];
-        }
       }
       return out;
     }
@@ -585,59 +711,80 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
   var PILLARS = [
     {
       id: "fisico",
-      name: "Ejercicio físico",
       emoji: "\uD83C\uDFC3",
       color: "#0ea5e9",
+      name: "Ejercicio físico",
+      name_en: "Physical exercise",
       tagline: "Mejora tu reserva cardiorrespiratoria y tu fuerza.",
-      why: "Una mejor capacidad física antes de la cirugía se asocia con menos complicaciones, recuperación más rápida y menor estancia hospitalaria."
+      tagline_en: "Improve your cardiorespiratory reserve and strength.",
+      why: "Una mejor capacidad física antes de la cirugía se asocia con menos complicaciones, recuperación más rápida y menor estancia hospitalaria.",
+      why_en: "Better physical fitness before surgery is linked to fewer complications, faster recovery and shorter hospital stay."
     },
     {
       id: "respiratorio",
-      name: "Entrenamiento respiratorio",
       emoji: "\uD83E\uDEC1",
       color: "#8b5cf6",
+      name: "Entrenamiento respiratorio",
+      name_en: "Breathing training",
       tagline: "Fortalece tus músculos respiratorios.",
-      why: "El entrenamiento de la musculatura inspiratoria reduce el riesgo de complicaciones pulmonares tras la anestesia general."
+      tagline_en: "Strengthen your breathing muscles.",
+      why: "El entrenamiento de la musculatura inspiratoria reduce el riesgo de complicaciones pulmonares tras la anestesia general.",
+      why_en: "Training the inspiratory muscles reduces the risk of lung complications after general anesthesia."
     },
     {
       id: "nutricion",
-      name: "Nutrición",
       emoji: "\uD83E\uDD57",
       color: "#22c55e",
+      name: "Nutrición",
+      name_en: "Nutrition",
       tagline: "Llega a la cirugía bien nutrido e hidratado.",
-      why: "Un buen estado nutricional (sobre todo suficiente proteína) favorece la cicatrización y la respuesta al estrés quirúrgico."
+      tagline_en: "Arrive at surgery well nourished and hydrated.",
+      why: "Un buen estado nutricional (sobre todo suficiente proteína) favorece la cicatrización y la respuesta al estrés quirúrgico.",
+      why_en: "Good nutritional status (especially enough protein) supports healing and the response to surgical stress."
     },
     {
       id: "mental",
-      name: "Bienestar mental",
       emoji: "\uD83E\uDDD8",
       color: "#f59e0b",
+      name: "Bienestar mental",
+      name_en: "Mental wellbeing",
       tagline: "Reduce la ansiedad y duerme mejor.",
-      why: "Menor ansiedad preoperatoria se asocia con menos dolor percibido, menor necesidad de analgésicos y mejor recuperación."
+      tagline_en: "Reduce anxiety and sleep better.",
+      why: "Menor ansiedad preoperatoria se asocia con menos dolor percibido, menor necesidad de analgésicos y mejor recuperación.",
+      why_en: "Lower pre-op anxiety is linked to less perceived pain, less need for painkillers and better recovery."
     },
     {
       id: "cognitivo",
-      name: "Salud cognitiva",
       emoji: "\uD83E\uDDE0",
       color: "#6366f1",
+      name: "Salud cognitiva",
+      name_en: "Cognitive health",
       tagline: "Mantén tu mente activa y protégida.",
-      why: "Mantener la mente activa y descansar bien ayuda a prevenir la confusión aguda (delírium) tras la cirugía, una complicación frecuente en personas mayores o frágiles."
+      tagline_en: "Keep your mind active and protected.",
+      why: "Mantener la mente activa y descansar bien ayuda a prevenir la confusión aguda (delírium) tras la cirugía, una complicación frecuente en personas mayores o frágiles.",
+      why_en: "Keeping the mind active and resting well helps prevent acute confusion (delirium) after surgery, a common complication in older or frail people."
     },
     {
       id: "habitos",
-      name: "Hábitos saludables",
       emoji: "\uD83D\uDEAD",
       color: "#ef4444",
+      name: "Hábitos saludables",
+      name_en: "Healthy habits",
       tagline: "Tabaco, alcohol y medicación bajo control.",
-      why: "Dejar de fumar y reducir el alcohol antes de la cirugía disminuye significativamente las complicaciones respiratorias y de la herida."
+      tagline_en: "Tobacco, alcohol and medication under control.",
+      why: "Dejar de fumar y reducir el alcohol antes de la cirugía disminuye significativamente las complicaciones respiratorias y de la herida.",
+      why_en: "Quitting smoking and cutting alcohol before surgery significantly reduces respiratory and wound complications."
     },
     {
       id: "educacion",
-      name: "Educación y preparación",
       emoji: "\uD83D\uDCDA",
       color: "#14b8a6",
+      name: "Educación y preparación",
+      name_en: "Education & preparation",
       tagline: "Entiende tu anestesia y tu cirugía.",
-      why: "Un paciente informado colabora mejor, tiene menos miedo y se recupera antes."
+      tagline_en: "Understand your anesthesia and your surgery.",
+      why: "Un paciente informado colabora mejor, tiene menos miedo y se recupera antes.",
+      why_en: "An informed patient cooperates better, feels less fear and recovers sooner."
     }
   ];
   var TASKS = [
@@ -646,11 +793,14 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       pillar: "fisico",
       type: "counter",
       unit: "min",
+      unit_en: "min",
       target: 30,
       xp: 25,
       icon: "\uD83D\uDEB6",
       title: "Caminata activa",
-      desc: "Camina a paso ligero (puedes hablar pero no cantar). Suma minutos a lo largo del día."
+      title_en: "Active walk",
+      desc: "Camina a paso ligero (puedes hablar pero no cantar). Suma minutos a lo largo del día.",
+      desc_en: "Walk at a brisk pace (you can talk but not sing). Add up minutes throughout the day."
     },
     {
       id: "fuerza",
@@ -659,7 +809,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 20,
       icon: "\uD83D\uDCAA",
       title: "Rutina de fuerza",
-      desc: "Sentadillas a una silla, puntillas y elevaciones de brazos: 2 series de 10."
+      title_en: "Strength routine",
+      desc: "Sentadillas a una silla, puntillas y elevaciones de brazos: 2 series de 10.",
+      desc_en: "Chair squats, calf raises and arm raises: 2 sets of 10."
     },
     {
       id: "movilidad",
@@ -668,7 +820,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 10,
       icon: "\uD83E\uDD38",
       title: "Movilidad y estiramientos",
-      desc: "5 minutos de estiramientos suaves de piernas, espalda y hombros."
+      title_en: "Mobility & stretching",
+      desc: "5 minutos de estiramientos suaves de piernas, espalda y hombros.",
+      desc_en: "5 minutes of gentle stretches for legs, back and shoulders."
     },
     {
       id: "equilibrio",
@@ -677,18 +831,23 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 15,
       icon: "\uD83E\uDDCD",
       title: "Equilibrio (con apoyo)",
-      desc: "Junto a una silla o encimera y, a ser posible, acompañado: mantén el equilibrio sobre una pierna 10-20 s por lado. Ten SIEMPRE un punto de apoyo cerca para evitar caídas."
+      title_en: "Balance (with support)",
+      desc: "Junto a una silla o encimera y, a ser posible, acompañado: mantén el equilibrio sobre una pierna 10-20 s por lado. Ten SIEMPRE un punto de apoyo cerca para evitar caídas.",
+      desc_en: "Next to a chair or counter and, if possible, with company: balance on one leg for 10-20 s per side. ALWAYS keep a support nearby to avoid falls."
     },
     {
       id: "inspiratorio",
       pillar: "respiratorio",
       type: "counter",
       unit: "reps",
+      unit_en: "reps",
       target: 30,
       xp: 25,
       icon: "\uD83E\uDEC1",
       title: "Entrenamiento inspiratorio",
-      desc: "Inspiraciones profundas y lentas (o con tu inspirómetro incentivador si tienes uno)."
+      title_en: "Inspiratory training",
+      desc: "Inspiraciones profundas y lentas (o con tu inspirómetro incentivador si tienes uno).",
+      desc_en: "Slow, deep breaths in (or with your incentive spirometer if you have one)."
     },
     {
       id: "diafragmatica",
@@ -697,7 +856,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 15,
       icon: "\uD83C\uDF2C️",
       title: "Respiración diafragmática",
-      desc: "5 minutos: inhala 4 s por la nariz, exhala 6 s por la boca, moviendo el abdomen."
+      title_en: "Diaphragmatic breathing",
+      desc: "5 minutos: inhala 4 s por la nariz, exhala 6 s por la boca, moviendo el abdomen.",
+      desc_en: "5 minutes: inhale 4 s through the nose, exhale 6 s through the mouth, moving your belly."
     },
     {
       id: "tos-eficaz",
@@ -706,7 +867,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 10,
       icon: "\uD83D\uDCA8",
       title: "Técnica de tos eficaz",
-      desc: "Practica la tos asistida que usarás tras la cirugía para despejar secreciones."
+      title_en: "Effective cough technique",
+      desc: "Practica la tos asistida que usarás tras la cirugía para despejar secreciones.",
+      desc_en: "Practise the assisted cough you will use after surgery to clear secretions."
     },
     {
       id: "proteina",
@@ -715,18 +878,23 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 20,
       icon: "\uD83C\uDF73",
       title: "Proteína en cada comida",
-      desc: "Incluye una fuente de proteína (huevo, legumbre, pescado, carne magra, lácteos) en cada comida principal."
+      title_en: "Protein at every meal",
+      desc: "Incluye una fuente de proteína (huevo, legumbre, pescado, carne magra, lácteos) en cada comida principal.",
+      desc_en: "Include a protein source (egg, legumes, fish, lean meat, dairy) at every main meal."
     },
     {
       id: "hidratacion",
       pillar: "nutricion",
       type: "counter",
       unit: "vasos",
+      unit_en: "glasses",
       target: 8,
       xp: 15,
       icon: "\uD83D\uDCA7",
       title: "Hidratación",
-      desc: "Bebe agua a lo largo del día (salvo indicación médica de restricción)."
+      title_en: "Hydration",
+      desc: "Bebe agua a lo largo del día (salvo indicación médica de restricción).",
+      desc_en: "Drink water throughout the day (unless your doctor advised fluid restriction)."
     },
     {
       id: "fruta-verdura",
@@ -735,7 +903,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 10,
       icon: "\uD83E\uDD66",
       title: "5 raciones de fruta/verdura",
-      desc: "Colorea tu plato con frutas y verduras para vitaminas y fibra."
+      title_en: "5 servings of fruit/veg",
+      desc: "Colorea tu plato con frutas y verduras para vitaminas y fibra.",
+      desc_en: "Fill your plate with colorful fruits and vegetables for vitamins and fiber."
     },
     {
       id: "relajacion",
@@ -744,7 +914,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 20,
       icon: "\uD83E\uDDD8",
       title: "Relajación guiada",
-      desc: "10 minutos de relajación, meditación o respiración consciente."
+      title_en: "Guided relaxation",
+      desc: "10 minutos de relajación, meditación o respiración consciente.",
+      desc_en: "10 minutes of relaxation, meditation or mindful breathing."
     },
     {
       id: "sueno",
@@ -753,7 +925,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 15,
       icon: "\uD83D\uDE34",
       title: "Higiene del sueño",
-      desc: "Sin pantallas 30 min antes de dormir; apunta a 7-8 h de sueño."
+      title_en: "Sleep hygiene",
+      desc: "Sin pantallas 30 min antes de dormir; apunta a 7-8 h de sueño.",
+      desc_en: "No screens 30 min before bed; aim for 7-8 h of sleep."
     },
     {
       id: "animo",
@@ -762,7 +936,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 10,
       icon: "\uD83D\uDCD3",
       title: "Registro de ánimo",
-      desc: "Anota cómo te sientes hoy y una cosa por la que estés agradecido."
+      title_en: "Mood check-in",
+      desc: "Anota cómo te sientes hoy y una cosa por la que estés agradecido.",
+      desc_en: "Note how you feel today and one thing you are grateful for."
     },
     {
       id: "gimnasia-mental",
@@ -771,7 +947,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 15,
       icon: "\uD83E\uDDE9",
       title: "Gimnasia mental",
-      desc: "Dedica 10-15 min a un pasatiempo que te haga pensar: el juego de memoria de la app, un crucigrama, sudoku, cartas o sopa de letras."
+      title_en: "Brain training",
+      desc: "Dedica 10-15 min a un pasatiempo que te haga pensar: el juego de memoria de la app, un crucigrama, sudoku, cartas o sopa de letras.",
+      desc_en: "Spend 10-15 min on a puzzle that makes you think: the app's memory game, a crossword, sudoku, cards or word search."
     },
     {
       id: "lectura-conversa",
@@ -780,7 +958,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 10,
       icon: "\uD83D\uDCD7",
       title: "Lectura o conversación",
-      desc: "Lee un rato o mantén una conversación estimulante. Mantener la mente activa ayuda a prevenir la confusión tras la cirugía."
+      title_en: "Reading or conversation",
+      desc: "Lee un rato o mantén una conversación estimulante. Mantener la mente activa ayuda a prevenir la confusión tras la cirugía.",
+      desc_en: "Read for a while or have a stimulating conversation. Keeping the mind active helps prevent confusion after surgery."
     },
     {
       id: "no-tabaco",
@@ -789,7 +969,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 30,
       icon: "\uD83D\uDEAD",
       title: "Día sin tabaco",
-      desc: "Cada día sin fumar mejora tu oxigenación y reduce complicaciones. ¡Cuenta!"
+      title_en: "Smoke-free day",
+      desc: "Cada día sin fumar mejora tu oxigenación y reduce complicaciones. ¡Cuenta!",
+      desc_en: "Every smoke-free day improves your oxygenation and reduces complications. It counts!"
     },
     {
       id: "no-alcohol",
@@ -798,7 +980,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 20,
       icon: "\uD83D\uDEB1",
       title: "Día sin alcohol",
-      desc: "Evitar el alcohol mejora la coagulación, el hígado y el sistema inmune."
+      title_en: "Alcohol-free day",
+      desc: "Evitar el alcohol mejora la coagulación, el hígado y el sistema inmune.",
+      desc_en: "Avoiding alcohol improves clotting, liver function and the immune system."
     },
     {
       id: "medicacion",
@@ -807,7 +991,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 15,
       icon: "\uD83D\uDC8A",
       title: "Medicación según indicación",
-      desc: "Toma tu medicación habitual tal y como te indicó tu equipo médico."
+      title_en: "Medication as prescribed",
+      desc: "Toma tu medicación habitual tal y como te indicó tu equipo médico.",
+      desc_en: "Take your usual medication exactly as your medical team instructed."
     },
     {
       id: "leccion",
@@ -816,7 +1002,9 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 15,
       icon: "\uD83D\uDCD6",
       title: "Lección del día",
-      desc: "Lee una píldora educativa sobre tu proceso quirúrgico y anestésico."
+      title_en: "Lesson of the day",
+      desc: "Lee una píldora educativa sobre tu proceso quirúrgico y anestésico.",
+      desc_en: "Read a quick educational tip about your surgical and anesthetic journey."
     },
     {
       id: "checklist-preop",
@@ -825,18 +1013,68 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
       xp: 10,
       icon: "✅",
       title: "Repaso de preparativos",
-      desc: "Revisa tu lista de preparativos preoperatorios (ayuno, documentos, acompañante)."
+      title_en: "Review your prep",
+      desc: "Revisa tu lista de preparativos preoperatorios (ayuno, documentos, acompañante).",
+      desc_en: "Review your pre-op checklist (fasting, documents, companion)."
     }
   ];
   var LESSONS = [
-    { id: "l1", title: "¿Qué es la prehabilitación?", body: 'La prehabilitación es preparar tu cuerpo y tu mente ANTES de la cirugía para llegar en la mejor forma posible. Igual que un atleta entrena antes de una competición, tú te preparas para el "gran día". Cuanto mejor sea tu punto de partida, mejor toleras la anestesia y la cirugía, y más rápido te recuperas.' },
-    { id: "l2", title: "Los 4 pilares que más importan", body: "Ejercicio (capacidad física), respiración (músculos pulmonares), nutrición (proteína e hidratación) y bienestar mental (ansiedad y sueño). Sumar hábitos como dejar el tabaco potencia enormemente los resultados." },
-    { id: "l3", title: "Tu anestesia, paso a paso", body: "El día de la cirugía, el equipo de anestesia te monitorizará (corazón, oxígeno, presión). Con anestesia general dormirás profundamente y no sentirás dolor. Al despertar estarás en la sala de recuperación, vigilado de cerca. Preguntar tus dudas al anestesiólogo reduce mucho el miedo." },
-    { id: "l4", title: "Por qué entrenar la respiración", body: "Tras una anestesia general, los pulmones pueden colapsar zonas pequeñas (atelectasias). Entrenar la musculatura inspiratoria y practicar la respiración profunda reduce el riesgo de neumonía y otras complicaciones pulmonares." },
-    { id: "l5", title: "El poder de dejar de fumar", body: "Dejar de fumar aunque sea 4 semanas antes reduce de forma notable las complicaciones de la herida y respiratorias. A las 12-24 h ya bajan los niveles de monóxido de carbono y mejora el oxígeno que llega a tus tejidos." },
-    { id: "l6", title: "Proteína: el ladrillo de tu recuperación", body: "La cirugía es un estrés que consume proteína para cicatrizar y mantener tus músculos. Reparte la proteína entre todas las comidas del día. Si tienes poco apetito, coméntalo con tu equipo: pueden recomendarte suplementos." },
-    { id: "l7", title: "El ayuno preoperatorio moderno", body: 'Ya no es necesario "ayuno desde la medianoche" en la mayoría de casos. Muchos protocolos permiten líquidos claros hasta 2 h antes. SIEMPRE sigue exactamente las instrucciones concretas de tu centro: son tu norma.' },
-    { id: "l8", title: "Domina la ansiedad preoperatoria", body: "Es normal tener miedo. Técnicas como la respiración 4-6, la relajación muscular progresiva y visualizar una recuperación exitosa reducen el estrés. Dormir bien la semana previa también ayuda a tu sistema inmune." }
+    {
+      id: "l1",
+      title: "¿Qué es la prehabilitación?",
+      title_en: "What is prehabilitation?",
+      body: 'La prehabilitación es preparar tu cuerpo y tu mente ANTES de la cirugía para llegar en la mejor forma posible. Igual que un atleta entrena antes de una competición, tú te preparas para el "gran día". Cuanto mejor sea tu punto de partida, mejor toleras la anestesia y la cirugía, y más rápido te recuperas.',
+      body_en: 'Prehabilitation means preparing your body and mind BEFORE surgery so you arrive in the best possible shape. Just like an athlete trains before a competition, you prepare for the "big day". The better your starting point, the better you tolerate anesthesia and surgery, and the faster you recover.'
+    },
+    {
+      id: "l2",
+      title: "Los 4 pilares que más importan",
+      title_en: "The 4 pillars that matter most",
+      body: "Ejercicio (capacidad física), respiración (músculos pulmonares), nutrición (proteína e hidratación) y bienestar mental (ansiedad y sueño). Sumar hábitos como dejar el tabaco potencia enormemente los resultados.",
+      body_en: "Exercise (physical capacity), breathing (lung muscles), nutrition (protein and hydration) and mental wellbeing (anxiety and sleep). Adding habits like quitting smoking greatly boosts the results."
+    },
+    {
+      id: "l3",
+      title: "Tu anestesia, paso a paso",
+      title_en: "Your anesthesia, step by step",
+      body: "El día de la cirugía, el equipo de anestesia te monitorizará (corazón, oxígeno, presión). Con anestesia general dormirás profundamente y no sentirás dolor. Al despertar estarás en la sala de recuperación, vigilado de cerca. Preguntar tus dudas al anestesiólogo reduce mucho el miedo.",
+      body_en: "On surgery day, the anesthesia team will monitor you (heart, oxygen, blood pressure). Under general anesthesia you will sleep deeply and feel no pain. When you wake up you will be in the recovery room, closely watched. Asking the anesthesiologist your questions greatly reduces fear."
+    },
+    {
+      id: "l4",
+      title: "Por qué entrenar la respiración",
+      title_en: "Why train your breathing",
+      body: "Tras una anestesia general, los pulmones pueden colapsar zonas pequeñas (atelectasias). Entrenar la musculatura inspiratoria y practicar la respiración profunda reduce el riesgo de neumonía y otras complicaciones pulmonares.",
+      body_en: "After general anesthesia, small areas of the lungs can collapse (atelectasis). Training the inspiratory muscles and practising deep breathing reduces the risk of pneumonia and other lung complications."
+    },
+    {
+      id: "l5",
+      title: "El poder de dejar de fumar",
+      title_en: "The power of quitting smoking",
+      body: "Dejar de fumar aunque sea 4 semanas antes reduce de forma notable las complicaciones de la herida y respiratorias. A las 12-24 h ya bajan los niveles de monóxido de carbono y mejora el oxígeno que llega a tus tejidos.",
+      body_en: "Quitting smoking even 4 weeks before markedly reduces wound and respiratory complications. Within 12-24 h carbon monoxide levels drop and the oxygen reaching your tissues improves."
+    },
+    {
+      id: "l6",
+      title: "Proteína: el ladrillo de tu recuperación",
+      title_en: "Protein: the building block of recovery",
+      body: "La cirugía es un estrés que consume proteína para cicatrizar y mantener tus músculos. Reparte la proteína entre todas las comidas del día. Si tienes poco apetito, coméntalo con tu equipo: pueden recomendarte suplementos.",
+      body_en: "Surgery is a stress that consumes protein to heal and maintain your muscles. Spread protein across all your meals. If you have little appetite, tell your team: they may recommend supplements."
+    },
+    {
+      id: "l7",
+      title: "El ayuno preoperatorio moderno",
+      title_en: "Modern pre-op fasting",
+      body: 'Ya no es necesario "ayuno desde la medianoche" en la mayoría de casos. Muchos protocolos permiten líquidos claros hasta 2 h antes. SIEMPRE sigue exactamente las instrucciones concretas de tu centro: son tu norma.',
+      body_en: 'Fasting "from midnight" is no longer needed in most cases. Many protocols allow clear fluids up to 2 h before. ALWAYS follow the exact instructions from your hospital: they are your rule.'
+    },
+    {
+      id: "l8",
+      title: "Domina la ansiedad preoperatoria",
+      title_en: "Master pre-op anxiety",
+      body: "Es normal tener miedo. Técnicas como la respiración 4-6, la relajación muscular progresiva y visualizar una recuperación exitosa reducen el estrés. Dormir bien la semana previa también ayuda a tu sistema inmune.",
+      body_en: "Feeling afraid is normal. Techniques like 4-6 breathing, progressive muscle relaxation and picturing a successful recovery reduce stress. Sleeping well the week before also helps your immune system."
+    }
   ];
   var PREOP_CHECKLIST = [
     "Confirma la fecha, hora y lugar de tu cirugía.",
@@ -848,106 +1086,221 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
     "Sigue al pie de la letra las instrucciones de ayuno de tu centro.",
     "Ducha con el jabón antiséptico si te lo indicaron."
   ];
+  var PREOP_CHECKLIST_EN = [
+    "Confirm the date, time and place of your surgery.",
+    "Write down your questions for the pre-anesthesia consultation.",
+    "Keep your list of medications and allergies handy.",
+    "Confirm which medication to stop or continue (as advised).",
+    "Arrange a companion for discharge day.",
+    "Pack comfortable clothes and toiletries for the hospital.",
+    "Follow your hospital's fasting instructions to the letter.",
+    "Shower with the antiseptic soap if instructed."
+  ];
   var BADGES = [
     {
       id: "primer-paso",
-      name: "Primer paso",
       emoji: "\uD83D\uDC5F",
+      name: "Primer paso",
+      name_en: "First step",
       desc: "Completa tu primer día de programa.",
+      desc_en: "Complete your first day of the program.",
       check: (s) => s.stats.daysCompleted >= 1
     },
     {
       id: "racha-3",
-      name: "En marcha",
       emoji: "\uD83D\uDD25",
+      name: "En marcha",
+      name_en: "Getting going",
       desc: "Mantén una racha de 3 días.",
+      desc_en: "Keep a 3-day streak.",
       check: (s) => s.stats.bestStreak >= 3
     },
     {
       id: "racha-7",
-      name: "Semana perfecta",
       emoji: "⭐",
+      name: "Semana perfecta",
+      name_en: "Perfect week",
       desc: "Mantén una racha de 7 días.",
+      desc_en: "Keep a 7-day streak.",
       check: (s) => s.stats.bestStreak >= 7
     },
     {
       id: "racha-14",
-      name: "Imparable",
       emoji: "\uD83C\uDFC6",
+      name: "Imparable",
+      name_en: "Unstoppable",
       desc: "Mantén una racha de 14 días.",
+      desc_en: "Keep a 14-day streak.",
       check: (s) => s.stats.bestStreak >= 14
     },
     {
       id: "nivel-5",
-      name: "Atleta prehab",
       emoji: "\uD83C\uDF96️",
+      name: "Atleta prehab",
+      name_en: "Prehab athlete",
       desc: "Alcanza el nivel 5.",
+      desc_en: "Reach level 5.",
       check: (s) => s.stats.level >= 5
     },
     {
       id: "pulmones",
-      name: "Pulmones de acero",
       emoji: "\uD83E\uDEC1",
+      name: "Pulmones de acero",
+      name_en: "Lungs of steel",
       desc: "Completa 20 sesiones respiratorias.",
+      desc_en: "Complete 20 breathing sessions.",
       check: (s) => (s.stats.taskCounts["inspiratorio"] || 0) + (s.stats.taskCounts["diafragmatica"] || 0) >= 20
     },
     {
       id: "caminante",
-      name: "Caminante",
       emoji: "\uD83E\uDD7E",
+      name: "Caminante",
+      name_en: "Walker",
       desc: "Acumula 300 minutos de caminata.",
+      desc_en: "Accumulate 300 minutes of walking.",
       check: (s) => (s.stats.counterTotals["caminar"] || 0) >= 300
     },
     {
       id: "humo-cero",
-      name: "Humo cero",
       emoji: "\uD83D\uDEAD",
+      name: "Humo cero",
+      name_en: "Smoke-free",
       desc: "7 días seguidos sin tabaco.",
+      desc_en: "7 days in a row without tobacco.",
       check: (s) => (s.stats.taskCounts["no-tabaco"] || 0) >= 7
     },
     {
       id: "sabio",
-      name: "Bien informado",
       emoji: "\uD83D\uDCDA",
+      name: "Bien informado",
+      name_en: "Well informed",
       desc: "Lee 5 lecciones educativas.",
+      desc_en: "Read 5 educational lessons.",
       check: (s) => (s.stats.lessonsRead || 0) >= 5
     },
     {
       id: "mente-agil",
-      name: "Mente ágil",
       emoji: "\uD83E\uDDE0",
+      name: "Mente ágil",
+      name_en: "Sharp mind",
       desc: "Completa 10 sesiones de gimnasia mental.",
+      desc_en: "Complete 10 brain-training sessions.",
       check: (s) => (s.stats.taskCounts["gimnasia-mental"] || 0) >= 10
     },
     {
       id: "memoria-maestra",
-      name: "Maestro de la memoria",
       emoji: "\uD83C\uDCCF",
+      name: "Maestro de la memoria",
+      name_en: "Memory master",
       desc: "Gana una partida del juego de memoria.",
+      desc_en: "Win a round of the memory game.",
       check: (s) => s.games && s.games.memory && s.games.memory.wins > 0
     },
     {
       id: "hidratado",
-      name: "Bien hidratado",
       emoji: "\uD83D\uDCA7",
+      name: "Bien hidratado",
+      name_en: "Well hydrated",
       desc: "Alcanza tu meta de hidratación 5 días.",
+      desc_en: "Reach your hydration goal on 5 days.",
       check: (s) => (s.stats.hydrationGoalDays || 0) >= 5
     },
     {
       id: "listo",
-      name: "¡Listo para el quirófano!",
       emoji: "\uD83C\uDF89",
+      name: "¡Listo para el quirófano!",
+      name_en: "Ready for the OR!",
       desc: "Completa 21 días de programa.",
+      desc_en: "Complete 21 days of the program.",
       check: (s) => s.stats.daysCompleted >= 21
     }
   ];
   var WEEKLY_CHALLENGES = [
-    { id: "w-camina", title: "Reto de la semana: 150 min de caminata", metric: "caminar", target: 150, unit: "min", xp: 100 },
-    { id: "w-resp", title: "Reto de la semana: 5 sesiones respiratorias", metric: "inspiratorio", target: 5, unit: "sesiones", xp: 80 },
-    { id: "w-agua", title: "Reto de la semana: hidrátate 5 días", metric: "hidratacion", target: 5, unit: "días", xp: 70 }
+    { id: "w-camina", title: "Reto de la semana: 150 min de caminata", title_en: "Weekly challenge: 150 min of walking", metric: "caminar", target: 150, unit: "min", unit_en: "min", xp: 100 },
+    { id: "w-resp", title: "Reto de la semana: 5 sesiones respiratorias", title_en: "Weekly challenge: 5 breathing sessions", metric: "inspiratorio", target: 5, unit: "sesiones", unit_en: "sessions", xp: 80 },
+    { id: "w-agua", title: "Reto de la semana: hidrátate 5 días", title_en: "Weekly challenge: hydrate on 5 days", metric: "hidratacion", target: 5, unit: "días", unit_en: "days", xp: 70 }
   ];
   var DISCLAIMER = "PreHabilita es una herramienta educativa y de acompañamiento. No sustituye la valoración ni las indicaciones de tu equipo médico y anestésico. Ante cualquier duda, dolor o síntoma nuevo, consulta con tu profesional de salud. Sigue siempre las instrucciones concretas de tu centro (ayuno, medicación, ejercicio permitido).";
+  var DISCLAIMER_EN = "PreHabilita is an educational and support tool. It does not replace the assessment or instructions of your medical and anesthetic team. If you have any doubt, pain or new symptom, consult your healthcare professional. Always follow the specific instructions from your hospital (fasting, medication, permitted exercise).";
   var ERAS_NOTE = "Este programa sigue los principios de la recuperación intensificada (ERAS®): " + "prehabilitación multimodal (ejercicio + nutrición + apoyo psicológico), " + "cese de tabaco y alcohol, ayuno preoperatorio abreviado con carga de hidratos de carbono, " + "y educación del paciente. Debe adaptarse siempre al protocolo concreto de tu centro.";
+  var ERAS_NOTE_EN = "This program follows Enhanced Recovery After Surgery (ERAS®) principles: " + "multimodal prehabilitation (exercise + nutrition + psychological support), " + "smoking and alcohol cessation, shortened pre-op fasting with carbohydrate loading, " + "and patient education. It must always be adapted to your hospital's specific protocol.";
+  function getPhase(days) {
+    if (days == null) {
+      return {
+        id: "sinfecha",
+        emoji: "\uD83D\uDDD3️",
+        color: "#64748b",
+        title: "Plan diario",
+        title_en: "Daily plan",
+        focus: 'Añade la fecha de tu cirugía (en "Editar mis datos") para adaptar el plan por fases.',
+        focus_en: 'Add your surgery date (in "Edit my details") to tailor the plan into phases.'
+      };
+    }
+    if (days < 0) {
+      return {
+        id: "recuperacion",
+        emoji: "\uD83C\uDF24️",
+        color: "#22c55e",
+        title: "Recuperación",
+        title_en: "Recovery",
+        focus: "Ya has pasado por el quirófano. Retoma la actividad de forma progresiva según te indique tu equipo, cuida la respiración y la nutrición, y descansa.",
+        focus_en: "You have had your surgery. Resume activity gradually as your team advises, care for your breathing and nutrition, and rest."
+      };
+    }
+    if (days === 0) {
+      return {
+        id: "dia-cirugia",
+        emoji: "\uD83C\uDFE5",
+        color: "#0f766e",
+        title: "¡Hoy es el día!",
+        title_en: "Today is the day!",
+        focus: "Sigue al pie de la letra las instrucciones de tu centro (ayuno, medicación, higiene). Respira con calma: te has preparado para esto.",
+        focus_en: "Follow your hospital's instructions exactly (fasting, medication, hygiene). Breathe calmly: you have prepared for this."
+      };
+    }
+    if (days <= 2) {
+      return {
+        id: "final",
+        emoji: "\uD83C\uDF92",
+        color: "#f59e0b",
+        title: "Preparativos finales",
+        title_en: "Final preparations",
+        focus: "Baja la intensidad del ejercicio y descansa bien. Repasa la lista de preparativos, prepara la bolsa y confirma tu acompañante y el ayuno.",
+        focus_en: "Ease off exercise intensity and rest well. Review the checklist, pack your bag and confirm your companion and fasting."
+      };
+    }
+    if (days <= 7) {
+      return {
+        id: "puesta-a-punto",
+        emoji: "\uD83C\uDFAF",
+        color: "#8b5cf6",
+        title: "Puesta a punto",
+        title_en: "Tune-up",
+        focus: "Mantén el ejercicio suave, prioriza la respiración, el sueño y la proteína. Reduce el estrés y afina los últimos detalles.",
+        focus_en: "Keep exercise gentle, prioritise breathing, sleep and protein. Lower stress and fine-tune the last details."
+      };
+    }
+    if (days <= 21) {
+      return {
+        id: "desarrollo",
+        emoji: "\uD83D\uDCC8",
+        color: "#0ea5e9",
+        title: "Fase de desarrollo",
+        title_en: "Development phase",
+        focus: "Es el momento de progresar: aumenta poco a poco la caminata y la fuerza, sé constante con la respiración y consolida buenos hábitos.",
+        focus_en: "Time to progress: gradually increase walking and strength, be consistent with breathing and lock in good habits."
+      };
+    }
+    return {
+      id: "base",
+      emoji: "\uD83C\uDFD7️",
+      color: "#14b8a6",
+      title: "Fase de base",
+      title_en: "Building phase",
+      focus: "Tienes tiempo para construir una buena base. Céntrate en crear el hábito diario, empezar a moverte y, si fumas o bebes, empezar a dejarlo.",
+      focus_en: "You have time to build a solid base. Focus on creating the daily habit, starting to move and, if you smoke or drink, starting to quit."
+    };
+  }
   var DEFAULT_POSTS = [
     {
       id: "post-eras",
@@ -1118,44 +1471,116 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     "Vómitos persistentes o incapacidad para beber líquidos.",
     "Hinchazón o dolor en una pierna (sobre todo en una sola)."
   ];
+  var ALARM_SIGNS_EN = [
+    "Chest pain, palpitations or shortness of breath at rest.",
+    "High fever or chills.",
+    "Severe dizziness, fainting or a fall.",
+    "New confusion, disorientation or sudden behavior changes.",
+    "Pain that does not ease or clearly worsens.",
+    "Bleeding, or a wound that is red, warm or discharging.",
+    "Persistent vomiting or inability to drink fluids.",
+    "Swelling or pain in one leg (especially just one)."
+  ];
   var CAREGIVER_TIPS = [
-    { icon: "\uD83E\uDD1D", title: "Acompaña, no sustituyas", text: "Anima a tu familiar a hacer sus tareas por sí mismo cuando sea seguro; tu papel es motivar y supervisar, no hacerlo por él/ella." },
-    { icon: "\uD83D\uDEDF", title: "Supervisa la seguridad", text: "Quédate cerca durante los ejercicios de fuerza y equilibrio. Retira alfombras sueltas y asegura que haya un punto de apoyo firme." },
-    { icon: "\uD83D\uDCC6", title: "Cread una rutina juntos", text: "Un horario fijo para caminar, comer y dormir da estructura y facilita la constancia. Celebrad juntos los pequeños logros." },
-    { icon: "\uD83C\uDF7D️", title: "Cuida la alimentación", text: "Vigila que come suficiente proteína y bebe líquidos. Si come poco, coméntalo con el equipo médico." },
-    { icon: "\uD83E\uDDE0", title: "Estimula la mente", text: "Conversad, jugad al juego de memoria o a las cartas, y asegúrate de que lleva gafas y audífonos si los usa." },
-    { icon: "\uD83D\uDCCB", title: "Prepara la consulta", text: "Ayúdale a tener lista la lista de medicación y alergias, y anotad juntos las dudas para el anestesiólogo." }
+    {
+      icon: "\uD83E\uDD1D",
+      title: "Acompaña, no sustituyas",
+      title_en: "Support, don't replace",
+      text: "Anima a tu familiar a hacer sus tareas por sí mismo cuando sea seguro; tu papel es motivar y supervisar, no hacerlo por él/ella.",
+      text_en: "Encourage your relative to do their tasks themselves when it is safe; your role is to motivate and supervise, not to do it for them."
+    },
+    {
+      icon: "\uD83D\uDEDF",
+      title: "Supervisa la seguridad",
+      title_en: "Watch over safety",
+      text: "Quédate cerca durante los ejercicios de fuerza y equilibrio. Retira alfombras sueltas y asegura que haya un punto de apoyo firme.",
+      text_en: "Stay close during strength and balance exercises. Remove loose rugs and make sure there is a firm support to hold on to."
+    },
+    {
+      icon: "\uD83D\uDCC6",
+      title: "Cread una rutina juntos",
+      title_en: "Build a routine together",
+      text: "Un horario fijo para caminar, comer y dormir da estructura y facilita la constancia. Celebrad juntos los pequeños logros.",
+      text_en: "A fixed schedule for walking, eating and sleeping gives structure and helps consistency. Celebrate the small wins together."
+    },
+    {
+      icon: "\uD83C\uDF7D️",
+      title: "Cuida la alimentación",
+      title_en: "Look after nutrition",
+      text: "Vigila que come suficiente proteína y bebe líquidos. Si come poco, coméntalo con el equipo médico.",
+      text_en: "Check that they eat enough protein and drink fluids. If they eat little, tell the medical team."
+    },
+    {
+      icon: "\uD83E\uDDE0",
+      title: "Estimula la mente",
+      title_en: "Stimulate the mind",
+      text: "Conversad, jugad al juego de memoria o a las cartas, y asegúrate de que lleva gafas y audífonos si los usa.",
+      text_en: "Chat, play the memory game or cards, and make sure they wear glasses and hearing aids if they use them."
+    },
+    {
+      icon: "\uD83D\uDCCB",
+      title: "Prepara la consulta",
+      title_en: "Prepare the appointment",
+      text: "Ayúdale a tener lista la lista de medicación y alergias, y anotad juntos las dudas para el anestesiólogo.",
+      text_en: "Help them have the medication and allergy list ready, and note down questions for the anesthesiologist together."
+    }
   ];
   var FRAIL_QUESTIONS = [
-    { id: "fatiga", q: "¿Se ha sentido cansado/a la MAYOR parte del tiempo en las últimas 4 semanas?" },
-    { id: "resistencia", q: "¿Tiene dificultad para subir un piso de escaleras (unos 10 escalones) sin ayuda ni descansar?" },
-    { id: "deambulacion", q: "¿Tiene dificultad para caminar unos 100-200 metros (una manzana) sin ayuda?" },
-    { id: "enfermedades", q: "¿Le ha dicho un médico que tiene 5 o más enfermedades crónicas (p. ej. hipertensión, diabetes, cáncer, EPOC, cardiopatía, artritis, ictus, enfermedad renal)?" },
-    { id: "peso", q: "¿Ha perdido más de un 5% de su peso (unos 3-4 kg) en el último año sin proponérselo?" }
+    {
+      id: "fatiga",
+      q: "¿Se ha sentido cansado/a la MAYOR parte del tiempo en las últimas 4 semanas?",
+      q_en: "Have you felt tired MOST of the time in the last 4 weeks?"
+    },
+    {
+      id: "resistencia",
+      q: "¿Tiene dificultad para subir un piso de escaleras (unos 10 escalones) sin ayuda ni descansar?",
+      q_en: "Do you have difficulty climbing one flight of stairs (about 10 steps) without help or resting?"
+    },
+    {
+      id: "deambulacion",
+      q: "¿Tiene dificultad para caminar unos 100-200 metros (una manzana) sin ayuda?",
+      q_en: "Do you have difficulty walking about 100-200 metres (one block) without help?"
+    },
+    {
+      id: "enfermedades",
+      q: "¿Le ha dicho un médico que tiene 5 o más enfermedades crónicas (p. ej. hipertensión, diabetes, cáncer, EPOC, cardiopatía, artritis, ictus, enfermedad renal)?",
+      q_en: "Has a doctor told you that you have 5 or more chronic illnesses (e.g. hypertension, diabetes, cancer, COPD, heart disease, arthritis, stroke, kidney disease)?"
+    },
+    {
+      id: "peso",
+      q: "¿Ha perdido más de un 5% de su peso (unos 3-4 kg) en el último año sin proponérselo?",
+      q_en: "Have you lost more than 5% of your weight (about 3-4 kg) in the last year without trying?"
+    }
   ];
   function frailResult(score) {
     if (score <= 0)
       return {
         level: "robusto",
-        label: "Robusto",
         emoji: "\uD83D\uDCAA",
         color: "#22c55e",
-        message: "Tu reserva es buena. La prehabilitación te ayudará a mantenerte fuerte y llegar en tu mejor forma a la cirugía."
+        label: "Robusto",
+        label_en: "Robust",
+        message: "Tu reserva es buena. La prehabilitación te ayudará a mantenerte fuerte y llegar en tu mejor forma a la cirugía.",
+        message_en: "Your reserve is good. Prehabilitation will help you stay strong and arrive at surgery in your best shape."
       };
     if (score <= 2)
       return {
         level: "prefragil",
-        label: "Prefragilidad",
         emoji: "\uD83C\uDF31",
         color: "#f59e0b",
-        message: "Estás en un punto en el que la prehabilitación tiene un impacto enorme. Empezar hoy mismo puede marcar una gran diferencia en tu recuperación."
+        label: "Prefragilidad",
+        label_en: "Pre-frailty",
+        message: "Estás en un punto en el que la prehabilitación tiene un impacto enorme. Empezar hoy mismo puede marcar una gran diferencia en tu recuperación.",
+        message_en: "You are at a point where prehabilitation has a huge impact. Starting today can make a big difference to your recovery."
       };
     return {
       level: "fragil",
-      label: "Fragilidad",
       emoji: "\uD83E\uDD17",
       color: "#ef4444",
-      message: "Tu reserva es valiosa y hay mucho que ganar. Trabaja con calma, prioriza la seguridad y el acompañamiento, y comparte este resultado con tu equipo médico para adaptar tu plan."
+      label: "Fragilidad",
+      label_en: "Frailty",
+      message: "Tu reserva es valiosa y hay mucho que ganar. Trabaja con calma, prioriza la seguridad y el acompañamiento, y comparte este resultado con tu equipo médico para adaptar tu plan.",
+      message_en: "Your reserve is valuable and there is a lot to gain. Work calmly, prioritise safety and support, and share this result with your medical team to tailor your plan."
     };
   }
   var MEMORY_EMOJIS = ["\uD83E\uDEC1", "\uD83D\uDCAA", "\uD83E\uDD57", "\uD83E\uDDD8", "\uD83D\uDEB6", "\uD83D\uDCA7", "\uD83D\uDE34", "\uD83E\uDDE0", "\uD83C\uDF4E", "\uD83C\uDFC6", "⭐", "\uD83C\uDF3F"];
@@ -1418,12 +1843,506 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     };
   }
 
+  // js/i18n.js
+  var LANGS = [
+    { id: "es", label: "Español", flag: "\uD83C\uDDEA\uD83C\uDDF8" },
+    { id: "en", label: "English", flag: "\uD83C\uDDEC\uD83C\uDDE7" }
+  ];
+  var LANG = "es";
+  function setLang(l) {
+    LANG = l === "en" ? "en" : "es";
+  }
+  function getLang() {
+    return LANG;
+  }
+  function tr(obj, field) {
+    if (!obj)
+      return "";
+    if (LANG !== "es") {
+      const v = obj[field + "_" + LANG];
+      if (v != null && v !== "")
+        return v;
+    }
+    return obj[field] ?? "";
+  }
+  function t(key, params) {
+    const dict = UI[LANG] || UI.es;
+    let s = dict[key] != null ? dict[key] : UI.es[key] != null ? UI.es[key] : key;
+    if (params) {
+      for (const k of Object.keys(params))
+        s = s.replace(new RegExp("\\{" + k + "\\}", "g"), params[k]);
+    }
+    return s;
+  }
+  var UI = {
+    es: {
+      greeting: "Hola, {name} \uD83D\uDC4B",
+      patient_default: "paciente",
+      level_abbr: "Nv",
+      streak_title: "Racha de días",
+      date_unset: "fecha sin definir",
+      days_to_surgery: "día{s} para tu cirugía",
+      today: "Hoy",
+      its_the_day: "¡es el día!",
+      post_surgery: "días post-cirugía",
+      nav_hoy: "Hoy",
+      nav_recursos: "Recursos",
+      nav_progreso: "Progreso",
+      nav_aprende: "Aprende",
+      nav_mas: "Más",
+      today_title: "Tu día de hoy",
+      goal_reached: "¡Objetivo diario logrado! \uD83C\uDF89",
+      add_more_xp: "Suma {n} XP más para completar el día",
+      tasks_word: "tareas",
+      daily_xp: "{a} / {b} XP diarios",
+      day_complete: "✔ Día completo",
+      tasks_today: "Tareas de hoy",
+      mood_question: "¿Cómo te sientes hoy?",
+      disclaimer_link: "ⓘ Aviso médico importante",
+      completed_excl: "¡completado!",
+      plan_title: "Tu programa de prehabilitación",
+      st_level: "Nivel",
+      st_xp: "XP total",
+      st_streak: "Racha actual",
+      st_best: "Mejor racha",
+      st_days: "Días completos",
+      st_medals: "Medallas",
+      chart_xp: "\uD83D\uDCC8 XP diaria (últimos 14 días)",
+      chart_adh: "\uD83D\uDCCA Adherencia por pilar (7 días)",
+      consistency: "Constancia (últimos 21 días)",
+      less: "Menos",
+      more: "Más",
+      recent_mood: "Ánimo reciente",
+      report_btn: "\uD83D\uDCC4 Generar informe de progreso (PDF)",
+      medals_title: "Medallas",
+      res_library: "\uD83C\uDFAC Biblioteca de recursos",
+      res_empty_1: "Aún no hay vídeos ni enlaces.",
+      res_empty_2: "Entra en <strong>Más → Modo médico → Recursos</strong> para añadir vídeos de YouTube (mindfulness, nutrición, ejercicio…) o cualquier enlace.",
+      res_add: "➕ Añadir recursos",
+      res_other: "Otros",
+      res_open: "Abrir recurso ↗",
+      learn_posts: "\uD83D\uDCF0 Publicaciones",
+      learn_pills: "\uD83D\uDCA1 Píldoras rápidas",
+      learn_no_posts: "Aún no hay publicaciones. Créalas desde el Modo médico.",
+      preop_title: "✅ Preparativos preoperatorios",
+      preop_note: "Sigue siempre las instrucciones concretas de tu centro; esta lista es orientativa.",
+      med_notice: "ⓘ Aviso médico",
+      listen: "\uD83D\uDD0A Escuchar",
+      back: "← Volver",
+      post_not_found: "Publicación no encontrada.",
+      more_options: "Más opciones",
+      m_frail: "Cribado de fragilidad",
+      m_frail_sub: "Test rápido (escala FRAIL)",
+      m_meds: "Mi medicación y alergias",
+      m_meds_sub: "Prepara tu lista para el anestesista",
+      m_care: "Para el cuidador / familiar",
+      m_care_sub: "Apoyo seguro y señales de alarma",
+      m_game: "Juego de memoria",
+      m_game_sub: "Gimnasia mental divertida",
+      m_report: "Informe de progreso",
+      m_report_sub: "Resumen imprimible en PDF",
+      m_plan: "Tu plan completo",
+      m_plan_sub: "Todas las tareas por pilar",
+      m_badges: "Medallas",
+      m_badges_sub: "{n} desbloqueadas",
+      m_profiles: "Perfiles",
+      m_profiles_sub: "Gestiona varios pacientes",
+      m_editor: "Modo médico",
+      m_editor_sub: "Crear tareas, vídeos y publicaciones",
+      m_settings: "Ajustes y accesibilidad",
+      m_settings_sub: "Idioma, recordatorios, texto grande",
+      personal_data: "\uD83D\uDC64 Tus datos personales",
+      surgery_unset: "Cirugía sin especificar",
+      edit_my_data: "✏️ Editar mis datos",
+      f_name: "Nombre",
+      f_surgery_type: "Tipo de cirugía",
+      f_surgery_date: "Fecha prevista de la cirugía",
+      f_activity: "Nivel de actividad",
+      act_low: "Bajo",
+      act_med: "Medio",
+      act_high: "Alto",
+      act_low_o: "Bajo · me muevo poco",
+      act_med_o: "Medio · algo de actividad",
+      act_high_o: "Alto · activo con frecuencia",
+      smoker: "Actualmente fumo",
+      save: "Guardar",
+      onb_tagline: "Prepárate en casa para tu cirugía. Entrena tu cuerpo y tu mente, gana puntos y llega en tu mejor forma al quirófano.",
+      onb_name_q: "¿Cómo te llamas?",
+      onb_name_ph: "Tu nombre",
+      onb_surgery_opt: "Tipo de cirugía (opcional)",
+      onb_surgery_ph: "Ej.: cirugía abdominal mayor",
+      onb_activity_now: "Nivel de actividad actual",
+      onb_start: "Empezar mi programa \uD83D\uDE80",
+      welcome_toast: "\uD83C\uDF89 ¡Bienvenido! Tu programa está listo. ¡Empieza a sumar puntos!",
+      care_title: "\uD83E\uDD1D Para el cuidador / familiar",
+      care_intro: "El acompañamiento marca una gran diferencia. Tu apoyo motiva, da seguridad y mejora los resultados. La mayoría de las personas frágiles no siguen el programa completamente solas: tu papel es clave.",
+      care_how: "Cómo acompañar de forma segura",
+      alarm_title: "\uD83D\uDEA8 Señales de alarma",
+      alarm_note: "Ante cualquiera de estas señales, contacta con tu equipo médico o llama a urgencias (112):",
+      frail_title: "\uD83E\uDDED Cribado de fragilidad (escala FRAIL)",
+      frail_intro: "Responde con sinceridad; solo lleva un minuto. Puedes hacerlo con tu cuidador.",
+      frail_see: "Ver mi resultado",
+      yes: "Sí",
+      no: "No",
+      frail_result_note: "Resultado del {date}. Es un cribado orientativo, no un diagnóstico. Compártelo con tu equipo médico.",
+      frail_important: "ⓘ Importante",
+      frail_disc: "La escala FRAIL es una herramienta de cribado orientativa; no sustituye la valoración de tu equipo médico. Sea cual sea tu resultado, la prehabilitación te beneficia.",
+      frail_saved: "✔ Cribado guardado. Compártelo con tu equipo médico.",
+      frail_answer_all: "Responde a todas las preguntas, por favor.",
+      meds_title: "\uD83D\uDC8A Mi medicación y alergias",
+      meds_intro: "Prepara tu lista para la consulta de preanestesia. Incluye TODO: recetados, sin receta y productos de herbolario. Al terminar podrás guardarla en PDF.",
+      meds_add: "Añadir medicamento",
+      meds_name: "Nombre",
+      meds_dose: "Dosis",
+      meds_freq: "Frecuencia",
+      meds_add_btn: "➕ Añadir a la lista",
+      meds_yours: "Tus medicamentos",
+      meds_none: "Aún no has añadido medicamentos.",
+      meds_allergies_notes: "Alergias y notas",
+      meds_allergies: "Alergias",
+      meds_allergies_ph: "Medicamentos, alimentos, látex...",
+      meds_other_notes: "Otras notas (enfermedades, anticoagulantes, marcapasos...)",
+      meds_save: "Guardar cambios",
+      meds_print: "\uD83D\uDDA8️ Imprimir / Guardar como PDF",
+      meds_print_note: 'Se abrirá el diálogo de impresión; elige "Guardar como PDF" para tenerlo en tu móvil o imprimirlo.',
+      meds_doc_title: "Lista de medicación y alergias",
+      meds_patient: "Paciente",
+      meds_surgery: "Cirugía",
+      meds_date: "Fecha prevista",
+      meds_doc_meds: "Medicación habitual",
+      meds_doc_none: "— sin medicación registrada —",
+      meds_doc_allergies: "Alergias",
+      meds_doc_notes: "Otras notas",
+      meds_doc_foot: "Documento generado con PreHabilita para la consulta de preanestesia.",
+      med_added: "✔ Medicamento añadido.",
+      saved_ok: "✔ Guardado.",
+      game_title: "\uD83E\uDDE9 Juego de memoria",
+      game_intro: "Encuentra todas las parejas de cartas. Ejercita tu memoria y tu concentración: una forma divertida de prehabilitación cognitiva que ayuda a prevenir la confusión tras la cirugía.",
+      game_best: "\uD83C\uDFC6 Tu mejor marca: <strong>{n} intentos</strong>.",
+      game_choose: "Elige la dificultad:",
+      game_easy: "Fácil · 6 parejas",
+      game_hard: "Difícil · 8 parejas",
+      game_tries: "Intentos",
+      game_exit: "Salir",
+      game_done: "¡Completado en {n} intentos!",
+      game_newbest: "\uD83C\uDFC6 ¡Nueva mejor marca!",
+      game_reward: "+15 XP · has completado tu gimnasia mental de hoy.",
+      game_again: "Jugar otra vez",
+      game_xp_toast: "\uD83E\uDDE9 +15 XP · gimnasia mental completada",
+      report_title: "\uD83D\uDCC4 Informe de progreso",
+      report_intro: "Un resumen de tu prehabilitación para compartir con tu equipo médico. Pulsa el botón para guardarlo en PDF o imprimirlo.",
+      report_print: "\uD83D\uDDA8️ Imprimir / Guardar como PDF",
+      report_doc_title: "Informe de progreso · PreHabilita",
+      report_generated: "Generado el {date}",
+      report_summary: "Resumen",
+      report_days_to: "Días para la cirugía",
+      report_adherence: "Adherencia por pilar (últimos 7 días)",
+      report_frail: "Cribado de fragilidad (FRAIL)",
+      report_frail_none: "No realizado.",
+      report_badges: "Medallas conseguidas",
+      report_none: "ninguna todavía",
+      report_foot: "Documento educativo generado con PreHabilita. No sustituye la valoración médica.",
+      report_level: "Nivel",
+      report_xp: "XP total",
+      report_streak: "Mejor racha",
+      report_daysc: "Días completados",
+      phase_label: "Fase actual de tu preparación",
+      profiles_title: "\uD83D\uDC65 Perfiles de paciente",
+      profiles_intro: "Gestiona varios pacientes en este dispositivo. Cada perfil guarda su propio progreso de forma independiente.",
+      profiles_active: "Activo",
+      profiles_switch: "Usar",
+      profiles_rename: "Renombrar",
+      profiles_delete: "Borrar",
+      profiles_new: "Nuevo perfil",
+      profiles_new_name: "Nombre del nuevo perfil",
+      profiles_copy: "Copiar el contenido del modo médico (tareas, recursos, publicaciones)",
+      profiles_create: "➕ Crear perfil",
+      profiles_switched: "Perfil cambiado.",
+      profiles_created: "✔ Perfil creado.",
+      profiles_min: "Debe quedar al menos un perfil.",
+      profiles_rename_q: "Nuevo nombre del perfil:",
+      profiles_delete_q: "¿Borrar este perfil y todos sus datos? No se puede deshacer.",
+      ed_title: "\uD83E\uDE7A Modo médico · gestión de contenidos",
+      ed_intro: "Aquí puedes ampliar y personalizar la app sin tocar código: crea tareas, añade vídeos y publicaciones, y ajusta las metas.",
+      ed_tab_tasks: "✅ Tareas",
+      ed_tab_res: "\uD83C\uDFAC Recursos",
+      ed_tab_blog: "\uD83D\uDCDD Blog",
+      ed_tab_set: "⚙️ Ajustes",
+      ed_add_task: "➕ Añadir nueva tarea",
+      ed_add_res: "➕ Añadir vídeo o enlace",
+      ed_new_post: "➕ Nueva publicación",
+      set_language: "\uD83C\uDF0D Idioma",
+      set_language_note: "Elige el idioma de la aplicación.",
+      set_goal: "\uD83C\uDFAF Meta diaria",
+      set_goal_note: "Puntos (XP) que el paciente debe sumar para completar el día.",
+      set_goal_unit: "XP/día",
+      set_reminders: "\uD83D\uDD14 Recordatorios",
+      set_reminders_on: "Activar recordatorios",
+      set_reminders_note: "Recibirás un aviso a las horas indicadas mientras la app esté abierta o instalada. Requiere permiso de notificaciones del navegador.",
+      set_no_times: "Sin horas configuradas.",
+      set_add_time: "➕ Añadir hora",
+      set_pin_title: "\uD83D\uDD12 Protección del modo médico",
+      set_pin_ask: "Pedir PIN para editar",
+      set_access: "♿ Accesibilidad",
+      set_access_note: "Pensado para personas mayores o con dificultades visuales.",
+      set_large: "Texto grande",
+      set_contrast: "Alto contraste",
+      set_motion: "Reducir animaciones",
+      set_data: "\uD83D\uDCBE Datos",
+      set_data_note: "Los datos se guardan solo en este dispositivo.",
+      set_export: "⬇️ Exportar copia",
+      set_import: "⬆️ Importar",
+      set_reset: "\uD83D\uDDD1️ Reiniciar todo",
+      set_eras: "ℹ️ Nota ERAS",
+      cancel: "Cancelar",
+      delete: "Eliminar",
+      confirm: "Confirmar",
+      save_changes: "Guardar cambios",
+      great: "¡Genial!",
+      badge_unlocked: "¡Medalla desbloqueada!",
+      level_up: "⬆️ ¡Subiste al nivel {n}! Sigue así."
+    },
+    en: {
+      greeting: "Hi, {name} \uD83D\uDC4B",
+      patient_default: "patient",
+      level_abbr: "Lv",
+      streak_title: "Day streak",
+      date_unset: "date not set",
+      days_to_surgery: "day{s} to your surgery",
+      today: "Today",
+      its_the_day: "it's the day!",
+      post_surgery: "days after surgery",
+      nav_hoy: "Today",
+      nav_recursos: "Resources",
+      nav_progreso: "Progress",
+      nav_aprende: "Learn",
+      nav_mas: "More",
+      today_title: "Your day today",
+      goal_reached: "Daily goal achieved! \uD83C\uDF89",
+      add_more_xp: "Earn {n} more XP to complete the day",
+      tasks_word: "tasks",
+      daily_xp: "{a} / {b} daily XP",
+      day_complete: "✔ Day complete",
+      tasks_today: "Today's tasks",
+      mood_question: "How do you feel today?",
+      disclaimer_link: "ⓘ Important medical notice",
+      completed_excl: "completed!",
+      plan_title: "Your prehabilitation program",
+      st_level: "Level",
+      st_xp: "Total XP",
+      st_streak: "Current streak",
+      st_best: "Best streak",
+      st_days: "Days completed",
+      st_medals: "Badges",
+      chart_xp: "\uD83D\uDCC8 Daily XP (last 14 days)",
+      chart_adh: "\uD83D\uDCCA Adherence by pillar (7 days)",
+      consistency: "Consistency (last 21 days)",
+      less: "Less",
+      more: "More",
+      recent_mood: "Recent mood",
+      report_btn: "\uD83D\uDCC4 Generate progress report (PDF)",
+      medals_title: "Badges",
+      res_library: "\uD83C\uDFAC Resource library",
+      res_empty_1: "No videos or links yet.",
+      res_empty_2: "Go to <strong>More → Clinician mode → Resources</strong> to add YouTube videos (mindfulness, nutrition, exercise…) or any link.",
+      res_add: "➕ Add resources",
+      res_other: "Other",
+      res_open: "Open resource ↗",
+      learn_posts: "\uD83D\uDCF0 Articles",
+      learn_pills: "\uD83D\uDCA1 Quick tips",
+      learn_no_posts: "No articles yet. Create them in Clinician mode.",
+      preop_title: "✅ Pre-op checklist",
+      preop_note: "Always follow the specific instructions from your hospital; this list is a guide.",
+      med_notice: "ⓘ Medical notice",
+      listen: "\uD83D\uDD0A Listen",
+      back: "← Back",
+      post_not_found: "Article not found.",
+      more_options: "More options",
+      m_frail: "Frailty screening",
+      m_frail_sub: "Quick test (FRAIL scale)",
+      m_meds: "My medication & allergies",
+      m_meds_sub: "Prepare your list for the anesthetist",
+      m_care: "For the caregiver / family",
+      m_care_sub: "Safe support and warning signs",
+      m_game: "Memory game",
+      m_game_sub: "Fun brain training",
+      m_report: "Progress report",
+      m_report_sub: "Printable PDF summary",
+      m_plan: "Your full plan",
+      m_plan_sub: "All tasks by pillar",
+      m_badges: "Badges",
+      m_badges_sub: "{n} unlocked",
+      m_profiles: "Profiles",
+      m_profiles_sub: "Manage several patients",
+      m_editor: "Clinician mode",
+      m_editor_sub: "Create tasks, videos and articles",
+      m_settings: "Settings & accessibility",
+      m_settings_sub: "Language, reminders, large text",
+      personal_data: "\uD83D\uDC64 Your personal details",
+      surgery_unset: "Surgery not specified",
+      edit_my_data: "✏️ Edit my details",
+      f_name: "Name",
+      f_surgery_type: "Type of surgery",
+      f_surgery_date: "Planned surgery date",
+      f_activity: "Activity level",
+      act_low: "Low",
+      act_med: "Medium",
+      act_high: "High",
+      act_low_o: "Low · I move little",
+      act_med_o: "Medium · some activity",
+      act_high_o: "High · frequently active",
+      smoker: "I currently smoke",
+      save: "Save",
+      onb_tagline: "Get ready for your surgery at home. Train your body and mind, earn points and arrive in your best shape.",
+      onb_name_q: "What's your name?",
+      onb_name_ph: "Your name",
+      onb_surgery_opt: "Type of surgery (optional)",
+      onb_surgery_ph: "E.g.: major abdominal surgery",
+      onb_activity_now: "Current activity level",
+      onb_start: "Start my program \uD83D\uDE80",
+      welcome_toast: "\uD83C\uDF89 Welcome! Your program is ready. Start earning points!",
+      care_title: "\uD83E\uDD1D For the caregiver / family",
+      care_intro: "Support makes a big difference. Your encouragement motivates, provides safety and improves outcomes. Most frail people do not follow the program entirely on their own: your role is key.",
+      care_how: "How to support safely",
+      alarm_title: "\uD83D\uDEA8 Warning signs",
+      alarm_note: "If any of these signs appear, contact your medical team or call emergency services (112/911):",
+      frail_title: "\uD83E\uDDED Frailty screening (FRAIL scale)",
+      frail_intro: "Answer honestly; it only takes a minute. You can do it with your caregiver.",
+      frail_see: "See my result",
+      yes: "Yes",
+      no: "No",
+      frail_result_note: "Result from {date}. This is a guidance screening, not a diagnosis. Share it with your medical team.",
+      frail_important: "ⓘ Important",
+      frail_disc: "The FRAIL scale is a guidance screening tool; it does not replace your medical team's assessment. Whatever your result, prehabilitation benefits you.",
+      frail_saved: "✔ Screening saved. Share it with your medical team.",
+      frail_answer_all: "Please answer all the questions.",
+      meds_title: "\uD83D\uDC8A My medication & allergies",
+      meds_intro: "Prepare your list for the pre-anesthesia consultation. Include EVERYTHING: prescription, over-the-counter and herbal products. When done you can save it as PDF.",
+      meds_add: "Add medication",
+      meds_name: "Name",
+      meds_dose: "Dose",
+      meds_freq: "Frequency",
+      meds_add_btn: "➕ Add to the list",
+      meds_yours: "Your medications",
+      meds_none: "You have not added any medication yet.",
+      meds_allergies_notes: "Allergies and notes",
+      meds_allergies: "Allergies",
+      meds_allergies_ph: "Medicines, foods, latex...",
+      meds_other_notes: "Other notes (conditions, blood thinners, pacemaker...)",
+      meds_save: "Save changes",
+      meds_print: "\uD83D\uDDA8️ Print / Save as PDF",
+      meds_print_note: 'The print dialog will open; choose "Save as PDF" to keep it on your phone or print it.',
+      meds_doc_title: "Medication & allergies list",
+      meds_patient: "Patient",
+      meds_surgery: "Surgery",
+      meds_date: "Planned date",
+      meds_doc_meds: "Regular medication",
+      meds_doc_none: "— no medication recorded —",
+      meds_doc_allergies: "Allergies",
+      meds_doc_notes: "Other notes",
+      meds_doc_foot: "Document generated with PreHabilita for the pre-anesthesia consultation.",
+      med_added: "✔ Medication added.",
+      saved_ok: "✔ Saved.",
+      game_title: "\uD83E\uDDE9 Memory game",
+      game_intro: "Find all the matching pairs. Train your memory and focus: a fun form of cognitive prehabilitation that helps prevent confusion after surgery.",
+      game_best: "\uD83C\uDFC6 Your best score: <strong>{n} tries</strong>.",
+      game_choose: "Choose difficulty:",
+      game_easy: "Easy · 6 pairs",
+      game_hard: "Hard · 8 pairs",
+      game_tries: "Tries",
+      game_exit: "Exit",
+      game_done: "Completed in {n} tries!",
+      game_newbest: "\uD83C\uDFC6 New best score!",
+      game_reward: "+15 XP · you completed your brain training for today.",
+      game_again: "Play again",
+      game_xp_toast: "\uD83E\uDDE9 +15 XP · brain training completed",
+      report_title: "\uD83D\uDCC4 Progress report",
+      report_intro: "A summary of your prehabilitation to share with your medical team. Tap the button to save it as PDF or print it.",
+      report_print: "\uD83D\uDDA8️ Print / Save as PDF",
+      report_doc_title: "Progress report · PreHabilita",
+      report_generated: "Generated on {date}",
+      report_summary: "Summary",
+      report_days_to: "Days to surgery",
+      report_adherence: "Adherence by pillar (last 7 days)",
+      report_frail: "Frailty screening (FRAIL)",
+      report_frail_none: "Not done.",
+      report_badges: "Badges earned",
+      report_none: "none yet",
+      report_foot: "Educational document generated with PreHabilita. It does not replace medical assessment.",
+      report_level: "Level",
+      report_xp: "Total XP",
+      report_streak: "Best streak",
+      report_daysc: "Days completed",
+      phase_label: "Current phase of your preparation",
+      profiles_title: "\uD83D\uDC65 Patient profiles",
+      profiles_intro: "Manage several patients on this device. Each profile stores its own progress independently.",
+      profiles_active: "Active",
+      profiles_switch: "Use",
+      profiles_rename: "Rename",
+      profiles_delete: "Delete",
+      profiles_new: "New profile",
+      profiles_new_name: "Name of the new profile",
+      profiles_copy: "Copy clinician-mode content (tasks, resources, articles)",
+      profiles_create: "➕ Create profile",
+      profiles_switched: "Profile switched.",
+      profiles_created: "✔ Profile created.",
+      profiles_min: "At least one profile must remain.",
+      profiles_rename_q: "New profile name:",
+      profiles_delete_q: "Delete this profile and all its data? This cannot be undone.",
+      ed_title: "\uD83E\uDE7A Clinician mode · content management",
+      ed_intro: "Here you can expand and customize the app without touching code: create tasks, add videos and articles, and adjust goals.",
+      ed_tab_tasks: "✅ Tasks",
+      ed_tab_res: "\uD83C\uDFAC Resources",
+      ed_tab_blog: "\uD83D\uDCDD Blog",
+      ed_tab_set: "⚙️ Settings",
+      ed_add_task: "➕ Add new task",
+      ed_add_res: "➕ Add video or link",
+      ed_new_post: "➕ New article",
+      set_language: "\uD83C\uDF0D Language",
+      set_language_note: "Choose the app language.",
+      set_goal: "\uD83C\uDFAF Daily goal",
+      set_goal_note: "Points (XP) the patient must earn to complete the day.",
+      set_goal_unit: "XP/day",
+      set_reminders: "\uD83D\uDD14 Reminders",
+      set_reminders_on: "Enable reminders",
+      set_reminders_note: "You will get a reminder at the set times while the app is open or installed. Requires browser notification permission.",
+      set_no_times: "No times set.",
+      set_add_time: "➕ Add time",
+      set_pin_title: "\uD83D\uDD12 Clinician mode protection",
+      set_pin_ask: "Ask for a PIN to edit",
+      set_access: "♿ Accessibility",
+      set_access_note: "Designed for older people or those with visual difficulties.",
+      set_large: "Large text",
+      set_contrast: "High contrast",
+      set_motion: "Reduce animations",
+      set_data: "\uD83D\uDCBE Data",
+      set_data_note: "Data is stored only on this device.",
+      set_export: "⬇️ Export backup",
+      set_import: "⬆️ Import",
+      set_reset: "\uD83D\uDDD1️ Reset everything",
+      set_eras: "ℹ️ ERAS note",
+      cancel: "Cancel",
+      delete: "Delete",
+      confirm: "Confirm",
+      save_changes: "Save changes",
+      great: "Great!",
+      badge_unlocked: "Badge unlocked!",
+      level_up: "⬆️ You reached level {n}! Keep it up."
+    }
+  };
+
   // js/ui.js
   function esc(s) {
     return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
   }
   function formatBody(body) {
     return esc(body).replace(/\n/g, "<br>");
+  }
+  function disc() {
+    return getLang() === "en" ? DISCLAIMER_EN : DISCLAIMER;
+  }
+  function erasNote() {
+    return getLang() === "en" ? ERAS_NOTE_EN : ERAS_NOTE;
   }
   function daysToSurgery(state2) {
     const d = state2.profile.surgeryDate;
@@ -1443,13 +2362,13 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     const dts = daysToSurgery(state2);
     let countdown = "";
     if (dts === null) {
-      countdown = `<div class="countdown neutral"><strong>—</strong><small>fecha sin definir</small></div>`;
+      countdown = `<div class="countdown neutral"><strong>—</strong><small>${t("date_unset")}</small></div>`;
     } else if (dts > 0) {
-      countdown = `<div class="countdown"><strong>${dts}</strong><small>día${dts === 1 ? "" : "s"} para tu cirugía</small></div>`;
+      countdown = `<div class="countdown"><strong>${dts}</strong><small>${t("days_to_surgery", { s: dts === 1 ? "" : getLang() === "en" ? "s" : "s" })}</small></div>`;
     } else if (dts === 0) {
-      countdown = `<div class="countdown today"><strong>Hoy</strong><small>¡es el día!</small></div>`;
+      countdown = `<div class="countdown today"><strong>${t("today")}</strong><small>${t("its_the_day")}</small></div>`;
     } else {
-      countdown = `<div class="countdown neutral"><strong>+${Math.abs(dts)}</strong><small>días post-cirugía</small></div>`;
+      countdown = `<div class="countdown neutral"><strong>+${Math.abs(dts)}</strong><small>${t("post_surgery")}</small></div>`;
     }
     return `
   <header class="app-header">
@@ -1458,20 +2377,31 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         <span class="brand-logo">\uD83E\uDEC1</span>
         <div>
           <div class="brand-name">PreHabilita</div>
-          <div class="brand-sub">Hola, ${esc(state2.profile.name || "paciente")} \uD83D\uDC4B</div>
+          <div class="brand-sub">${t("greeting", { name: esc(state2.profile.name || t("patient_default")) })}</div>
         </div>
       </div>
       ${countdown}
     </div>
     <div class="level-row">
-      <div class="level-badge">Nv ${li.level}</div>
+      <div class="level-badge">${t("level_abbr")} ${li.level}</div>
       <div class="level-bar">
         ${progressBar(li.progress * 100)}
         <div class="level-xp">${li.into} / ${li.span} XP</div>
       </div>
-      <div class="streak" title="Racha de días">\uD83D\uDD25 ${state2.stats.streak}</div>
+      <div class="streak" title="${t("streak_title")}">\uD83D\uDD25 ${state2.stats.streak}</div>
     </div>
   </header>`;
+  }
+  function phaseBanner(state2) {
+    const dts = daysToSurgery(state2);
+    const ph = getPhase(dts);
+    return `
+    <section class="card phase-banner" style="--pc:${ph.color}">
+      <div class="phase-head"><span class="phase-emoji">${ph.emoji}</span>
+        <div><small class="muted">${t("phase_label")}</small><strong class="phase-title">${esc(tr(ph, "title"))}</strong></div>
+      </div>
+      <p class="phase-focus">${esc(tr(ph, "focus"))}</p>
+    </section>`;
   }
   function renderToday(state2) {
     const tasks = getTasks(state2);
@@ -1487,115 +2417,109 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     <section class="card daily-goal ${complete ? "is-complete" : ""}">
       <div class="daily-goal-head">
         <div>
-          <h2>Tu día de hoy</h2>
-          <p class="muted">${complete ? "¡Objetivo diario logrado! \uD83C\uDF89" : `Suma ${Math.max(0, goal - xp)} XP más para completar el día`}</p>
+          <h2>${t("today_title")}</h2>
+          <p class="muted">${complete ? t("goal_reached") : t("add_more_xp", { n: Math.max(0, goal - xp) })}</p>
         </div>
-        <div class="daily-ring">${doneN}<small>tareas</small></div>
+        <div class="daily-ring">${doneN}<small>${t("tasks_word")}</small></div>
       </div>
       ${progressBar(goalPct)}
       <div class="daily-goal-foot">
-        <span>${xp} / ${goal} XP diarios</span>
-        ${complete ? '<span class="badge-ok">✔ Día completo</span>' : ""}
+        <span>${t("daily_xp", { a: xp, b: goal })}</span>
+        ${complete ? `<span class="badge-ok">${t("day_complete")}</span>` : ""}
       </div>
     </section>`;
     const challengeCard = `
     <section class="card challenge">
-      <div class="challenge-head"><span>\uD83C\uDFAF ${esc(wc.challenge.title)}</span><span class="challenge-xp">+${wc.challenge.xp} XP</span></div>
+      <div class="challenge-head"><span>\uD83C\uDFAF ${esc(tr(wc.challenge, "title"))}</span><span class="challenge-xp">+${wc.challenge.xp} XP</span></div>
       ${progressBar(wc.progress / wc.target * 100, "#f59e0b")}
-      <div class="muted small">${wc.progress} / ${wc.target} ${esc(wc.challenge.unit)} ${wc.done ? "· ¡completado! ✅" : ""}</div>
+      <div class="muted small">${wc.progress} / ${wc.target} ${esc(tr(wc.challenge, "unit"))} ${wc.done ? "· " + t("completed_excl") + " ✅" : ""}</div>
     </section>`;
     const groups = pillars.map((p) => {
-      const pt = tasks.filter((t) => t.pillar === p.id);
+      const pt = tasks.filter((x) => x.pillar === p.id);
       if (pt.length === 0)
         return "";
-      const items = pt.map((t) => renderTaskItem(t, dayLog)).join("");
-      const doneInPillar = pt.filter((t) => taskIsDone(t, dayLog)).length;
+      const items = pt.map((x) => renderTaskItem(x, dayLog)).join("");
+      const doneInPillar = pt.filter((x) => taskIsDone(x, dayLog)).length;
       return `
       <section class="card pillar-group" style="--pc:${p.color}">
         <button class="pillar-head" data-action="open-pillar" data-pillar="${p.id}">
           <span class="pillar-emoji">${p.emoji}</span>
-          <span class="pillar-title">${esc(p.name)}</span>
+          <span class="pillar-title">${esc(tr(p, "name"))}</span>
           <span class="pillar-count">${doneInPillar}/${pt.length}</span>
         </button>
         <div class="task-list">${items}</div>
       </section>`;
     }).join("");
     return `
+    ${phaseBanner(state2)}
     ${dailyCard}
     ${challengeCard}
-    <div class="section-label">Tareas de hoy</div>
+    <div class="section-label">${t("tasks_today")}</div>
     ${groups}
     ${moodCard(dayLog)}
-    <p class="disclaimer-mini" data-action="show-disclaimer">ⓘ Aviso médico importante</p>
+    <p class="disclaimer-mini" data-action="show-disclaimer">${t("disclaimer_link")}</p>
   `;
   }
-  function renderTaskItem(t, dayLog) {
-    const v = dayLog.tasks[t.id];
-    const done = taskIsDone(t, dayLog);
-    if (t.type === "check") {
+  function renderTaskItem(tk, dayLog) {
+    const v = dayLog.tasks[tk.id];
+    const done = taskIsDone(tk, dayLog);
+    const title = tr(tk, "title");
+    const desc = tr(tk, "desc");
+    if (tk.type === "check") {
       return `
       <div class="task ${done ? "done" : ""}">
-        <button class="task-check" data-action="toggle-task" data-task="${t.id}" aria-pressed="${done}" aria-label="Marcar ${esc(t.title)}">
-          ${done ? "✔" : ""}
-        </button>
+        <button class="task-check" data-action="toggle-task" data-task="${tk.id}" aria-pressed="${done}" aria-label="${esc(title)}">${done ? "✔" : ""}</button>
         <div class="task-body">
-          <div class="task-title">${esc(t.icon || "")} ${esc(t.title)}</div>
-          <div class="task-desc">${esc(t.desc || "")}</div>
+          <div class="task-title">${esc(tk.icon || "")} ${esc(title)}</div>
+          <div class="task-desc">${esc(desc)}</div>
         </div>
-        <div class="task-xp">+${t.xp}</div>
+        <div class="task-xp">+${tk.xp}</div>
       </div>`;
     }
     const cur = typeof v === "number" ? v : 0;
-    const pct = Math.min(100, cur / t.target * 100);
+    const pct = Math.min(100, cur / tk.target * 100);
     return `
     <div class="task counter ${done ? "done" : ""}">
       <div class="task-body">
-        <div class="task-title">${esc(t.icon || "")} ${esc(t.title)} ${done ? "✔" : ""}</div>
-        <div class="task-desc">${esc(t.desc || "")}</div>
+        <div class="task-title">${esc(tk.icon || "")} ${esc(title)} ${done ? "✔" : ""}</div>
+        <div class="task-desc">${esc(desc)}</div>
         <div class="counter-row">
-          <button class="stepper" data-action="counter-dec" data-task="${t.id}" aria-label="Restar">−</button>
-          <div class="counter-val">${cur} <small>/ ${t.target} ${esc(t.unit || "")}</small></div>
-          <button class="stepper" data-action="counter-inc" data-task="${t.id}" aria-label="Sumar">+</button>
+          <button class="stepper" data-action="counter-dec" data-task="${tk.id}" aria-label="−">−</button>
+          <div class="counter-val">${cur} <small>/ ${tk.target} ${esc(tr(tk, "unit"))}</small></div>
+          <button class="stepper" data-action="counter-inc" data-task="${tk.id}" aria-label="+">+</button>
         </div>
         ${progressBar(pct)}
       </div>
-      <div class="task-xp">+${t.xp}</div>
+      <div class="task-xp">+${tk.xp}</div>
     </div>`;
   }
   function moodCard(dayLog) {
     const moods = ["\uD83D\uDE23", "\uD83D\uDE15", "\uD83D\uDE10", "\uD83D\uDE42", "\uD83D\uDE04"];
     const cur = dayLog.mood;
     const btns = moods.map((m, i) => `
-    <button class="mood-btn ${cur === i + 1 ? "sel" : ""}" data-action="set-mood" data-mood="${i + 1}" aria-label="Ánimo ${i + 1} de 5">${m}</button>
+    <button class="mood-btn ${cur === i + 1 ? "sel" : ""}" data-action="set-mood" data-mood="${i + 1}" aria-label="${i + 1}/5">${m}</button>
   `).join("");
-    return `
-    <section class="card mood">
-      <h3>¿Cómo te sientes hoy?</h3>
-      <div class="mood-row">${btns}</div>
-    </section>`;
+    return `<section class="card mood"><h3>${t("mood_question")}</h3><div class="mood-row">${btns}</div></section>`;
   }
   function renderPlan(state2) {
     const tasks = getTasks(state2);
     const cards = getPillars(state2).map((p) => {
-      const pt = tasks.filter((t) => t.pillar === p.id);
+      const pt = tasks.filter((x) => x.pillar === p.id);
       if (pt.length === 0)
         return "";
       return `
       <section class="card plan-pillar" style="--pc:${p.color}">
         <div class="plan-pillar-head">
           <span class="pillar-emoji">${p.emoji}</span>
-          <div>
-            <h3>${esc(p.name)}</h3>
-            <p class="muted small">${esc(p.tagline || "")}</p>
-          </div>
+          <div><h3>${esc(tr(p, "name"))}</h3><p class="muted small">${esc(tr(p, "tagline"))}</p></div>
         </div>
-        ${p.why ? `<p class="why">\uD83D\uDCA1 ${esc(p.why)}</p>` : ""}
+        ${tr(p, "why") ? `<p class="why">\uD83D\uDCA1 ${esc(tr(p, "why"))}</p>` : ""}
         <ul class="plan-tasks">
-          ${pt.map((t) => `<li><span>${esc(t.icon || "•")}</span><div><strong>${esc(t.title)}</strong><br><small class="muted">${esc(t.desc || "")}</small></div><span class="xp-tag">+${t.xp}</span></li>`).join("")}
+          ${pt.map((x) => `<li><span>${esc(x.icon || "•")}</span><div><strong>${esc(tr(x, "title"))}</strong><br><small class="muted">${esc(tr(x, "desc"))}</small></div><span class="xp-tag">+${x.xp}</span></li>`).join("")}
         </ul>
       </section>`;
     }).join("");
-    return `<div class="section-label">Tu programa de prehabilitación</div>${cards}`;
+    return `<div class="section-label">${t("plan_title")}</div>${phaseBanner(state2)}${cards}`;
   }
   function renderProgress(state2, charts) {
     const li = levelInfo(state2.stats.xp);
@@ -1603,12 +2527,12 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     const goal = getDailyGoal(state2);
     const chips = `
     <div class="chips">
-      ${statChip("⭐", li.level, "Nivel")}
-      ${statChip("✨", state2.stats.xp, "XP total")}
-      ${statChip("\uD83D\uDD25", state2.stats.streak, "Racha actual")}
-      ${statChip("\uD83C\uDFC5", state2.stats.bestStreak, "Mejor racha")}
-      ${statChip("\uD83D\uDCC5", state2.stats.daysCompleted, "Días completos")}
-      ${statChip("\uD83C\uDF96️", state2.badges.length, "Medallas")}
+      ${statChip("⭐", li.level, t("st_level"))}
+      ${statChip("✨", state2.stats.xp, t("st_xp"))}
+      ${statChip("\uD83D\uDD25", state2.stats.streak, t("st_streak"))}
+      ${statChip("\uD83C\uDFC5", state2.stats.bestStreak, t("st_best"))}
+      ${statChip("\uD83D\uDCC5", state2.stats.daysCompleted, t("st_days"))}
+      ${statChip("\uD83C\uDF96️", state2.badges.length, t("st_medals"))}
     </div>`;
     const lineData = [];
     for (let i = 13;i >= 0; i--) {
@@ -1618,14 +2542,10 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       const log = state2.logs[key];
       lineData.push({ label: key.slice(8) + "/" + key.slice(5, 7), value: log ? dayXp(log, tasks) : 0 });
     }
-    const lineCard = `
-    <section class="card">
-      <h3>\uD83D\uDCC8 XP diaria (últimos 14 días)</h3>
-      ${charts.lineChart(lineData, { color: "#0f766e" })}
-    </section>`;
+    const lineCard = `<section class="card"><h3>${t("chart_xp")}</h3>${charts.lineChart(lineData, { color: "#0f766e" })}</section>`;
     const pillars = getPillars(state2);
     const barData = pillars.map((p) => {
-      const pt = tasks.filter((t) => t.pillar === p.id);
+      const pt = tasks.filter((x) => x.pillar === p.id);
       if (pt.length === 0)
         return null;
       let done = 0, possible = 0;
@@ -1635,16 +2555,12 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         const log = state2.logs[todayKey(d)];
         possible += pt.length;
         if (log)
-          done += pt.filter((t) => taskIsDone(t, log)).length;
+          done += pt.filter((x) => taskIsDone(x, log)).length;
       }
       const pctv = possible ? Math.round(done / possible * 100) : 0;
       return { label: p.emoji, value: pctv, color: p.color, sub: pctv + "%" };
     }).filter(Boolean);
-    const barCard = `
-    <section class="card">
-      <h3>\uD83D\uDCCA Adherencia por pilar (7 días)</h3>
-      ${charts.barChart(barData)}
-    </section>`;
+    const barCard = `<section class="card"><h3>${t("chart_adh")}</h3>${charts.barChart(barData)}</section>`;
     const cells = [];
     for (let i = 20;i >= 0; i--) {
       const d = new Date;
@@ -1655,72 +2571,63 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       const lvl = xp === 0 ? 0 : xp >= goal ? 3 : xp >= goal / 2 ? 2 : 1;
       cells.push(`<div class="heat l${lvl}" title="${key}: ${xp} XP"></div>`);
     }
-    const heat = `
-    <section class="card">
-      <h3>Constancia (últimos 21 días)</h3>
-      <div class="heatmap">${cells.join("")}</div>
-      <div class="heat-legend"><span>Menos</span><i class="heat l0"></i><i class="heat l1"></i><i class="heat l2"></i><i class="heat l3"></i><span>Más</span></div>
-    </section>`;
+    const heat = `<section class="card"><h3>${t("consistency")}</h3><div class="heatmap">${cells.join("")}</div>
+    <div class="heat-legend"><span>${t("less")}</span><i class="heat l0"></i><i class="heat l1"></i><i class="heat l2"></i><i class="heat l3"></i><span>${t("more")}</span></div></section>`;
     const moodLogs = Object.entries(state2.logs).filter(([, l]) => l.mood).sort((a, b) => a[0].localeCompare(b[0])).slice(-7);
     const moodEmoji = ["", "\uD83D\uDE23", "\uD83D\uDE15", "\uD83D\uDE10", "\uD83D\uDE42", "\uD83D\uDE04"];
-    const moodRow = moodLogs.length ? `<section class="card"><h3>Ánimo reciente</h3><div class="mood-history">${moodLogs.map(([k, l]) => `<div class="mh"><span>${moodEmoji[l.mood]}</span><small>${k.slice(5)}</small></div>`).join("")}</div></section>` : "";
-    return `${chips}${lineCard}${barCard}${heat}${moodRow}`;
+    const moodRow = moodLogs.length ? `<section class="card"><h3>${t("recent_mood")}</h3><div class="mood-history">${moodLogs.map(([k, l]) => `<div class="mh"><span>${moodEmoji[l.mood]}</span><small>${k.slice(5)}</small></div>`).join("")}</div></section>` : "";
+    const reportBtn = `<button class="btn ghost block" data-action="nav" data-view="report">${t("report_btn")}</button>`;
+    return `${chips}${lineCard}${barCard}${heat}${moodRow}${reportBtn}`;
   }
   function renderBadges(state2, BADGES2) {
     const unlocked = new Set(state2.badges);
     const grid = BADGES2.map((b) => {
       const has = unlocked.has(b.id);
-      return `
-      <div class="badge ${has ? "unlocked" : "locked"}">
-        <div class="badge-emoji">${has ? b.emoji : "\uD83D\uDD12"}</div>
-        <div class="badge-name">${esc(b.name)}</div>
-        <div class="badge-desc">${esc(b.desc)}</div>
-      </div>`;
+      return `<div class="badge ${has ? "unlocked" : "locked"}">
+      <div class="badge-emoji">${has ? b.emoji : "\uD83D\uDD12"}</div>
+      <div class="badge-name">${esc(tr(b, "name"))}</div>
+      <div class="badge-desc">${esc(tr(b, "desc"))}</div>
+    </div>`;
     }).join("");
-    return `
-    <div class="section-label">Medallas · ${state2.badges.length}/${BADGES2.length}</div>
-    <div class="badge-grid">${grid}</div>`;
+    return `<div class="section-label">${t("medals_title")} · ${state2.badges.length}/${BADGES2.length}</div><div class="badge-grid">${grid}</div>`;
   }
   function renderResources(state2) {
     const resources = getResources(state2);
     if (resources.length === 0) {
       return `
-      <div class="section-label">Biblioteca de recursos</div>
+      <div class="section-label">${t("res_library")}</div>
       <section class="card empty-state">
         <div class="empty-emoji">\uD83C\uDFAC</div>
-        <p>Aún no hay vídeos ni enlaces.</p>
-        <p class="muted small">Entra en <strong>Más → Modo médico → Recursos</strong> para añadir vídeos de YouTube (mindfulness, nutrición, ejercicio…) o cualquier enlace.</p>
-        <button class="btn primary" data-action="nav" data-view="editor" data-tab="recursos">➕ Añadir recursos</button>
+        <p>${t("res_empty_1")}</p>
+        <p class="muted small">${t("res_empty_2")}</p>
+        <button class="btn primary" data-action="nav" data-view="editor" data-tab="recursos">${t("res_add")}</button>
       </section>`;
     }
     const byPillar = getPillars(state2).map((p) => {
       const rs = resources.filter((r) => r.pillar === p.id);
       if (rs.length === 0)
         return "";
-      const cards = rs.map((r) => renderResourceCard(r)).join("");
-      return `<div class="section-label" style="color:${p.color}">${p.emoji} ${esc(p.name)}</div>${cards}`;
+      return `<div class="section-label" style="color:${p.color}">${p.emoji} ${esc(tr(p, "name"))}</div>${rs.map(renderResourceCard).join("")}`;
     }).join("");
     const known = new Set(getPillars(state2).map((p) => p.id));
     const others = resources.filter((r) => !known.has(r.pillar));
-    const otherHtml = others.length ? `<div class="section-label">Otros</div>${others.map(renderResourceCard).join("")}` : "";
-    return `<div class="section-label">\uD83C\uDFAC Biblioteca de recursos</div>${byPillar}${otherHtml}`;
+    const otherHtml = others.length ? `<div class="section-label">${t("res_other")}</div>${others.map(renderResourceCard).join("")}` : "";
+    return `<div class="section-label">${t("res_library")}</div>${byPillar}${otherHtml}`;
   }
   function renderResourceCard(r) {
     const ytId = parseYouTubeId(r.url);
     if (ytId) {
-      return `
-      <section class="card resource">
-        <div class="resource-title">▶️ ${esc(r.title)}</div>
-        ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ""}
-        <div class="video"><iframe src="${youTubeEmbedUrl(ytId)}" title="${esc(r.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
-      </section>`;
-    }
-    return `
-    <section class="card resource">
-      <div class="resource-title">\uD83D\uDD17 ${esc(r.title)}</div>
+      return `<section class="card resource">
+      <div class="resource-title">▶️ ${esc(r.title)}</div>
       ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ""}
-      <a class="btn ghost block" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">Abrir recurso ↗</a>
+      <div class="video"><iframe src="${youTubeEmbedUrl(ytId)}" title="${esc(r.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
     </section>`;
+    }
+    return `<section class="card resource">
+    <div class="resource-title">\uD83D\uDD17 ${esc(r.title)}</div>
+    ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ""}
+    <a class="btn ghost block" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${t("res_open")}</a>
+  </section>`;
   }
   function renderLearn(state2) {
     const posts = getPosts(state2);
@@ -1728,60 +2635,57 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     const postCards = posts.length ? posts.map((p) => `
     <button class="post-card ${readPosts.has(p.id) ? "read" : ""}" data-action="open-post" data-id="${p.id}">
       ${p.cover ? `<div class="post-cover" style="background-image:url('${esc(p.cover)}')"></div>` : `<div class="post-cover ph">\uD83D\uDCDD</div>`}
-      <div class="post-info">
-        <strong>${esc(p.title)}</strong>
-        <small class="muted">${esc(p.date || "")} · ${esc(p.category || "general")}</small>
-      </div>
-    </button>`).join("") : '<p class="muted small">Aún no hay publicaciones. Créalas desde el Modo médico.</p>';
+      <div class="post-info"><strong>${esc(p.title)}</strong><small class="muted">${esc(p.date || "")} · ${esc(p.category || "general")}</small></div>
+    </button>`).join("") : `<p class="muted small">${t("learn_no_posts")}</p>`;
     const read = new Set(state2.readLessons);
     const lessons = getLessons().map((l) => `
     <details class="card lesson ${read.has(l.id) ? "read" : ""}" data-lesson="${l.id}" data-speak-scope>
-      <summary>${read.has(l.id) ? "✅" : "\uD83D\uDCD6"} ${esc(l.title)}</summary>
-      <p class="speakable">${esc(l.body)}</p>
-      <button class="btn ghost speak-btn" data-action="speak">\uD83D\uDD0A Escuchar</button>
+      <summary>${read.has(l.id) ? "✅" : "\uD83D\uDCD6"} ${esc(tr(l, "title"))}</summary>
+      <p class="speakable">${esc(tr(l, "body"))}</p>
+      <button class="btn ghost speak-btn" data-action="speak">${t("listen")}</button>
     </details>`).join("");
-    const checklist = PREOP_CHECKLIST.map((c) => `<li>☐ ${esc(c)}</li>`).join("");
+    const preop = getLang() === "en" ? PREOP_CHECKLIST_EN : PREOP_CHECKLIST;
+    const checklist = preop.map((c) => `<li>☐ ${esc(c)}</li>`).join("");
     return `
-    <div class="section-label">\uD83D\uDCF0 Publicaciones</div>
+    <div class="section-label">${t("learn_posts")}</div>
     <div class="post-list">${postCards}</div>
-    <div class="section-label">\uD83D\uDCA1 Píldoras rápidas</div>
+    <div class="section-label">${t("learn_pills")}</div>
     ${lessons}
     <section class="card">
-      <h3>✅ Preparativos preoperatorios</h3>
+      <h3>${t("preop_title")}</h3>
       <ul class="preop">${checklist}</ul>
-      <p class="muted small">Sigue siempre las instrucciones concretas de tu centro; esta lista es orientativa.</p>
+      <p class="muted small">${t("preop_note")}</p>
     </section>
-    <section class="card disclaimer-card">
-      <h3>ⓘ Aviso médico</h3>
-      <p class="small">${esc(DISCLAIMER)}</p>
-    </section>`;
+    <section class="card disclaimer-card"><h3>${t("med_notice")}</h3><p class="small">${esc(disc())}</p></section>`;
   }
   function renderPost(state2, id) {
     const p = getPostById(state2, id);
     if (!p)
-      return `<p class="muted">Publicación no encontrada.</p>`;
+      return `<p class="muted">${t("post_not_found")}</p>`;
     const pillar = getPillarById(state2, p.category);
     return `
-    <button class="btn ghost back-btn" data-action="nav" data-view="aprende">← Volver</button>
+    <button class="btn ghost back-btn" data-action="nav" data-view="aprende">${t("back")}</button>
     <article class="card post-full" data-speak-scope>
       ${p.cover ? `<div class="post-cover-full" style="background-image:url('${esc(p.cover)}')"></div>` : ""}
-      <span class="post-tag">${pillar ? pillar.emoji + " " + esc(pillar.name) : esc(p.category || "general")}</span>
+      <span class="post-tag">${pillar ? pillar.emoji + " " + esc(tr(pillar, "name")) : esc(p.category || "general")}</span>
       <h2>${esc(p.title)}</h2>
       <div class="post-meta muted small">${esc(p.date || "")}${p.author ? " · " + esc(p.author) : ""}</div>
-      <button class="btn ghost speak-btn" data-action="speak">\uD83D\uDD0A Escuchar</button>
+      <button class="btn ghost speak-btn" data-action="speak">${t("listen")}</button>
       <div class="post-body speakable">${formatBody(p.body)}</div>
     </article>`;
   }
   function renderMore(state2) {
     const items = [
-      { view: "fragilidad", icon: "\uD83E\uDDED", label: "Cribado de fragilidad", sub: "Test rápido (escala FRAIL)" },
-      { view: "medicacion", icon: "\uD83D\uDC8A", label: "Mi medicación y alergias", sub: "Prepara tu lista para el anestesista" },
-      { view: "cuidador", icon: "\uD83E\uDD1D", label: "Para el cuidador / familiar", sub: "Apoyo seguro y señales de alarma" },
-      { view: "juego", icon: "\uD83E\uDDE9", label: "Juego de memoria", sub: "Gimnasia mental divertida" },
-      { view: "plan", icon: "\uD83D\uDCCB", label: "Tu plan completo", sub: "Todas las tareas por pilar" },
-      { view: "logros", icon: "\uD83C\uDFC5", label: "Medallas", sub: `${state2.badges.length} desbloqueadas` },
-      { view: "editor", icon: "\uD83E\uDE7A", label: "Modo médico", sub: "Crear tareas, vídeos y publicaciones" },
-      { view: "editor", icon: "⚙️", label: "Ajustes y accesibilidad", sub: "Recordatorios, texto grande, contraste", tab: "ajustes" }
+      { view: "fragilidad", icon: "\uD83E\uDDED", label: t("m_frail"), sub: t("m_frail_sub") },
+      { view: "medicacion", icon: "\uD83D\uDC8A", label: t("m_meds"), sub: t("m_meds_sub") },
+      { view: "cuidador", icon: "\uD83E\uDD1D", label: t("m_care"), sub: t("m_care_sub") },
+      { view: "juego", icon: "\uD83E\uDDE9", label: t("m_game"), sub: t("m_game_sub") },
+      { view: "report", icon: "\uD83D\uDCC4", label: t("m_report"), sub: t("m_report_sub") },
+      { view: "plan", icon: "\uD83D\uDCCB", label: t("m_plan"), sub: t("m_plan_sub") },
+      { view: "logros", icon: "\uD83C\uDFC5", label: t("m_badges"), sub: t("m_badges_sub", { n: state2.badges.length }) },
+      { view: "perfiles", icon: "\uD83D\uDC65", label: t("m_profiles"), sub: t("m_profiles_sub") },
+      { view: "editor", icon: "\uD83E\uDE7A", label: t("m_editor"), sub: t("m_editor_sub") },
+      { view: "editor", icon: "⚙️", label: t("m_settings"), sub: t("m_settings_sub"), tab: "ajustes" }
     ];
     const menu = items.map((i) => `
     <button class="more-item" data-action="nav" data-view="${i.view}" ${i.tab ? `data-tab="${i.tab}"` : ""}>
@@ -1790,50 +2694,40 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       <span class="more-arrow">›</span>
     </button>`).join("");
     return `
-    <div class="section-label">Más opciones</div>
+    <div class="section-label">${t("more_options")}</div>
     <section class="card more-menu">${menu}</section>
     <section class="card">
-      <h3>\uD83D\uDC64 Tus datos personales</h3>
-      <p class="muted small">${esc(state2.profile.surgeryType || "Cirugía sin especificar")}${state2.profile.surgeryDate ? " · " + esc(state2.profile.surgeryDate) : ""}</p>
-      <button class="btn ghost block" data-action="edit-profile">✏️ Editar mis datos</button>
+      <h3>${t("personal_data")}</h3>
+      <p class="muted small">${esc(state2.profile.surgeryType || t("surgery_unset"))}${state2.profile.surgeryDate ? " · " + esc(state2.profile.surgeryDate) : ""}</p>
+      <button class="btn ghost block" data-action="edit-profile">${t("edit_my_data")}</button>
     </section>
-    <section class="card disclaimer-card">
-      <h3>ⓘ Aviso médico</h3>
-      <p class="small">${esc(DISCLAIMER)}</p>
-    </section>`;
+    <section class="card disclaimer-card"><h3>${t("med_notice")}</h3><p class="small">${esc(disc())}</p></section>`;
   }
   function profileFormHtml(state2) {
     const p = state2.profile;
-    const today = todayKey();
     return `
   <form id="form-profile" class="stack-form">
-    <label>Nombre
-      <input name="name" type="text" required value="${esc(p.name || "")}" />
-    </label>
-    <label>Tipo de cirugía
-      <input name="surgeryType" type="text" value="${esc(p.surgeryType || "")}" placeholder="Ej.: cirugía abdominal mayor" />
-    </label>
-    <label>Fecha prevista de la cirugía
-      <input name="surgeryDate" type="date" value="${esc(p.surgeryDate || "")}" />
-    </label>
-    <label>Nivel de actividad
+    <label>${t("f_name")}<input name="name" type="text" required value="${esc(p.name || "")}" /></label>
+    <label>${t("f_surgery_type")}<input name="surgeryType" type="text" value="${esc(p.surgeryType || "")}" placeholder="${t("onb_surgery_ph")}" /></label>
+    <label>${t("f_surgery_date")}<input name="surgeryDate" type="date" value="${esc(p.surgeryDate || "")}" /></label>
+    <label>${t("f_activity")}
       <select name="activityLevel">
-        <option value="bajo" ${p.activityLevel === "bajo" ? "selected" : ""}>Bajo</option>
-        <option value="medio" ${p.activityLevel === "medio" ? "selected" : ""}>Medio</option>
-        <option value="alto" ${p.activityLevel === "alto" ? "selected" : ""}>Alto</option>
+        <option value="bajo" ${p.activityLevel === "bajo" ? "selected" : ""}>${t("act_low")}</option>
+        <option value="medio" ${p.activityLevel === "medio" ? "selected" : ""}>${t("act_med")}</option>
+        <option value="alto" ${p.activityLevel === "alto" ? "selected" : ""}>${t("act_high")}</option>
       </select>
     </label>
-    <label class="check-inline"><input name="smoker" type="checkbox" ${p.smoker ? "checked" : ""} /> Actualmente fumo</label>
-    <button type="submit" class="btn primary block">Guardar</button>
+    <label class="check-inline"><input name="smoker" type="checkbox" ${p.smoker ? "checked" : ""} /> ${t("smoker")}</label>
+    <button type="submit" class="btn primary block">${t("save")}</button>
   </form>`;
   }
   function renderNav(route) {
     const items = [
-      { id: "hoy", icon: "\uD83C\uDFE0", label: "Hoy" },
-      { id: "recursos", icon: "\uD83C\uDFAC", label: "Recursos" },
-      { id: "progreso", icon: "\uD83D\uDCC8", label: "Progreso" },
-      { id: "aprende", icon: "\uD83D\uDCDA", label: "Aprende" },
-      { id: "mas", icon: "⋯", label: "Más" }
+      { id: "hoy", icon: "\uD83C\uDFE0", label: t("nav_hoy") },
+      { id: "recursos", icon: "\uD83C\uDFAC", label: t("nav_recursos") },
+      { id: "progreso", icon: "\uD83D\uDCC8", label: t("nav_progreso") },
+      { id: "aprende", icon: "\uD83D\uDCDA", label: t("nav_aprende") },
+      { id: "mas", icon: "⋯", label: t("nav_mas") }
     ];
     const activeSet = {
       hoy: "hoy",
@@ -1848,7 +2742,9 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       fragilidad: "mas",
       medicacion: "mas",
       cuidador: "mas",
-      juego: "mas"
+      juego: "mas",
+      report: "mas",
+      perfiles: "mas"
     };
     return `<nav class="bottom-nav">${items.map((i) => `
     <button class="nav-item ${activeSet[route] === i.id ? "active" : ""}" data-action="nav" data-view="${i.id}">
@@ -1862,60 +2758,46 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     <div class="onb-hero">
       <div class="onb-logo">\uD83E\uDEC1</div>
       <h1>PreHabilita</h1>
-      <p>Prepárate en casa para tu cirugía. Entrena tu cuerpo y tu mente, gana puntos y llega en tu mejor forma al quirófano.</p>
+      <p>${t("onb_tagline")}</p>
     </div>
     <form id="onb-form" class="card onb-form">
-      <label>¿Cómo te llamas?
-        <input name="name" type="text" required placeholder="Tu nombre" autocomplete="given-name" />
-      </label>
-      <label>Tipo de cirugía (opcional)
-        <input name="surgeryType" type="text" placeholder="Ej.: cirugía abdominal mayor" />
-      </label>
-      <label>Fecha prevista de la cirugía
-        <input name="surgeryDate" type="date" min="${today}" />
-      </label>
-      <label>Nivel de actividad actual
+      <label>${t("onb_name_q")}<input name="name" type="text" required placeholder="${t("onb_name_ph")}" autocomplete="given-name" /></label>
+      <label>${t("onb_surgery_opt")}<input name="surgeryType" type="text" placeholder="${t("onb_surgery_ph")}" /></label>
+      <label>${t("f_surgery_date")}<input name="surgeryDate" type="date" min="${today}" /></label>
+      <label>${t("onb_activity_now")}
         <select name="activityLevel">
-          <option value="bajo">Bajo · me muevo poco</option>
-          <option value="medio" selected>Medio · algo de actividad</option>
-          <option value="alto">Alto · activo con frecuencia</option>
+          <option value="bajo">${t("act_low_o")}</option>
+          <option value="medio" selected>${t("act_med_o")}</option>
+          <option value="alto">${t("act_high_o")}</option>
         </select>
       </label>
-      <label class="check-inline">
-        <input name="smoker" type="checkbox" /> Actualmente fumo
-      </label>
-      <p class="disclaimer-mini">${esc(ERAS_NOTE)}</p>
-      <p class="disclaimer-mini">${esc(DISCLAIMER)}</p>
-      <button type="submit" class="btn primary big">Empezar mi programa \uD83D\uDE80</button>
+      <label class="check-inline"><input name="smoker" type="checkbox" /> ${t("smoker")}</label>
+      <p class="disclaimer-mini">${esc(erasNote())}</p>
+      <p class="disclaimer-mini">${esc(disc())}</p>
+      <button type="submit" class="btn primary big">${t("onb_start")}</button>
     </form>
   </div>`;
   }
   function renderCaregiver() {
-    const tips = CAREGIVER_TIPS.map((t) => `
-    <div class="ctip">
-      <span class="ctip-ico">${t.icon}</span>
-      <div><strong>${esc(t.title)}</strong><p class="muted small">${esc(t.text)}</p></div>
+    const tips = CAREGIVER_TIPS.map((tp) => `
+    <div class="ctip"><span class="ctip-ico">${tp.icon}</span>
+      <div><strong>${esc(tr(tp, "title"))}</strong><p class="muted small">${esc(tr(tp, "text"))}</p></div>
     </div>`).join("");
-    const alarms = ALARM_SIGNS.map((a) => `<li>${esc(a)}</li>`).join("");
+    const alarmsArr = getLang() === "en" ? ALARM_SIGNS_EN : ALARM_SIGNS;
+    const alarms = alarmsArr.map((a) => `<li>${esc(a)}</li>`).join("");
     return `
-    <div class="section-label">\uD83E\uDD1D Para el cuidador / familiar</div>
+    <div class="section-label">${t("care_title")}</div>
     <section class="card speak-scope" data-speak-scope>
-      <p class="speakable">El acompañamiento marca una gran diferencia. Tu apoyo motiva, da seguridad y mejora los resultados. La mayoría de las personas frágiles no siguen el programa completamente solas: tu papel es clave.</p>
-      <button class="btn ghost speak-btn" data-action="speak">\uD83D\uDD0A Escuchar</button>
+      <p class="speakable">${t("care_intro")}</p>
+      <button class="btn ghost speak-btn" data-action="speak">${t("listen")}</button>
     </section>
-    <section class="card">
-      <h3>Cómo acompañar de forma segura</h3>
-      <div class="ctips">${tips}</div>
-    </section>
+    <section class="card"><h3>${t("care_how")}</h3><div class="ctips">${tips}</div></section>
     <section class="card alarm-card">
-      <h3>\uD83D\uDEA8 Señales de alarma</h3>
-      <p class="small">Ante cualquiera de estas señales, contacta con tu equipo médico o llama a urgencias (112):</p>
+      <h3>${t("alarm_title")}</h3>
+      <p class="small">${t("alarm_note")}</p>
       <ul class="alarm-list">${alarms}</ul>
     </section>
-    <section class="card disclaimer-card">
-      <h3>ⓘ Aviso médico</h3>
-      <p class="small">${esc(DISCLAIMER)}</p>
-    </section>`;
+    <section class="card disclaimer-card"><h3>${t("med_notice")}</h3><p class="small">${esc(disc())}</p></section>`;
   }
   function renderFrailty(state2) {
     const fr = state2.frail || { score: null, answers: {} };
@@ -1926,139 +2808,214 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       <section class="card frail-result" style="--fc:${r.color}">
         <div class="frail-emoji">${r.emoji}</div>
         <div class="frail-score">${fr.score} <small>/ 5</small></div>
-        <div class="frail-label">${esc(r.label)}</div>
-        <p>${esc(r.message)}</p>
-        <p class="muted small">Resultado del ${esc(fr.date || "")}. Es un cribado orientativo, no un diagnóstico. Compártelo con tu equipo médico.</p>
+        <div class="frail-label">${esc(tr(r, "label"))}</div>
+        <p>${esc(tr(r, "message"))}</p>
+        <p class="muted small">${t("frail_result_note", { date: esc(fr.date || "") })}</p>
       </section>`;
     }
     const qs = FRAIL_QUESTIONS.map((q, i) => {
       const cur = fr.answers ? fr.answers[q.id] : undefined;
-      return `
-      <div class="frail-q">
-        <p><strong>${i + 1}.</strong> ${esc(q.q)}</p>
+      return `<div class="frail-q">
+        <p><strong>${i + 1}.</strong> ${esc(tr(q, "q"))}</p>
         <div class="frail-opts">
-          <label class="fopt"><input type="radio" name="${q.id}" value="1" ${cur === 1 ? "checked" : ""}/> Sí</label>
-          <label class="fopt"><input type="radio" name="${q.id}" value="0" ${cur === 0 ? "checked" : ""}/> No</label>
+          <label class="fopt"><input type="radio" name="${q.id}" value="1" ${cur === 1 ? "checked" : ""}/> ${t("yes")}</label>
+          <label class="fopt"><input type="radio" name="${q.id}" value="0" ${cur === 0 ? "checked" : ""}/> ${t("no")}</label>
         </div>
       </div>`;
     }).join("");
     return `
-    <div class="section-label">\uD83E\uDDED Cribado de fragilidad (escala FRAIL)</div>
+    <div class="section-label">${t("frail_title")}</div>
     ${resultCard}
     <form id="form-frail" class="card">
-      <p class="muted small">Responde con sinceridad; solo lleva un minuto. Puedes hacerlo con tu cuidador.</p>
+      <p class="muted small">${t("frail_intro")}</p>
       ${qs}
-      <button type="submit" class="btn primary block">Ver mi resultado</button>
+      <button type="submit" class="btn primary block">${t("frail_see")}</button>
     </form>
-    <section class="card disclaimer-card">
-      <h3>ⓘ Importante</h3>
-      <p class="small">La escala FRAIL es una herramienta de cribado orientativa; no sustituye la valoración de tu equipo médico. Sea cual sea tu resultado, la prehabilitación te beneficia.</p>
-    </section>`;
+    <section class="card disclaimer-card"><h3>${t("frail_important")}</h3><p class="small">${t("frail_disc")}</p></section>`;
   }
   function renderMeds(state2) {
     const m = state2.medList || { meds: [], allergies: "", notes: "" };
     const rows = m.meds.length ? m.meds.map((x, i) => `
     <div class="med-row">
       <div><strong>${esc(x.name)}</strong> <small class="muted">${esc(x.dose || "")} ${esc(x.freq || "")}</small></div>
-      <button class="mini-btn danger" data-action="del-med" data-idx="${i}" aria-label="Eliminar">\uD83D\uDDD1️</button>
-    </div>`).join("") : '<p class="muted small">Aún no has añadido medicamentos.</p>';
-    const docRows = m.meds.length ? m.meds.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.dose || "")}</td><td>${esc(x.freq || "")}</td></tr>`).join("") : '<tr><td colspan="3">— sin medicación registrada —</td></tr>';
+      <button class="mini-btn danger" data-action="del-med" data-idx="${i}" aria-label="\uD83D\uDDD1️">\uD83D\uDDD1️</button>
+    </div>`).join("") : `<p class="muted small">${t("meds_none")}</p>`;
+    const docRows = m.meds.length ? m.meds.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.dose || "")}</td><td>${esc(x.freq || "")}</td></tr>`).join("") : `<tr><td colspan="3">${t("meds_doc_none")}</td></tr>`;
     return `
-    <div class="section-label">\uD83D\uDC8A Mi medicación y alergias</div>
+    <div class="section-label">${t("meds_title")}</div>
     <div class="no-print">
+      <section class="card"><p class="muted small">${t("meds_intro")}</p></section>
       <section class="card">
-        <p class="muted small">Prepara tu lista para la consulta de preanestesia. Incluye TODO: recetados, sin receta y productos de herbolario. Al terminar podrás guardarla en PDF.</p>
-      </section>
-      <section class="card">
-        <h3>Añadir medicamento</h3>
+        <h3>${t("meds_add")}</h3>
         <form id="form-med" class="stack-form">
-          <label>Nombre <input name="name" type="text" required placeholder="Ej.: Omeprazol" /></label>
+          <label>${t("meds_name")} <input name="name" type="text" required placeholder="Omeprazol" /></label>
           <div class="two-col">
-            <label>Dosis <input name="dose" type="text" placeholder="20 mg" /></label>
-            <label>Frecuencia <input name="freq" type="text" placeholder="1 al día" /></label>
+            <label>${t("meds_dose")} <input name="dose" type="text" placeholder="20 mg" /></label>
+            <label>${t("meds_freq")} <input name="freq" type="text" placeholder="1/día" /></label>
           </div>
-          <button type="submit" class="btn primary block">➕ Añadir a la lista</button>
+          <button type="submit" class="btn primary block">${t("meds_add_btn")}</button>
         </form>
       </section>
+      <section class="card"><h3>${t("meds_yours")}</h3><div class="med-list">${rows}</div></section>
       <section class="card">
-        <h3>Tus medicamentos</h3>
-        <div class="med-list">${rows}</div>
-      </section>
-      <section class="card">
-        <h3>Alergias y notas</h3>
+        <h3>${t("meds_allergies_notes")}</h3>
         <form id="form-med-extra" class="stack-form">
-          <label>Alergias <textarea name="allergies" rows="2" placeholder="Medicamentos, alimentos, látex...">${esc(m.allergies || "")}</textarea></label>
-          <label>Otras notas (enfermedades, anticoagulantes, marcapasos...) <textarea name="notes" rows="2">${esc(m.notes || "")}</textarea></label>
-          <button type="submit" class="btn ghost block">Guardar cambios</button>
+          <label>${t("meds_allergies")} <textarea name="allergies" rows="2" placeholder="${t("meds_allergies_ph")}">${esc(m.allergies || "")}</textarea></label>
+          <label>${t("meds_other_notes")} <textarea name="notes" rows="2">${esc(m.notes || "")}</textarea></label>
+          <button type="submit" class="btn ghost block">${t("meds_save")}</button>
         </form>
       </section>
-      <button class="btn primary block" data-action="print-meds">\uD83D\uDDA8️ Imprimir / Guardar como PDF</button>
-      <p class="muted small">Se abrirá el diálogo de impresión; elige "Guardar como PDF" para tenerlo en tu móvil o imprimirlo.</p>
+      <button class="btn primary block" data-action="print-doc">${t("meds_print")}</button>
+      <p class="muted small">${t("meds_print_note")}</p>
     </div>
-
     <section class="print-doc">
-      <h2>Lista de medicación y alergias</h2>
-      <p><strong>Paciente:</strong> ${esc(state2.profile.name || "")}</p>
-      <p><strong>Cirugía:</strong> ${esc(state2.profile.surgeryType || "—")} &nbsp;·&nbsp; <strong>Fecha prevista:</strong> ${esc(state2.profile.surgeryDate || "—")}</p>
-      <h3>Medicación habitual</h3>
-      <table class="med-table"><thead><tr><th>Medicamento</th><th>Dosis</th><th>Frecuencia</th></tr></thead><tbody>${docRows}</tbody></table>
-      <h3>Alergias</h3><p>${esc(m.allergies || "—")}</p>
-      <h3>Otras notas</h3><p>${esc(m.notes || "—")}</p>
-      <p class="doc-foot">Documento generado con PreHabilita para la consulta de preanestesia.</p>
+      <h2>${t("meds_doc_title")}</h2>
+      <p><strong>${t("meds_patient")}:</strong> ${esc(state2.profile.name || "")}</p>
+      <p><strong>${t("meds_surgery")}:</strong> ${esc(state2.profile.surgeryType || "—")} &nbsp;·&nbsp; <strong>${t("meds_date")}:</strong> ${esc(state2.profile.surgeryDate || "—")}</p>
+      <h3>${t("meds_doc_meds")}</h3>
+      <table class="med-table"><thead><tr><th>${t("meds_name")}</th><th>${t("meds_dose")}</th><th>${t("meds_freq")}</th></tr></thead><tbody>${docRows}</tbody></table>
+      <h3>${t("meds_doc_allergies")}</h3><p>${esc(m.allergies || "—")}</p>
+      <h3>${t("meds_doc_notes")}</h3><p>${esc(m.notes || "—")}</p>
+      <p class="doc-foot">${t("meds_doc_foot")}</p>
+    </section>`;
+  }
+  function renderReport(state2) {
+    const li = levelInfo(state2.stats.xp);
+    const tasks = getTasks(state2);
+    const dts = daysToSurgery(state2);
+    const pillars = getPillars(state2);
+    const adhRows = pillars.map((p) => {
+      const pt = tasks.filter((x) => x.pillar === p.id);
+      if (pt.length === 0)
+        return "";
+      let done = 0, possible = 0;
+      for (let i = 6;i >= 0; i--) {
+        const d = new Date;
+        d.setDate(d.getDate() - i);
+        const log = state2.logs[todayKey(d)];
+        possible += pt.length;
+        if (log)
+          done += pt.filter((x) => taskIsDone(x, log)).length;
+      }
+      const pctv = possible ? Math.round(done / possible * 100) : 0;
+      return `<tr><td>${p.emoji} ${esc(tr(p, "name"))}</td><td>${pctv}%</td></tr>`;
+    }).join("");
+    let frailLine = t("report_frail_none");
+    if (state2.frail && state2.frail.score != null) {
+      const r = frailResult(state2.frail.score);
+      frailLine = `${state2.frail.score}/5 · ${esc(tr(r, "label"))} (${esc(state2.frail.date || "")})`;
+    }
+    const earned = state2.badges || [];
+    const badgeList = earned.length ? earned.map((id) => `<span class="rep-badge">\uD83C\uDFC5 ${esc(id)}</span>`).join(" ") : t("report_none");
+    const dtsLine = dts == null ? "—" : dts > 0 ? dts : dts === 0 ? t("today") : "—";
+    return `
+    <div class="section-label">${t("report_title")}</div>
+    <div class="no-print">
+      <section class="card"><p class="muted small">${t("report_intro")}</p></section>
+      <button class="btn primary block" data-action="print-doc">${t("report_print")}</button>
+    </div>
+    <section class="print-doc">
+      <h2>${t("report_doc_title")}</h2>
+      <p class="muted small">${t("report_generated", { date: todayKey() })}</p>
+      <p><strong>${t("meds_patient")}:</strong> ${esc(state2.profile.name || "")} &nbsp;·&nbsp; <strong>${t("meds_surgery")}:</strong> ${esc(state2.profile.surgeryType || "—")}</p>
+      <p><strong>${t("report_days_to")}:</strong> ${dtsLine} &nbsp;·&nbsp; <strong>${t("meds_date")}:</strong> ${esc(state2.profile.surgeryDate || "—")}</p>
+      <h3>${t("report_summary")}</h3>
+      <table class="med-table"><tbody>
+        <tr><td>${t("report_level")}</td><td>${li.level}</td></tr>
+        <tr><td>${t("report_xp")}</td><td>${state2.stats.xp}</td></tr>
+        <tr><td>${t("report_streak")}</td><td>${state2.stats.bestStreak}</td></tr>
+        <tr><td>${t("report_daysc")}</td><td>${state2.stats.daysCompleted}</td></tr>
+      </tbody></table>
+      <h3>${t("report_adherence")}</h3>
+      <table class="med-table"><tbody>${adhRows}</tbody></table>
+      <h3>${t("report_frail")}</h3><p>${frailLine}</p>
+      <h3>${t("report_badges")} (${earned.length})</h3><p class="rep-badges">${badgeList}</p>
+      <p class="doc-foot">${t("report_foot")}</p>
+    </section>`;
+  }
+  function renderProfiles(state2) {
+    const profiles = listProfiles();
+    const activeId = getActiveProfileId();
+    const rows = profiles.map((p) => `
+    <div class="prof-row ${p.id === activeId ? "active" : ""}">
+      <div class="prof-info">
+        <strong>${esc(p.name)}</strong>
+        ${p.id === activeId ? `<span class="prof-badge">${t("profiles_active")}</span>` : ""}
+      </div>
+      <div class="prof-actions">
+        ${p.id === activeId ? "" : `<button class="mini-btn" data-action="switch-profile" data-id="${p.id}" title="${t("profiles_switch")}">✅</button>`}
+        <button class="mini-btn" data-action="rename-profile" data-id="${p.id}" title="${t("profiles_rename")}">✏️</button>
+        ${profiles.length > 1 ? `<button class="mini-btn danger" data-action="delete-profile" data-id="${p.id}" title="${t("profiles_delete")}">\uD83D\uDDD1️</button>` : ""}
+      </div>
+    </div>`).join("");
+    return `
+    <div class="section-label">${t("profiles_title")}</div>
+    <section class="card"><p class="muted small">${t("profiles_intro")}</p></section>
+    <section class="card"><div class="prof-list">${rows}</div></section>
+    <section class="card">
+      <h3>${t("profiles_new")}</h3>
+      <form id="form-profile-new" class="stack-form">
+        <label>${t("profiles_new_name")}<input name="name" type="text" required placeholder="${t("patient_default")}" /></label>
+        <label class="check-inline"><input name="copy" type="checkbox" /> ${t("profiles_copy")}</label>
+        <button type="submit" class="btn primary block">${t("profiles_create")}</button>
+      </form>
     </section>`;
   }
   function renderMemoryGame(state2, game) {
     const best = state2.games && state2.games.memory ? state2.games.memory.bestMoves : null;
     if (!game) {
       return `
-      <div class="section-label">\uD83E\uDDE9 Juego de memoria</div>
+      <div class="section-label">${t("game_title")}</div>
       <section class="card">
-        <p>Encuentra todas las parejas de cartas. Ejercita tu memoria y tu concentración: una forma divertida de prehabilitación cognitiva que ayuda a prevenir la confusión tras la cirugía.</p>
-        ${best != null ? `<p class="muted small">\uD83C\uDFC6 Tu mejor marca: <strong>${best} intentos</strong>.</p>` : ""}
-        <p class="muted small">Elige la dificultad:</p>
+        <p>${t("game_intro")}</p>
+        ${best != null ? `<p class="muted small">${t("game_best", { n: best })}</p>` : ""}
+        <p class="muted small">${t("game_choose")}</p>
         <div class="row-btns">
-          <button class="btn primary" data-action="memory-start" data-pairs="6">Fácil · 6 parejas</button>
-          <button class="btn ghost" data-action="memory-start" data-pairs="8">Difícil · 8 parejas</button>
+          <button class="btn primary" data-action="memory-start" data-pairs="6">${t("game_easy")}</button>
+          <button class="btn ghost" data-action="memory-start" data-pairs="8">${t("game_hard")}</button>
         </div>
       </section>`;
     }
     const cards = game.cards.map((c, i) => {
       const shown = c.matched || game.flipped.includes(i);
-      return `<button class="mcard ${shown ? "up" : ""} ${c.matched ? "matched" : ""}" data-action="flip-card" data-idx="${i}" ${c.matched || game.locked ? "disabled" : ""} aria-label="carta">${shown ? c.emoji : "❓"}</button>`;
+      return `<button class="mcard ${shown ? "up" : ""} ${c.matched ? "matched" : ""}" data-action="flip-card" data-idx="${i}" ${c.matched || game.locked ? "disabled" : ""} aria-label="?">${shown ? c.emoji : "❓"}</button>`;
     }).join("");
     const isBest = game.done && state2.games.memory.bestMoves === game.moves;
     const doneCard = game.done ? `
     <section class="card game-done">
       <div class="big-emoji">\uD83C\uDF89</div>
-      <h3>¡Completado en ${game.moves} intentos!</h3>
-      ${isBest ? '<p class="badge-ok">\uD83C\uDFC6 ¡Nueva mejor marca!</p>' : ""}
-      <p class="muted small">+15 XP · has completado tu gimnasia mental de hoy.</p>
-      <button class="btn primary block" data-action="memory-start" data-pairs="${game.cards.length / 2}">Jugar otra vez</button>
+      <h3>${t("game_done", { n: game.moves })}</h3>
+      ${isBest ? `<p class="badge-ok">${t("game_newbest")}</p>` : ""}
+      <p class="muted small">${t("game_reward")}</p>
+      <button class="btn primary block" data-action="memory-start" data-pairs="${game.cards.length / 2}">${t("game_again")}</button>
     </section>` : "";
     return `
-    <div class="section-label">\uD83E\uDDE9 Juego de memoria</div>
+    <div class="section-label">${t("game_title")}</div>
     <section class="card">
-      <div class="game-head"><span>Intentos: <strong>${game.moves}</strong></span><button class="btn ghost mini-exit" data-action="memory-exit">Salir</button></div>
+      <div class="game-head"><span>${t("game_tries")}: <strong>${game.moves}</strong></span><button class="btn ghost mini-exit" data-action="memory-exit">${t("game_exit")}</button></div>
       <div class="mgrid">${cards}</div>
     </section>
     ${doneCard}`;
   }
 
   // js/editor.js
+  function L(es, en) {
+    return getLang() === "en" ? en : es;
+  }
   function pillarOptions(state2, selected) {
-    return getPillars(state2).map((p) => `<option value="${p.id}" ${p.id === selected ? "selected" : ""}>${esc(p.emoji + " " + p.name)}</option>`).join("");
+    return getPillars(state2).map((p) => `<option value="${p.id}" ${p.id === selected ? "selected" : ""}>${esc(p.emoji + " " + tr(p, "name"))}</option>`).join("");
   }
   function categoryOptions(state2, selected) {
-    return `<option value="general" ${selected === "general" ? "selected" : ""}>\uD83D\uDCCC General</option>` + pillarOptions(state2, selected);
+    return `<option value="general" ${selected === "general" ? "selected" : ""}>\uD83D\uDCCC ${L("General", "General")}</option>` + pillarOptions(state2, selected);
   }
   function renderEditor(state2, tab = "tareas") {
     const tabs = [
-      { id: "tareas", label: "✅ Tareas" },
-      { id: "recursos", label: "\uD83C\uDFAC Recursos" },
-      { id: "blog", label: "\uD83D\uDCDD Blog" },
-      { id: "ajustes", label: "⚙️ Metas" }
+      { id: "tareas", label: t("ed_tab_tasks") },
+      { id: "recursos", label: t("ed_tab_res") },
+      { id: "blog", label: t("ed_tab_blog") },
+      { id: "ajustes", label: t("ed_tab_set") }
     ];
-    const tabBar = `<div class="editor-tabs">${tabs.map((t) => `<button class="etab ${t.id === tab ? "active" : ""}" data-action="editor-tab" data-tab="${t.id}">${t.label}</button>`).join("")}</div>`;
+    const tabBar = `<div class="editor-tabs">${tabs.map((x) => `<button class="etab ${x.id === tab ? "active" : ""}" data-action="editor-tab" data-tab="${x.id}">${x.label}</button>`).join("")}</div>`;
     let body = "";
     if (tab === "tareas")
       body = renderTasksTab(state2);
@@ -2069,8 +3026,8 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     else
       body = renderSettingsTab(state2);
     return `
-    <div class="section-label">\uD83E\uDE7A Modo médico · gestión de contenidos</div>
-    <p class="muted small editor-intro">Aquí puedes ampliar y personalizar la app sin tocar código: crea tareas, añade vídeos y publicaciones, y ajusta las metas.</p>
+    <div class="section-label">${t("ed_title")}</div>
+    <p class="muted small editor-intro">${t("ed_intro")}</p>
     ${tabBar}
     <div class="editor-body">${body}</div>`;
   }
@@ -2078,69 +3035,70 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     const pillars = getPillars(state2);
     const all = getAllTasksForEditor(state2);
     const groups = pillars.map((p) => {
-      const tasks = all.filter((t) => t.pillar === p.id);
+      const tasks = all.filter((x) => x.pillar === p.id);
       if (tasks.length === 0)
         return "";
-      const items = tasks.map((t) => `
-      <div class="etask ${t.disabled ? "off" : ""}">
+      const items = tasks.map((x) => `
+      <div class="etask ${x.disabled ? "off" : ""}">
         <div class="etask-main">
-          <span>${t.icon || "•"} ${esc(t.title)}</span>
-          <small class="muted">${t.type === "counter" ? `meta ${t.target} ${esc(t.unit || "")} · ` : ""}+${t.xp} XP ${t.isDefault ? "" : "· personalizada"}</small>
+          <span>${x.icon || "•"} ${esc(tr(x, "title"))}</span>
+          <small class="muted">${x.type === "counter" ? `${L("meta", "goal")} ${x.target} ${esc(tr(x, "unit"))} · ` : ""}+${x.xp} XP ${x.isDefault ? "" : "· " + L("personalizada", "custom")}</small>
         </div>
         <div class="etask-actions">
-          <button class="mini-btn" data-action="edit-task" data-id="${t.id}">✏️</button>
-          <button class="mini-btn" data-action="toggle-task-active" data-id="${t.id}">${t.disabled ? "\uD83D\uDC41️" : "\uD83D\uDEAB"}</button>
-          ${t.isDefault ? "" : `<button class="mini-btn danger" data-action="delete-task" data-id="${t.id}">\uD83D\uDDD1️</button>`}
+          <button class="mini-btn" data-action="edit-task" data-id="${x.id}">✏️</button>
+          <button class="mini-btn" data-action="toggle-task-active" data-id="${x.id}">${x.disabled ? "\uD83D\uDC41️" : "\uD83D\uDEAB"}</button>
+          ${x.isDefault ? "" : `<button class="mini-btn danger" data-action="delete-task" data-id="${x.id}">\uD83D\uDDD1️</button>`}
         </div>
       </div>`).join("");
       return `<section class="card" style="--pc:${p.color}">
-      <div class="etask-group-head">${p.emoji} ${esc(p.name)}</div>
+      <div class="etask-group-head">${p.emoji} ${esc(tr(p, "name"))}</div>
       ${items}
     </section>`;
     }).join("");
-    return `
-    <button class="btn primary block" data-action="new-task">➕ Añadir nueva tarea</button>
-    ${groups}`;
+    return `<button class="btn primary block" data-action="new-task">${t("ed_add_task")}</button>${groups}`;
   }
   function taskFormHtml(state2, task) {
     const isEdit = !!task;
     const isDefault = task ? task.isDefault : false;
-    const t = task || { type: "check", xp: 15, target: 10, unit: "", icon: "", pillar: getPillars(state2)[0].id };
+    const x = task || { type: "check", xp: 15, target: 10, unit: "", icon: "", pillar: getPillars(state2)[0].id };
+    const titleVal = isDefault ? tr(x, "title") : x.title || "";
+    const descVal = isDefault ? tr(x, "desc") : x.desc || "";
+    const unitVal = isDefault ? tr(x, "unit") : x.unit || "";
     return `
   <form id="form-task" class="stack-form">
-    <input type="hidden" name="id" value="${isEdit ? esc(t.id) : ""}" />
+    <input type="hidden" name="id" value="${isEdit ? esc(x.id) : ""}" />
     <input type="hidden" name="isDefault" value="${isDefault ? "1" : ""}" />
-    <label>Título de la tarea
-      <input name="title" type="text" required value="${esc(t.title || "")}" placeholder="Ej.: Paseo por la mañana" />
+    <label>${L("Título de la tarea", "Task title")}
+      <input name="title" type="text" required value="${esc(titleVal)}" placeholder="${L("Ej.: Paseo por la mañana", "E.g.: Morning walk")}" />
     </label>
-    <label>Pilar / categoría
-      <select name="pillar" ${isDefault ? "disabled" : ""}>${pillarOptions(state2, t.pillar)}</select>
+    <label>${L("Pilar / categoría", "Pillar / category")}
+      <select name="pillar" ${isDefault ? "disabled" : ""}>${pillarOptions(state2, x.pillar)}</select>
     </label>
-    <label>Icono (emoji, opcional)
-      <input name="icon" type="text" maxlength="4" value="${esc(t.icon || "")}" placeholder="\uD83D\uDEB6" />
+    <label>${L("Icono (emoji, opcional)", "Icon (emoji, optional)")}
+      <input name="icon" type="text" maxlength="4" value="${esc(x.icon || "")}" placeholder="\uD83D\uDEB6" />
     </label>
-    <label>Tipo
+    <label>${L("Tipo", "Type")}
       <select name="type" ${isDefault ? "disabled" : ""}>
-        <option value="check" ${t.type === "check" ? "selected" : ""}>Casilla (hecho / no hecho)</option>
-        <option value="counter" ${t.type === "counter" ? "selected" : ""}>Contador (con meta)</option>
+        <option value="check" ${x.type === "check" ? "selected" : ""}>${L("Casilla (hecho / no hecho)", "Checkbox (done / not done)")}</option>
+        <option value="counter" ${x.type === "counter" ? "selected" : ""}>${L("Contador (con meta)", "Counter (with a goal)")}</option>
       </select>
     </label>
     <div class="two-col">
-      <label>Meta (si es contador)
-        <input name="target" type="number" min="1" value="${esc(t.target || 10)}" />
+      <label>${L("Meta (si es contador)", "Goal (if counter)")}
+        <input name="target" type="number" min="1" value="${esc(x.target || 10)}" />
       </label>
-      <label>Unidad
-        <input name="unit" type="text" value="${esc(t.unit || "")}" placeholder="min, reps, vasos" />
+      <label>${L("Unidad", "Unit")}
+        <input name="unit" type="text" value="${esc(unitVal)}" placeholder="${L("min, reps, vasos", "min, reps, glasses")}" />
       </label>
     </div>
-    <label>Puntos (XP) al completar
-      <input name="xp" type="number" min="0" max="100" value="${esc(t.xp ?? 15)}" />
+    <label>${L("Puntos (XP) al completar", "Points (XP) on completion")}
+      <input name="xp" type="number" min="0" max="100" value="${esc(x.xp ?? 15)}" />
     </label>
-    <label>Descripción
-      <textarea name="desc" rows="3" placeholder="Instrucciones para el paciente">${esc(t.desc || "")}</textarea>
+    <label>${L("Descripción", "Description")}
+      <textarea name="desc" rows="3" placeholder="${L("Instrucciones para el paciente", "Instructions for the patient")}">${esc(descVal)}</textarea>
     </label>
-    ${isDefault ? '<p class="muted small">Es una tarea del programa base: puedes personalizar sus textos, meta y puntos.</p>' : ""}
-    <button type="submit" class="btn primary block">${isEdit ? "Guardar cambios" : "Crear tarea"}</button>
+    ${isDefault ? `<p class="muted small">${L("Es una tarea del programa base: puedes personalizar sus textos, meta y puntos.", "This is a base-program task: you can customize its text, goal and points.")}</p>` : ""}
+    <button type="submit" class="btn primary block">${isEdit ? t("save_changes") : L("Crear tarea", "Create task")}</button>
   </form>`;
   }
   function renderResourcesTab(state2) {
@@ -2156,11 +3114,11 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
           <button class="mini-btn danger" data-action="delete-resource" data-id="${r.id}">\uD83D\uDDD1️</button>
         </div>
       </div>`;
-    }).join("") : '<p class="muted small">Aún no hay recursos. Añade tu primer vídeo o enlace.</p>';
+    }).join("") : `<p class="muted small">${L("Aún no hay recursos. Añade tu primer vídeo o enlace.", "No resources yet. Add your first video or link.")}</p>`;
     return `
-    <button class="btn primary block" data-action="new-resource">➕ Añadir vídeo o enlace</button>
+    <button class="btn primary block" data-action="new-resource">${t("ed_add_res")}</button>
     <section class="card">${list}</section>
-    <p class="muted small">Consejo: pega la dirección de un vídeo de YouTube (por ejemplo <em>youtube.com/watch?v=...</em>) y se mostrará incrustado dentro de la app.</p>`;
+    <p class="muted small">${L("Consejo: pega la dirección de un vídeo de YouTube y se mostrará incrustado dentro de la app.", "Tip: paste a YouTube video URL and it will be embedded inside the app.")}</p>`;
   }
   function resourceFormHtml(state2, res) {
     const isEdit = !!res;
@@ -2168,19 +3126,19 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     return `
   <form id="form-resource" class="stack-form">
     <input type="hidden" name="id" value="${isEdit ? esc(r.id) : ""}" />
-    <label>Título
-      <input name="title" type="text" required value="${esc(r.title || "")}" placeholder="Ej.: Meditación guiada 10 min" />
+    <label>${L("Título", "Title")}
+      <input name="title" type="text" required value="${esc(r.title || "")}" placeholder="${L("Ej.: Meditación guiada 10 min", "E.g.: Guided meditation 10 min")}" />
     </label>
-    <label>Dirección (URL de YouTube u otro enlace)
+    <label>${L("Dirección (URL de YouTube u otro enlace)", "Address (YouTube URL or other link)")}
       <input name="url" type="url" required value="${esc(r.url || "")}" placeholder="https://www.youtube.com/watch?v=..." />
     </label>
-    <label>Pilar / categoría
+    <label>${L("Pilar / categoría", "Pillar / category")}
       <select name="pillar">${pillarOptions(state2, r.pillar)}</select>
     </label>
-    <label>Descripción (opcional)
-      <textarea name="desc" rows="2" placeholder="Breve descripción del recurso">${esc(r.desc || "")}</textarea>
+    <label>${L("Descripción (opcional)", "Description (optional)")}
+      <textarea name="desc" rows="2" placeholder="${L("Breve descripción del recurso", "Short description of the resource")}">${esc(r.desc || "")}</textarea>
     </label>
-    <button type="submit" class="btn primary block">${isEdit ? "Guardar cambios" : "Añadir recurso"}</button>
+    <button type="submit" class="btn primary block">${isEdit ? t("save_changes") : L("Añadir recurso", "Add resource")}</button>
   </form>`;
   }
   function renderBlogTab(state2) {
@@ -2193,10 +3151,8 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         <button class="mini-btn" data-action="edit-post" data-id="${p.id}">✏️</button>
         <button class="mini-btn danger" data-action="delete-post" data-id="${p.id}">\uD83D\uDDD1️</button>
       </div>
-    </div>`).join("") : '<p class="muted small">Aún no hay publicaciones. Crea la primera entrada de tu blog.</p>';
-    return `
-    <button class="btn primary block" data-action="new-post">➕ Nueva publicación</button>
-    <section class="card">${list}</section>`;
+    </div>`).join("") : `<p class="muted small">${L("Aún no hay publicaciones. Crea la primera entrada de tu blog.", "No articles yet. Create the first entry of your blog.")}</p>`;
+    return `<button class="btn primary block" data-action="new-post">${t("ed_new_post")}</button><section class="card">${list}</section>`;
   }
   function postFormHtml(state2, post) {
     const isEdit = !!post;
@@ -2204,96 +3160,88 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     return `
   <form id="form-post" class="stack-form">
     <input type="hidden" name="id" value="${isEdit ? esc(p.id) : ""}" />
-    <label>Título
-      <input name="title" type="text" required value="${esc(p.title || "")}" placeholder="Título de la entrada" />
+    <label>${L("Título", "Title")}
+      <input name="title" type="text" required value="${esc(p.title || "")}" placeholder="${L("Título de la entrada", "Article title")}" />
     </label>
-    <label>Categoría
+    <label>${L("Categoría", "Category")}
       <select name="category">${categoryOptions(state2, p.category)}</select>
     </label>
-    <label>Imagen de portada (URL, opcional)
+    <label>${L("Imagen de portada (URL, opcional)", "Cover image (URL, optional)")}
       <input name="cover" type="url" value="${esc(p.cover || "")}" placeholder="https://..." />
     </label>
-    <label>Contenido
-      <textarea name="body" rows="9" required placeholder="Escribe aquí tu contenido. Puedes usar saltos de línea y viñetas con •">${esc(p.body || "")}</textarea>
+    <label>${L("Contenido", "Content")}
+      <textarea name="body" rows="9" required placeholder="${L("Escribe aquí tu contenido. Puedes usar saltos de línea y viñetas con •", "Write your content here. You can use line breaks and bullets with •")}">${esc(p.body || "")}</textarea>
     </label>
-    <button type="submit" class="btn primary block">${isEdit ? "Guardar cambios" : "Publicar"}</button>
+    <button type="submit" class="btn primary block">${isEdit ? t("save_changes") : L("Publicar", "Publish")}</button>
   </form>`;
   }
   function renderSettingsTab(state2) {
     const s = state2.settings;
     const goal = getDailyGoal(state2);
     const rem = s.reminders;
-    const timesChips = (rem.times || []).map((tm, i) => `<span class="time-chip">${esc(tm)} <button data-action="remove-reminder-time" data-idx="${i}" aria-label="Quitar">✕</button></span>`).join("");
+    const timesChips = (rem.times || []).map((tm, i) => `<span class="time-chip">${esc(tm)} <button data-action="remove-reminder-time" data-idx="${i}" aria-label="✕">✕</button></span>`).join("");
+    const langOptions = LANGS.map((l) => `<option value="${l.id}" ${s.lang === l.id ? "selected" : ""}>${l.flag} ${l.label}</option>`).join("");
     return `
     <section class="card">
-      <h3>\uD83C\uDFAF Meta diaria</h3>
-      <p class="muted small">Puntos (XP) que el paciente debe sumar para completar el día.</p>
+      <h3>${t("set_language")}</h3>
+      <p class="muted small">${t("set_language_note")}</p>
+      <select class="lang-select" data-action="set-lang">${langOptions}</select>
+    </section>
+
+    <section class="card">
+      <h3>${t("set_goal")}</h3>
+      <p class="muted small">${t("set_goal_note")}</p>
       <div class="goal-setter">
         <button class="stepper" data-action="goal-dec">−</button>
-        <div class="counter-val">${goal} <small>XP/día</small></div>
+        <div class="counter-val">${goal} <small>${t("set_goal_unit")}</small></div>
         <button class="stepper" data-action="goal-inc">+</button>
       </div>
     </section>
 
     <section class="card">
-      <h3>\uD83D\uDD14 Recordatorios</h3>
-      <label class="switch-row">
-        <span>Activar recordatorios</span>
-        <input type="checkbox" data-action="toggle-reminders" ${rem.enabled ? "checked" : ""} />
-      </label>
-      <p class="muted small">Recibirás un aviso a las horas indicadas mientras la app esté abierta o instalada. Requiere permiso de notificaciones del navegador.</p>
-      <div class="times-list">${timesChips || '<span class="muted small">Sin horas configuradas.</span>'}</div>
+      <h3>${t("set_reminders")}</h3>
+      <label class="switch-row"><span>${t("set_reminders_on")}</span>
+        <input type="checkbox" data-action="toggle-reminders" ${rem.enabled ? "checked" : ""} /></label>
+      <p class="muted small">${t("set_reminders_note")}</p>
+      <div class="times-list">${timesChips || `<span class="muted small">${t("set_no_times")}</span>`}</div>
       <div class="add-time-row">
         <input type="time" id="new-reminder-time" value="09:00" />
-        <button class="btn ghost" data-action="add-reminder-time">➕ Añadir hora</button>
+        <button class="btn ghost" data-action="add-reminder-time">${t("set_add_time")}</button>
       </div>
     </section>
 
     <section class="card">
-      <h3>\uD83D\uDD12 Protección del modo médico</h3>
-      <label class="switch-row">
-        <span>Pedir PIN para editar</span>
-        <input type="checkbox" data-action="toggle-pin" ${s.editor.pinEnabled ? "checked" : ""} />
-      </label>
+      <h3>${t("set_pin_title")}</h3>
+      <label class="switch-row"><span>${t("set_pin_ask")}</span>
+        <input type="checkbox" data-action="toggle-pin" ${s.editor.pinEnabled ? "checked" : ""} /></label>
       ${s.editor.pinEnabled ? `
-      <label>PIN (4 dígitos)
+      <label>PIN
         <input type="text" inputmode="numeric" maxlength="4" id="editor-pin" value="${esc(s.editor.pin || "")}" placeholder="0000" />
-        <button class="btn ghost" data-action="save-pin">Guardar PIN</button>
+        <button class="btn ghost" data-action="save-pin">${t("save")} PIN</button>
       </label>` : ""}
     </section>
 
     <section class="card">
-      <h3>♿ Accesibilidad</h3>
-      <p class="muted small">Pensado para personas mayores o con dificultades visuales.</p>
-      <label class="switch-row">
-        <span>Texto grande</span>
-        <input type="checkbox" data-action="toggle-large-text" ${s.largeText ? "checked" : ""} />
-      </label>
-      <label class="switch-row">
-        <span>Alto contraste</span>
-        <input type="checkbox" data-action="toggle-contrast" ${s.highContrast ? "checked" : ""} />
-      </label>
-      <label class="switch-row">
-        <span>Reducir animaciones</span>
-        <input type="checkbox" data-action="toggle-motion" ${s.reducedMotion ? "checked" : ""} />
-      </label>
+      <h3>${t("set_access")}</h3>
+      <p class="muted small">${t("set_access_note")}</p>
+      <label class="switch-row"><span>${t("set_large")}</span><input type="checkbox" data-action="toggle-large-text" ${s.largeText ? "checked" : ""} /></label>
+      <label class="switch-row"><span>${t("set_contrast")}</span><input type="checkbox" data-action="toggle-contrast" ${s.highContrast ? "checked" : ""} /></label>
+      <label class="switch-row"><span>${t("set_motion")}</span><input type="checkbox" data-action="toggle-motion" ${s.reducedMotion ? "checked" : ""} /></label>
     </section>
 
     <section class="card">
-      <h3>\uD83D\uDCBE Datos</h3>
-      <p class="muted small">Los datos se guardan solo en este dispositivo.</p>
+      <h3>${t("set_data")}</h3>
+      <p class="muted small">${t("set_data_note")}</p>
       <div class="row-btns">
-        <button class="btn ghost" data-action="export">⬇️ Exportar copia</button>
-        <label class="btn ghost file-btn">⬆️ Importar
-          <input type="file" id="import-file" accept="application/json" hidden />
-        </label>
-        <button class="btn danger ghost" data-action="reset">\uD83D\uDDD1️ Reiniciar todo</button>
+        <button class="btn ghost" data-action="export">${t("set_export")}</button>
+        <label class="btn ghost file-btn">${t("set_import")}<input type="file" id="import-file" accept="application/json" hidden /></label>
+        <button class="btn danger ghost" data-action="reset">${t("set_reset")}</button>
       </div>
     </section>
 
     <section class="card disclaimer-card">
-      <h3>ℹ️ Nota ERAS</h3>
-      <p class="small">${esc(ERAS_NOTE)}</p>
+      <h3>${t("set_eras")}</h3>
+      <p class="small">${esc(getLang() === "en" ? ERAS_NOTE_EN : ERAS_NOTE)}</p>
     </section>`;
   }
 
@@ -2361,6 +3309,9 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
   }
 
   // js/app.js
+  function L2(es, en) {
+    return getLang() === "en" ? en : es;
+  }
   var route = "hoy";
   var editorTab = "tareas";
   var currentPostId = null;
@@ -2393,6 +3344,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
   }
   function render() {
     const state2 = getState();
+    setLang(state2.settings.lang);
     const app = document.getElementById("app");
     if (!state2.onboarded) {
       app.className = "onboarding-mode";
@@ -2437,6 +3389,12 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         break;
       case "juego":
         body = renderMemoryGame(state2, memoryGame);
+        break;
+      case "report":
+        body = renderReport(state2);
+        break;
+      case "perfiles":
+        body = renderProfiles(state2);
         break;
       default:
         body = renderToday(state2);
@@ -2485,25 +3443,25 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         break;
       case "toggle-task": {
         const id = el.dataset.task;
-        const t = getTaskById(state2, id);
+        const t2 = getTaskById(state2, id);
         const log = getDayLog();
         log.tasks[id] = !(log.tasks[id] === true);
-        afterTaskChange(log.tasks[id] === true ? t : null);
+        afterTaskChange(log.tasks[id] === true ? t2 : null);
         break;
       }
       case "counter-inc":
       case "counter-dec": {
         const id = el.dataset.task;
-        const t = getTaskById(state2, id);
-        if (!t)
+        const t2 = getTaskById(state2, id);
+        if (!t2)
           break;
-        const step = t.target >= 20 ? 5 : 1;
+        const step = t2.target >= 20 ? 5 : 1;
         const log = getDayLog();
         const cur = typeof log.tasks[id] === "number" ? log.tasks[id] : 0;
-        const wasDone = cur >= t.target;
+        const wasDone = cur >= t2.target;
         const next = Math.max(0, cur + (action === "counter-inc" ? step : -step));
         log.tasks[id] = next;
-        afterTaskChange(!wasDone && next >= t.target ? t : null);
+        afterTaskChange(!wasDone && next >= t2.target ? t2 : null);
         break;
       }
       case "set-mood": {
@@ -2517,7 +3475,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         openPillarInfo(el.dataset.pillar);
         break;
       case "show-disclaimer":
-        openModal("Aviso médico", `<p>${esc(DISCLAIMER)}</p>`);
+        openModal(L2("Aviso médico", "Medical notice"), `<p>${esc(getLang() === "en" ? DISCLAIMER_EN : DISCLAIMER)}</p>`);
         break;
       case "export":
         doExport();
@@ -2531,11 +3489,20 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       case "speak":
         speakFrom(el);
         break;
-      case "print-meds":
+      case "print-doc":
         window.print();
         break;
       case "del-med":
         delMed(Number(el.dataset.idx));
+        break;
+      case "switch-profile":
+        doSwitchProfile(el.dataset.id);
+        break;
+      case "rename-profile":
+        doRenameProfile(el.dataset.id);
+        break;
+      case "delete-profile":
+        doDeleteProfile(el.dataset.id);
         break;
       case "memory-start":
         startMemory(Number(el.dataset.pairs));
@@ -2551,47 +3518,47 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         openPost(el.dataset.id);
         break;
       case "edit-profile":
-        openModal("Editar mis datos", profileFormHtml(state2));
+        openModal(L2("Editar mis datos", "Edit my details"), profileFormHtml(state2));
         break;
       case "editor-tab":
         editorTab = el.dataset.tab;
         render();
         break;
       case "new-task":
-        openModal("Nueva tarea", taskFormHtml(state2, null));
+        openModal(L2("Nueva tarea", "New task"), taskFormHtml(state2, null));
         break;
       case "edit-task": {
-        const t = getAllTasksForEditor(state2).find((x) => x.id === el.dataset.id);
-        openModal("Editar tarea", taskFormHtml(state2, t));
+        const t2 = getAllTasksForEditor(state2).find((x) => x.id === el.dataset.id);
+        openModal(L2("Editar tarea", "Edit task"), taskFormHtml(state2, t2));
         break;
       }
       case "toggle-task-active":
         toggleTaskActive(el.dataset.id);
         break;
       case "delete-task":
-        confirmDelete("tarea", () => deleteCustomTask(el.dataset.id));
+        confirmDelete(L2("tarea", "task"), () => deleteCustomTask(el.dataset.id));
         break;
       case "new-resource":
-        openModal("Nuevo recurso", resourceFormHtml(state2, null));
+        openModal(L2("Nuevo recurso", "New resource"), resourceFormHtml(state2, null));
         break;
       case "edit-resource": {
         const r = getResources(state2).find((x) => x.id === el.dataset.id);
-        openModal("Editar recurso", resourceFormHtml(state2, r));
+        openModal(L2("Editar recurso", "Edit resource"), resourceFormHtml(state2, r));
         break;
       }
       case "delete-resource":
-        confirmDelete("recurso", () => deleteResource(el.dataset.id));
+        confirmDelete(L2("recurso", "resource"), () => deleteResource(el.dataset.id));
         break;
       case "new-post":
-        openModal("Nueva publicación", postFormHtml(state2, null));
+        openModal(L2("Nueva publicación", "New article"), postFormHtml(state2, null));
         break;
       case "edit-post": {
         const p = getPosts(state2).find((x) => x.id === el.dataset.id);
-        openModal("Editar publicación", postFormHtml(state2, p));
+        openModal(L2("Editar publicación", "Edit article"), postFormHtml(state2, p));
         break;
       }
       case "delete-post":
-        confirmDelete("publicación", () => deletePost(el.dataset.id));
+        confirmDelete(L2("publicación", "article"), () => deletePost(el.dataset.id));
         break;
       case "goal-inc":
         changeGoal(5);
@@ -2641,6 +3608,12 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
           applyDisplaySettings();
           render();
           return;
+        case "set-lang":
+          state2.settings.lang = el.value === "en" ? "en" : "es";
+          setLang(state2.settings.lang);
+          saveState();
+          render();
+          return;
       }
     }
     if (e.target.id === "import-file")
@@ -2666,11 +3639,60 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       return submitMed(form);
     if (form.id === "form-med-extra")
       return submitMedExtra(form);
+    if (form.id === "form-profile-new")
+      return submitProfileNew(form);
+  }
+  function doSwitchProfile(id) {
+    switchProfile(id);
+    const state2 = getState();
+    setLang(state2.settings.lang);
+    applyDisplaySettings();
+    route = "hoy";
+    editorUnlocked = false;
+    render();
+    toast(L2("Perfil cambiado.", "Profile switched."));
+  }
+  function submitProfileNew(form) {
+    const fd = new FormData(form);
+    const name = (fd.get("name") || "").toString().trim() || L2("Nuevo paciente", "New patient");
+    const copy = fd.get("copy") === "on";
+    createProfile(name, copy);
+    const state2 = getState();
+    seedLibrary(state2);
+    recompute(state2);
+    saveState();
+    applyDisplaySettings();
+    route = "hoy";
+    editorUnlocked = false;
+    render();
+    toast(L2("✔ Perfil creado.", "✔ Profile created."));
+  }
+  function doRenameProfile(id) {
+    const current = listProfiles().find((p) => p.id === id);
+    const name = window.prompt(L2("Nuevo nombre del perfil:", "New profile name:"), current ? current.name : "");
+    if (name && name.trim()) {
+      renameProfile(id, name.trim());
+      render();
+    }
+  }
+  function doDeleteProfile(id) {
+    if (!window.confirm(L2("¿Borrar este perfil y todos sus datos? No se puede deshacer.", "Delete this profile and all its data? This cannot be undone.")))
+      return;
+    const ok = deleteProfile(id);
+    if (!ok) {
+      toast(L2("Debe quedar al menos un perfil.", "At least one profile must remain."));
+      return;
+    }
+    const state2 = getState();
+    setLang(state2.settings.lang);
+    applyDisplaySettings();
+    route = "hoy";
+    render();
   }
   function submitOnboarding(form) {
     const fd = new FormData(form);
     const state2 = getState();
-    state2.profile.name = (fd.get("name") || "").toString().trim() || "paciente";
+    state2.profile.name = (fd.get("name") || "").toString().trim() || L2("paciente", "patient");
     state2.profile.surgeryType = (fd.get("surgeryType") || "").toString().trim();
     state2.profile.surgeryDate = (fd.get("surgeryDate") || "").toString();
     state2.profile.activityLevel = (fd.get("activityLevel") || "medio").toString();
@@ -2680,12 +3702,12 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     saveState();
     route = "hoy";
     render();
-    toast("\uD83C\uDF89 ¡Bienvenido! Tu programa está listo. ¡Empieza a sumar puntos!");
+    toast(L2("\uD83C\uDF89 ¡Bienvenido! Tu programa está listo. ¡Empieza a sumar puntos!", "\uD83C\uDF89 Welcome! Your program is ready. Start earning points!"));
   }
   function submitProfile(form) {
     const fd = new FormData(form);
     const p = getState().profile;
-    p.name = (fd.get("name") || "").toString().trim() || "paciente";
+    p.name = (fd.get("name") || "").toString().trim() || L2("paciente", "patient");
     p.surgeryType = (fd.get("surgeryType") || "").toString().trim();
     p.surgeryDate = (fd.get("surgeryDate") || "").toString();
     p.activityLevel = (fd.get("activityLevel") || "medio").toString();
@@ -2693,7 +3715,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     saveState();
     closeModal();
     render();
-    toast("✔ Datos actualizados.");
+    toast(L2("✔ Datos actualizados.", "✔ Details updated."));
   }
   function submitTask(form) {
     const fd = new FormData(form);
@@ -2722,9 +3744,9 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         unit: fields.unit
       };
     } else if (id) {
-      const t = state2.library.tasks.find((x) => x.id === id);
-      if (t)
-        Object.assign(t, fields);
+      const t2 = state2.library.tasks.find((x) => x.id === id);
+      if (t2)
+        Object.assign(t2, fields);
     } else {
       state2.library.tasks.push({ id: uid("task"), disabled: false, ...fields });
     }
@@ -2732,13 +3754,13 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     saveState();
     closeModal();
     render();
-    toast("✔ Tarea guardada.");
+    toast(L2("✔ Tarea guardada.", "✔ Task saved."));
   }
   function toggleTaskActive(id) {
     const state2 = getState();
-    if (state2.library.tasks.some((t) => t.id === id)) {
-      const t = state2.library.tasks.find((x) => x.id === id);
-      t.disabled = !t.disabled;
+    if (state2.library.tasks.some((t2) => t2.id === id)) {
+      const t2 = state2.library.tasks.find((x) => x.id === id);
+      t2.disabled = !t2.disabled;
     } else {
       const o = state2.library.taskOverrides[id] || {};
       o.disabled = !o.disabled;
@@ -2750,11 +3772,11 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
   }
   function deleteCustomTask(id) {
     const state2 = getState();
-    state2.library.tasks = state2.library.tasks.filter((t) => t.id !== id);
+    state2.library.tasks = state2.library.tasks.filter((t2) => t2.id !== id);
     recompute(state2);
     saveState();
     render();
-    toast("Tarea eliminada.");
+    toast(L2("Tarea eliminada.", "Task deleted."));
   }
   function submitResource(form) {
     const fd = new FormData(form);
@@ -2776,14 +3798,14 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     saveState();
     closeModal();
     render();
-    toast("✔ Recurso guardado.");
+    toast(L2("✔ Recurso guardado.", "✔ Resource saved."));
   }
   function deleteResource(id) {
     const state2 = getState();
     state2.library.resources = state2.library.resources.filter((r) => r.id !== id);
     saveState();
     render();
-    toast("Recurso eliminado.");
+    toast(L2("Recurso eliminado.", "Resource deleted."));
   }
   function submitPost(form) {
     const fd = new FormData(form);
@@ -2800,19 +3822,19 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       if (p)
         Object.assign(p, fields);
     } else {
-      state2.library.posts.push({ id: uid("post"), date: todayKey(), author: state2.profile.name || "Equipo médico", ...fields });
+      state2.library.posts.push({ id: uid("post"), date: todayKey(), author: state2.profile.name || L2("Equipo médico", "Medical team"), ...fields });
     }
     saveState();
     closeModal();
     render();
-    toast("✔ Publicación guardada.");
+    toast(L2("✔ Publicación guardada.", "✔ Article saved."));
   }
   function deletePost(id) {
     const state2 = getState();
     state2.library.posts = state2.library.posts.filter((p) => p.id !== id);
     saveState();
     render();
-    toast("Publicación eliminada.");
+    toast(L2("Publicación eliminada.", "Article deleted."));
   }
   function openPost(id) {
     const state2 = getState();
@@ -2849,7 +3871,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     saveState();
     render();
     if (enabled && !state2.settings.reminders.enabled) {
-      toast("Activa las notificaciones en tu navegador para recibir recordatorios.");
+      toast(L2("Activa las notificaciones en tu navegador para recibir recordatorios.", "Enable notifications in your browser to receive reminders."));
     }
   }
   function addReminderTime() {
@@ -2877,15 +3899,15 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     const val = (input && input.value || "").trim();
     getState().settings.editor.pin = val;
     saveState();
-    toast("\uD83D\uDD12 PIN guardado.");
+    toast(L2("\uD83D\uDD12 PIN guardado.", "\uD83D\uDD12 PIN saved."));
   }
   function openPinPrompt(onSuccess) {
-    openModal("Introduce el PIN", `
-    <p class="muted small">El modo médico está protegido con un PIN.</p>
+    openModal(L2("Introduce el PIN", "Enter the PIN"), `
+    <p class="muted small">${L2("El modo médico está protegido con un PIN.", "Clinician mode is protected with a PIN.")}</p>
     <input type="text" inputmode="numeric" maxlength="4" id="pin-input" class="pin-input" placeholder="••••" />
     <div class="row-btns">
-      <button class="btn ghost" data-action="close-modal">Cancelar</button>
-      <button class="btn primary" id="pin-ok">Entrar</button>
+      <button class="btn ghost" data-action="close-modal">${L2("Cancelar", "Cancel")}</button>
+      <button class="btn primary" id="pin-ok">${L2("Entrar", "Enter")}</button>
     </div>`);
     const ok = document.getElementById("pin-ok");
     const inp = document.getElementById("pin-input");
@@ -2898,7 +3920,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
           onSuccess();
         } else {
           inp.classList.add("shake");
-          toast("PIN incorrecto.");
+          toast(L2("PIN incorrecto.", "Wrong PIN."));
         }
       });
   }
@@ -2917,9 +3939,9 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         applyDisplaySettings();
         route = "hoy";
         render();
-        toast("✔ Datos importados correctamente.");
+        toast(L2("✔ Datos importados correctamente.", "✔ Data imported successfully."));
       } catch (err) {
-        toast("No se pudo importar: archivo no válido.");
+        toast(L2("No se pudo importar: archivo no válido.", "Import failed: invalid file."));
       }
     };
     reader.readAsText(file);
@@ -2930,18 +3952,18 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     saveState();
     render();
     if (completedTask)
-      toast(`${completedTask.icon || "✔"} +${completedTask.xp} XP · ${completedTask.title}`);
+      toast(`${completedTask.icon || "✔"} +${completedTask.xp} XP · ${tr(completedTask, "title")}`);
     handleEvents(events);
   }
   function handleEvents(events) {
     if (!events)
       return;
     if (events.leveledUp)
-      setTimeout(() => toast(`⬆️ ¡Subiste al nivel ${events.level}! Sigue así.`, "level"), 350);
+      setTimeout(() => toast(L2(`⬆️ ¡Subiste al nivel ${events.level}! Sigue así.`, `⬆️ You reached level ${events.level}! Keep it up.`), "level"), 350);
     for (const b of events.newBadges)
       setTimeout(() => celebrateBadge(b), 600);
     if (events.challengeCompletedNow)
-      setTimeout(() => toast(`\uD83C\uDFAF ¡Reto semanal completado! +${events.challenge.xp} XP`, "level"), 500);
+      setTimeout(() => toast(L2(`\uD83C\uDFAF ¡Reto semanal completado! +${events.challenge.xp} XP`, `\uD83C\uDFAF Weekly challenge completed! +${events.challenge.xp} XP`), "level"), 500);
   }
   document.addEventListener("toggle", (e) => {
     const det = e.target;
@@ -2979,14 +4001,14 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     const p = getPillarById(getState(), pillarId);
     if (!p)
       return;
-    openModal(`${p.emoji} ${p.name}`, `<p><strong>${esc(p.tagline || "")}</strong></p><p>${esc(p.why || "")}</p>`);
+    openModal(`${p.emoji} ${tr(p, "name")}`, `<p><strong>${esc(tr(p, "tagline"))}</strong></p><p>${esc(tr(p, "why"))}</p>`);
   }
   function confirmDelete(what, onConfirm) {
-    openModal("Confirmar", `
-    <p>¿Seguro que quieres eliminar esta ${esc(what)}? Esta acción no se puede deshacer.</p>
+    openModal(L2("Confirmar", "Confirm"), `
+    <p>${L2("¿Seguro que quieres eliminar esta " + esc(what) + "? Esta acción no se puede deshacer.", "Are you sure you want to delete this " + esc(what) + "? This cannot be undone.")}</p>
     <div class="row-btns">
-      <button class="btn ghost" data-action="close-modal">Cancelar</button>
-      <button class="btn danger" id="do-del">Eliminar</button>
+      <button class="btn ghost" data-action="close-modal">${L2("Cancelar", "Cancel")}</button>
+      <button class="btn danger" id="do-del">${L2("Eliminar", "Delete")}</button>
     </div>`);
     const btn = document.getElementById("do-del");
     if (btn)
@@ -2996,11 +4018,11 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       });
   }
   function confirmReset() {
-    openModal("Reiniciar programa", `
-    <p>Esto borrará TODO: progreso, tareas personalizadas, recursos, publicaciones y medallas de este dispositivo. No se puede deshacer.</p>
+    openModal(L2("Reiniciar programa", "Reset program"), `
+    <p>${L2("Esto borrará TODO en este perfil: progreso, tareas personalizadas, recursos, publicaciones y medallas. No se puede deshacer.", "This will erase EVERYTHING in this profile: progress, custom tasks, resources, articles and badges. It cannot be undone.")}</p>
     <div class="row-btns">
-      <button class="btn ghost" data-action="close-modal">Cancelar</button>
-      <button class="btn danger" id="do-reset">Sí, reiniciar</button>
+      <button class="btn ghost" data-action="close-modal">${L2("Cancelar", "Cancel")}</button>
+      <button class="btn danger" id="do-reset">${L2("Sí, reiniciar", "Yes, reset")}</button>
     </div>`);
     const btn = document.getElementById("do-reset");
     if (btn)
@@ -3012,7 +4034,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
         editorUnlocked = false;
         closeModal();
         render();
-        toast("Programa reiniciado.");
+        toast(L2("Programa reiniciado.", "Program reset."));
       });
   }
   function doExport() {
@@ -3025,7 +4047,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
-    toast("⬇️ Copia de seguridad descargada.");
+    toast(L2("⬇️ Copia de seguridad descargada.", "⬇️ Backup downloaded."));
   }
   function toast(msg, kind = "xp") {
     const layer = document.getElementById("toast-layer");
@@ -3046,10 +4068,10 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
       <div class="modal badge-modal">
         <div class="confetti">\uD83C\uDF89</div>
         <div class="big-emoji">${b.emoji}</div>
-        <h2>¡Medalla desbloqueada!</h2>
-        <h3>${esc(b.name)}</h3>
-        <p class="muted">${esc(b.desc)}</p>
-        <button class="btn primary" data-action="close-modal">¡Genial!</button>
+        <h2>${L2("¡Medalla desbloqueada!", "Badge unlocked!")}</h2>
+        <h3>${esc(tr(b, "name"))}</h3>
+        <p class="muted">${esc(tr(b, "desc"))}</p>
+        <button class="btn primary" data-action="close-modal">${L2("¡Genial!", "Great!")}</button>
       </div>
     </div>`;
     const backdrop = root.querySelector(".modal-backdrop");
@@ -3101,12 +4123,12 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
   function speakFrom(el) {
     const synth = window.speechSynthesis;
     if (!synth) {
-      toast("Tu navegador no permite lectura por voz.");
+      toast(L2("Tu navegador no permite lectura por voz.", "Your browser does not support text-to-speech."));
       return;
     }
     if (synth.speaking || synth.pending) {
       synth.cancel();
-      toast("Lectura detenida.");
+      toast(L2("Lectura detenida.", "Reading stopped."));
       return;
     }
     const scope = el.closest("[data-speak-scope]") || el.parentElement;
@@ -3115,10 +4137,10 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     if (!text)
       return;
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = "es-ES";
+    u.lang = getLang() === "en" ? "en-US" : "es-ES";
     u.rate = 0.95;
     synth.speak(u);
-    toast("\uD83D\uDD0A Leyendo… (toca de nuevo para parar)");
+    toast(L2("\uD83D\uDD0A Leyendo… (toca de nuevo para parar)", "\uD83D\uDD0A Reading… (tap again to stop)"));
   }
   function submitFrail(form) {
     const fd = new FormData(form);
@@ -3128,7 +4150,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     for (const q of FRAIL_QUESTIONS) {
       const v = fd.get(q.id);
       if (v == null) {
-        toast("Responde a todas las preguntas, por favor.");
+        toast(L2("Responde a todas las preguntas, por favor.", "Please answer all the questions."));
         return;
       }
       const n = Number(v);
@@ -3139,7 +4161,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     saveState();
     render();
     window.scrollTo(0, 0);
-    toast("✔ Cribado guardado. Compártelo con tu equipo médico.");
+    toast(L2("✔ Cribado guardado. Compártelo con tu equipo médico.", "✔ Screening saved. Share it with your medical team."));
   }
   function submitMed(form) {
     const fd = new FormData(form);
@@ -3154,7 +4176,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     });
     saveState();
     render();
-    toast("✔ Medicamento añadido.");
+    toast(L2("✔ Medicamento añadido.", "✔ Medication added."));
   }
   function delMed(idx) {
     const state2 = getState();
@@ -3169,7 +4191,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     state2.medList.notes = (fd.get("notes") || "").toString().trim();
     saveState();
     render();
-    toast("✔ Guardado.");
+    toast(L2("✔ Guardado.", "✔ Saved."));
   }
   function startMemory(pairs) {
     const n = Math.max(2, Math.min(MEMORY_EMOJIS.length, pairs || 6));
@@ -3230,7 +4252,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     const events = applyEngine(state2);
     saveState();
     if (!wasDone)
-      setTimeout(() => toast("\uD83E\uDDE9 +15 XP · gimnasia mental completada"), 200);
+      setTimeout(() => toast(L2("\uD83E\uDDE9 +15 XP · gimnasia mental completada", "\uD83E\uDDE9 +15 XP · brain training completed")), 200);
     handleEvents(events);
   }
   function registerServiceWorker() {

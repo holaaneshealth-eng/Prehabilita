@@ -4,16 +4,21 @@
 import {
   loadState, saveState, getState, resetState, getDayLog, todayKey,
   exportState, importState,
+  listProfiles, getActiveProfileId, switchProfile, createProfile, renameProfile, deleteProfile,
 } from './state.js';
-import { BADGES, DISCLAIMER, FRAIL_QUESTIONS, MEMORY_EMOJIS } from './content.js';
+import { BADGES, DISCLAIMER, DISCLAIMER_EN, FRAIL_QUESTIONS, MEMORY_EMOJIS } from './content.js';
 import {
   seedLibrary, getTasks, getTaskById, getAllTasksForEditor, getPillarById,
   getResources, getPosts, getDailyGoal, uid,
 } from './data.js';
 import { applyEngine, recompute, dayXp, tasksDoneCount } from './gamification.js';
+import { setLang, getLang, tr } from './i18n.js';
 import * as ui from './ui.js';
 import * as editor from './editor.js';
 import * as charts from './charts.js';
+
+/** Helper de idioma para cadenas locales del controlador (es/en). */
+function L(es, en) { return getLang() === 'en' ? en : es; }
 
 let route = 'hoy';
 let editorTab = 'tareas';
@@ -59,6 +64,7 @@ function applyDisplaySettings() {
 
 function render() {
   const state = getState();
+  setLang(state.settings.lang);
   const app = document.getElementById('app');
 
   if (!state.onboarded) {
@@ -82,6 +88,8 @@ function render() {
     case 'medicacion': body = ui.renderMeds(state); break;
     case 'cuidador': body = ui.renderCaregiver(); break;
     case 'juego': body = ui.renderMemoryGame(state, memoryGame); break;
+    case 'report': body = ui.renderReport(state); break;
+    case 'perfiles': body = ui.renderProfiles(state); break;
     default: body = ui.renderToday(state);
   }
 
@@ -160,7 +168,7 @@ function onClick(e) {
     }
 
     case 'open-pillar': openPillarInfo(el.dataset.pillar); break;
-    case 'show-disclaimer': openModal('Aviso médico', `<p>${ui.esc(DISCLAIMER)}</p>`); break;
+    case 'show-disclaimer': openModal(L('Aviso médico', 'Medical notice'), `<p>${ui.esc(getLang() === 'en' ? DISCLAIMER_EN : DISCLAIMER)}</p>`); break;
     case 'export': doExport(); break;
     case 'reset': confirmReset(); break;
     case 'close-modal': closeModal(); break;
@@ -168,9 +176,14 @@ function onClick(e) {
     /* ----- Accesibilidad / voz ----- */
     case 'speak': speakFrom(el); break;
 
-    /* ----- Medicación ----- */
-    case 'print-meds': window.print(); break;
+    /* ----- Impresión (medicación / informe) ----- */
+    case 'print-doc': window.print(); break;
     case 'del-med': delMed(Number(el.dataset.idx)); break;
+
+    /* ----- Perfiles ----- */
+    case 'switch-profile': doSwitchProfile(el.dataset.id); break;
+    case 'rename-profile': doRenameProfile(el.dataset.id); break;
+    case 'delete-profile': doDeleteProfile(el.dataset.id); break;
 
     /* ----- Juego de memoria ----- */
     case 'memory-start': startMemory(Number(el.dataset.pairs)); break;
@@ -179,38 +192,38 @@ function onClick(e) {
 
     /* ----- Blog ----- */
     case 'open-post': openPost(el.dataset.id); break;
-    case 'edit-profile': openModal('Editar mis datos', ui.profileFormHtml(state)); break;
+    case 'edit-profile': openModal(L('Editar mis datos', 'Edit my details'), ui.profileFormHtml(state)); break;
 
     /* ----- Editor: navegación de pestañas ----- */
     case 'editor-tab': editorTab = el.dataset.tab; render(); break;
 
     /* ----- Editor: tareas ----- */
-    case 'new-task': openModal('Nueva tarea', editor.taskFormHtml(state, null)); break;
+    case 'new-task': openModal(L('Nueva tarea', 'New task'), editor.taskFormHtml(state, null)); break;
     case 'edit-task': {
       const t = getAllTasksForEditor(state).find((x) => x.id === el.dataset.id);
-      openModal('Editar tarea', editor.taskFormHtml(state, t));
+      openModal(L('Editar tarea', 'Edit task'), editor.taskFormHtml(state, t));
       break;
     }
     case 'toggle-task-active': toggleTaskActive(el.dataset.id); break;
-    case 'delete-task': confirmDelete('tarea', () => deleteCustomTask(el.dataset.id)); break;
+    case 'delete-task': confirmDelete(L('tarea', 'task'), () => deleteCustomTask(el.dataset.id)); break;
 
     /* ----- Editor: recursos ----- */
-    case 'new-resource': openModal('Nuevo recurso', editor.resourceFormHtml(state, null)); break;
+    case 'new-resource': openModal(L('Nuevo recurso', 'New resource'), editor.resourceFormHtml(state, null)); break;
     case 'edit-resource': {
       const r = getResources(state).find((x) => x.id === el.dataset.id);
-      openModal('Editar recurso', editor.resourceFormHtml(state, r));
+      openModal(L('Editar recurso', 'Edit resource'), editor.resourceFormHtml(state, r));
       break;
     }
-    case 'delete-resource': confirmDelete('recurso', () => deleteResource(el.dataset.id)); break;
+    case 'delete-resource': confirmDelete(L('recurso', 'resource'), () => deleteResource(el.dataset.id)); break;
 
     /* ----- Editor: blog ----- */
-    case 'new-post': openModal('Nueva publicación', editor.postFormHtml(state, null)); break;
+    case 'new-post': openModal(L('Nueva publicación', 'New article'), editor.postFormHtml(state, null)); break;
     case 'edit-post': {
       const p = getPosts(state).find((x) => x.id === el.dataset.id);
-      openModal('Editar publicación', editor.postFormHtml(state, p));
+      openModal(L('Editar publicación', 'Edit article'), editor.postFormHtml(state, p));
       break;
     }
-    case 'delete-post': confirmDelete('publicación', () => deletePost(el.dataset.id)); break;
+    case 'delete-post': confirmDelete(L('publicación', 'article'), () => deletePost(el.dataset.id)); break;
 
     /* ----- Editor: metas y ajustes ----- */
     case 'goal-inc': changeGoal(5); break;
@@ -241,6 +254,10 @@ function onChange(e) {
       case 'toggle-contrast':
         state.settings.highContrast = el.checked;
         saveState(); applyDisplaySettings(); render(); return;
+      case 'set-lang':
+        state.settings.lang = (el.value === 'en') ? 'en' : 'es';
+        setLang(state.settings.lang);
+        saveState(); render(); return;
     }
   }
   if (e.target.id === 'import-file') importFromFile(e.target);
@@ -261,12 +278,62 @@ function onSubmit(e) {
   if (form.id === 'form-frail') return submitFrail(form);
   if (form.id === 'form-med') return submitMed(form);
   if (form.id === 'form-med-extra') return submitMedExtra(form);
+  if (form.id === 'form-profile-new') return submitProfileNew(form);
+}
+
+/* ---------- Perfiles ---------- */
+
+function doSwitchProfile(id) {
+  switchProfile(id);
+  const state = getState();
+  setLang(state.settings.lang);
+  applyDisplaySettings();
+  route = 'hoy';
+  editorUnlocked = false;
+  render();
+  toast(L('Perfil cambiado.', 'Profile switched.'));
+}
+
+function submitProfileNew(form) {
+  const fd = new FormData(form);
+  const name = (fd.get('name') || '').toString().trim() || L('Nuevo paciente', 'New patient');
+  const copy = fd.get('copy') === 'on';
+  createProfile(name, copy);
+  const state = getState();
+  seedLibrary(state);
+  recompute(state);
+  saveState();
+  applyDisplaySettings();
+  route = 'hoy';
+  editorUnlocked = false;
+  render();
+  toast(L('✔ Perfil creado.', '✔ Profile created.'));
+}
+
+function doRenameProfile(id) {
+  const current = listProfiles().find((p) => p.id === id);
+  const name = window.prompt(L('Nuevo nombre del perfil:', 'New profile name:'), current ? current.name : '');
+  if (name && name.trim()) {
+    renameProfile(id, name.trim());
+    render();
+  }
+}
+
+function doDeleteProfile(id) {
+  if (!window.confirm(L('¿Borrar este perfil y todos sus datos? No se puede deshacer.', 'Delete this profile and all its data? This cannot be undone.'))) return;
+  const ok = deleteProfile(id);
+  if (!ok) { toast(L('Debe quedar al menos un perfil.', 'At least one profile must remain.')); return; }
+  const state = getState();
+  setLang(state.settings.lang);
+  applyDisplaySettings();
+  route = 'hoy';
+  render();
 }
 
 function submitOnboarding(form) {
   const fd = new FormData(form);
   const state = getState();
-  state.profile.name = (fd.get('name') || '').toString().trim() || 'paciente';
+  state.profile.name = (fd.get('name') || '').toString().trim() || L('paciente', 'patient');
   state.profile.surgeryType = (fd.get('surgeryType') || '').toString().trim();
   state.profile.surgeryDate = (fd.get('surgeryDate') || '').toString();
   state.profile.activityLevel = (fd.get('activityLevel') || 'medio').toString();
@@ -276,13 +343,13 @@ function submitOnboarding(form) {
   saveState();
   route = 'hoy';
   render();
-  toast('🎉 ¡Bienvenido! Tu programa está listo. ¡Empieza a sumar puntos!');
+  toast(L('🎉 ¡Bienvenido! Tu programa está listo. ¡Empieza a sumar puntos!', '🎉 Welcome! Your program is ready. Start earning points!'));
 }
 
 function submitProfile(form) {
   const fd = new FormData(form);
   const p = getState().profile;
-  p.name = (fd.get('name') || '').toString().trim() || 'paciente';
+  p.name = (fd.get('name') || '').toString().trim() || L('paciente', 'patient');
   p.surgeryType = (fd.get('surgeryType') || '').toString().trim();
   p.surgeryDate = (fd.get('surgeryDate') || '').toString();
   p.activityLevel = (fd.get('activityLevel') || 'medio').toString();
@@ -290,7 +357,7 @@ function submitProfile(form) {
   saveState();
   closeModal();
   render();
-  toast('✔ Datos actualizados.');
+  toast(L('✔ Datos actualizados.', '✔ Details updated.'));
 }
 
 function submitTask(form) {
@@ -327,7 +394,7 @@ function submitTask(form) {
   saveState();
   closeModal();
   render();
-  toast('✔ Tarea guardada.');
+  toast(L('✔ Tarea guardada.', '✔ Task saved.'));
 }
 
 function toggleTaskActive(id) {
@@ -351,7 +418,7 @@ function deleteCustomTask(id) {
   recompute(state);
   saveState();
   render();
-  toast('Tarea eliminada.');
+  toast(L('Tarea eliminada.', 'Task deleted.'));
 }
 
 function submitResource(form) {
@@ -373,7 +440,7 @@ function submitResource(form) {
   saveState();
   closeModal();
   render();
-  toast('✔ Recurso guardado.');
+  toast(L('✔ Recurso guardado.', '✔ Resource saved.'));
 }
 
 function deleteResource(id) {
@@ -381,7 +448,7 @@ function deleteResource(id) {
   state.library.resources = state.library.resources.filter((r) => r.id !== id);
   saveState();
   render();
-  toast('Recurso eliminado.');
+  toast(L('Recurso eliminado.', 'Resource deleted.'));
 }
 
 function submitPost(form) {
@@ -398,12 +465,12 @@ function submitPost(form) {
     const p = state.library.posts.find((x) => x.id === id);
     if (p) Object.assign(p, fields);
   } else {
-    state.library.posts.push({ id: uid('post'), date: todayKey(), author: state.profile.name || 'Equipo médico', ...fields });
+    state.library.posts.push({ id: uid('post'), date: todayKey(), author: state.profile.name || L('Equipo médico', 'Medical team'), ...fields });
   }
   saveState();
   closeModal();
   render();
-  toast('✔ Publicación guardada.');
+  toast(L('✔ Publicación guardada.', '✔ Article saved.'));
 }
 
 function deletePost(id) {
@@ -411,7 +478,7 @@ function deletePost(id) {
   state.library.posts = state.library.posts.filter((p) => p.id !== id);
   saveState();
   render();
-  toast('Publicación eliminada.');
+  toast(L('Publicación eliminada.', 'Article deleted.'));
 }
 
 function openPost(id) {
@@ -451,7 +518,7 @@ async function toggleReminders(enabled) {
   saveState();
   render();
   if (enabled && !state.settings.reminders.enabled) {
-    toast('Activa las notificaciones en tu navegador para recibir recordatorios.');
+    toast(L('Activa las notificaciones en tu navegador para recibir recordatorios.', 'Enable notifications in your browser to receive reminders.'));
   }
 }
 
@@ -478,16 +545,16 @@ function savePin() {
   const val = (input && input.value || '').trim();
   getState().settings.editor.pin = val;
   saveState();
-  toast('🔒 PIN guardado.');
+  toast(L('🔒 PIN guardado.', '🔒 PIN saved.'));
 }
 
 function openPinPrompt(onSuccess) {
-  openModal('Introduce el PIN', `
-    <p class="muted small">El modo médico está protegido con un PIN.</p>
+  openModal(L('Introduce el PIN', 'Enter the PIN'), `
+    <p class="muted small">${L('El modo médico está protegido con un PIN.', 'Clinician mode is protected with a PIN.')}</p>
     <input type="text" inputmode="numeric" maxlength="4" id="pin-input" class="pin-input" placeholder="••••" />
     <div class="row-btns">
-      <button class="btn ghost" data-action="close-modal">Cancelar</button>
-      <button class="btn primary" id="pin-ok">Entrar</button>
+      <button class="btn ghost" data-action="close-modal">${L('Cancelar', 'Cancel')}</button>
+      <button class="btn primary" id="pin-ok">${L('Entrar', 'Enter')}</button>
     </div>`);
   const ok = document.getElementById('pin-ok');
   const inp = document.getElementById('pin-input');
@@ -498,7 +565,7 @@ function openPinPrompt(onSuccess) {
       onSuccess();
     } else {
       inp.classList.add('shake');
-      toast('PIN incorrecto.');
+      toast(L('PIN incorrecto.', 'Wrong PIN.'));
     }
   });
 }
@@ -519,9 +586,9 @@ function importFromFile(input) {
       applyDisplaySettings();
       route = 'hoy';
       render();
-      toast('✔ Datos importados correctamente.');
+      toast(L('✔ Datos importados correctamente.', '✔ Data imported successfully.'));
     } catch (err) {
-      toast('No se pudo importar: archivo no válido.');
+      toast(L('No se pudo importar: archivo no válido.', 'Import failed: invalid file.'));
     }
   };
   reader.readAsText(file);
@@ -534,15 +601,15 @@ function afterTaskChange(completedTask) {
   const events = applyEngine(state);
   saveState();
   render();
-  if (completedTask) toast(`${completedTask.icon || '✔'} +${completedTask.xp} XP · ${completedTask.title}`);
+  if (completedTask) toast(`${completedTask.icon || '✔'} +${completedTask.xp} XP · ${tr(completedTask, 'title')}`);
   handleEvents(events);
 }
 
 function handleEvents(events) {
   if (!events) return;
-  if (events.leveledUp) setTimeout(() => toast(`⬆️ ¡Subiste al nivel ${events.level}! Sigue así.`, 'level'), 350);
+  if (events.leveledUp) setTimeout(() => toast(L(`⬆️ ¡Subiste al nivel ${events.level}! Sigue así.`, `⬆️ You reached level ${events.level}! Keep it up.`), 'level'), 350);
   for (const b of events.newBadges) setTimeout(() => celebrateBadge(b), 600);
-  if (events.challengeCompletedNow) setTimeout(() => toast(`🎯 ¡Reto semanal completado! +${events.challenge.xp} XP`, 'level'), 500);
+  if (events.challengeCompletedNow) setTimeout(() => toast(L(`🎯 ¡Reto semanal completado! +${events.challenge.xp} XP`, `🎯 Weekly challenge completed! +${events.challenge.xp} XP`), 'level'), 500);
 }
 
 /* ---------- Marca de lecciones leídas (evento toggle) ---------- */
@@ -587,26 +654,26 @@ function closeModal() {
 function openPillarInfo(pillarId) {
   const p = getPillarById(getState(), pillarId);
   if (!p) return;
-  openModal(`${p.emoji} ${p.name}`, `<p><strong>${ui.esc(p.tagline || '')}</strong></p><p>${ui.esc(p.why || '')}</p>`);
+  openModal(`${p.emoji} ${tr(p, 'name')}`, `<p><strong>${ui.esc(tr(p, 'tagline'))}</strong></p><p>${ui.esc(tr(p, 'why'))}</p>`);
 }
 
 function confirmDelete(what, onConfirm) {
-  openModal('Confirmar', `
-    <p>¿Seguro que quieres eliminar esta ${ui.esc(what)}? Esta acción no se puede deshacer.</p>
+  openModal(L('Confirmar', 'Confirm'), `
+    <p>${L('¿Seguro que quieres eliminar esta ' + ui.esc(what) + '? Esta acción no se puede deshacer.', 'Are you sure you want to delete this ' + ui.esc(what) + '? This cannot be undone.')}</p>
     <div class="row-btns">
-      <button class="btn ghost" data-action="close-modal">Cancelar</button>
-      <button class="btn danger" id="do-del">Eliminar</button>
+      <button class="btn ghost" data-action="close-modal">${L('Cancelar', 'Cancel')}</button>
+      <button class="btn danger" id="do-del">${L('Eliminar', 'Delete')}</button>
     </div>`);
   const btn = document.getElementById('do-del');
   if (btn) btn.addEventListener('click', () => { closeModal(); onConfirm(); });
 }
 
 function confirmReset() {
-  openModal('Reiniciar programa', `
-    <p>Esto borrará TODO: progreso, tareas personalizadas, recursos, publicaciones y medallas de este dispositivo. No se puede deshacer.</p>
+  openModal(L('Reiniciar programa', 'Reset program'), `
+    <p>${L('Esto borrará TODO en este perfil: progreso, tareas personalizadas, recursos, publicaciones y medallas. No se puede deshacer.', 'This will erase EVERYTHING in this profile: progress, custom tasks, resources, articles and badges. It cannot be undone.')}</p>
     <div class="row-btns">
-      <button class="btn ghost" data-action="close-modal">Cancelar</button>
-      <button class="btn danger" id="do-reset">Sí, reiniciar</button>
+      <button class="btn ghost" data-action="close-modal">${L('Cancelar', 'Cancel')}</button>
+      <button class="btn danger" id="do-reset">${L('Sí, reiniciar', 'Yes, reset')}</button>
     </div>`);
   const btn = document.getElementById('do-reset');
   if (btn) btn.addEventListener('click', () => {
@@ -617,7 +684,7 @@ function confirmReset() {
     editorUnlocked = false;
     closeModal();
     render();
-    toast('Programa reiniciado.');
+    toast(L('Programa reiniciado.', 'Program reset.'));
   });
 }
 
@@ -631,7 +698,7 @@ function doExport() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  toast('⬇️ Copia de seguridad descargada.');
+  toast(L('⬇️ Copia de seguridad descargada.', '⬇️ Backup downloaded.'));
 }
 
 /* ---------- Toasts ---------- */
@@ -653,10 +720,10 @@ function celebrateBadge(b) {
       <div class="modal badge-modal">
         <div class="confetti">🎉</div>
         <div class="big-emoji">${b.emoji}</div>
-        <h2>¡Medalla desbloqueada!</h2>
-        <h3>${ui.esc(b.name)}</h3>
-        <p class="muted">${ui.esc(b.desc)}</p>
-        <button class="btn primary" data-action="close-modal">¡Genial!</button>
+        <h2>${L('¡Medalla desbloqueada!', 'Badge unlocked!')}</h2>
+        <h3>${ui.esc(tr(b, 'name'))}</h3>
+        <p class="muted">${ui.esc(tr(b, 'desc'))}</p>
+        <button class="btn primary" data-action="close-modal">${L('¡Genial!', 'Great!')}</button>
       </div>
     </div>`;
   const backdrop = root.querySelector('.modal-backdrop');
@@ -711,17 +778,17 @@ function fireReminder() {
 
 function speakFrom(el) {
   const synth = window.speechSynthesis;
-  if (!synth) { toast('Tu navegador no permite lectura por voz.'); return; }
-  if (synth.speaking || synth.pending) { synth.cancel(); toast('Lectura detenida.'); return; }
+  if (!synth) { toast(L('Tu navegador no permite lectura por voz.', 'Your browser does not support text-to-speech.')); return; }
+  if (synth.speaking || synth.pending) { synth.cancel(); toast(L('Lectura detenida.', 'Reading stopped.')); return; }
   const scope = el.closest('[data-speak-scope]') || el.parentElement;
   const target = (scope && scope.querySelector('.speakable')) || scope;
   const text = (target.innerText || target.textContent || '').trim();
   if (!text) return;
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'es-ES';
+  u.lang = getLang() === 'en' ? 'en-US' : 'es-ES';
   u.rate = 0.95;
   synth.speak(u);
-  toast('🔊 Leyendo… (toca de nuevo para parar)');
+  toast(L('🔊 Leyendo… (toca de nuevo para parar)', '🔊 Reading… (tap again to stop)'));
 }
 
 /* ---------- Cribado de fragilidad (FRAIL) ---------- */
@@ -733,7 +800,7 @@ function submitFrail(form) {
   const answers = {};
   for (const q of FRAIL_QUESTIONS) {
     const v = fd.get(q.id);
-    if (v == null) { toast('Responde a todas las preguntas, por favor.'); return; }
+    if (v == null) { toast(L('Responde a todas las preguntas, por favor.', 'Please answer all the questions.')); return; }
     const n = Number(v);
     answers[q.id] = n;
     score += n;
@@ -742,7 +809,7 @@ function submitFrail(form) {
   saveState();
   render();
   window.scrollTo(0, 0);
-  toast('✔ Cribado guardado. Compártelo con tu equipo médico.');
+  toast(L('✔ Cribado guardado. Compártelo con tu equipo médico.', '✔ Screening saved. Share it with your medical team.'));
 }
 
 /* ---------- Medicación y alergias ---------- */
@@ -759,7 +826,7 @@ function submitMed(form) {
   });
   saveState();
   render();
-  toast('✔ Medicamento añadido.');
+  toast(L('✔ Medicamento añadido.', '✔ Medication added.'));
 }
 
 function delMed(idx) {
@@ -776,7 +843,7 @@ function submitMedExtra(form) {
   state.medList.notes = (fd.get('notes') || '').toString().trim();
   saveState();
   render();
-  toast('✔ Guardado.');
+  toast(L('✔ Guardado.', '✔ Saved.'));
 }
 
 /* ---------- Juego de memoria ---------- */
@@ -833,7 +900,7 @@ function finishMemory() {
   log.tasks['gimnasia-mental'] = true;
   const events = applyEngine(state);
   saveState();
-  if (!wasDone) setTimeout(() => toast('🧩 +15 XP · gimnasia mental completada'), 200);
+  if (!wasDone) setTimeout(() => toast(L('🧩 +15 XP · gimnasia mental completada', '🧩 +15 XP · brain training completed')), 200);
   handleEvents(events);
 }
 
