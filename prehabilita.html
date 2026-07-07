@@ -464,6 +464,11 @@ body.high-contrast .phase-focus { color: #111827; }
 .ed-warn p { font-size: .88rem; color: #334155; margin-bottom: 10px; }
 .ed-protected { text-align: center; color: var(--accent); font-weight: 700; font-size: .85rem; background: var(--accent-soft); padding: 8px; border-radius: 10px; margin-bottom: 12px; }
 
+
+/* ---------- Lecciones ampliadas ---------- */
+.lesson-body { font-size: .9rem; color: #334155; line-height: 1.6; }
+.lesson[open] .lesson-body { margin-top: 6px; }
+
   </style>
 </head>
 <body>
@@ -805,8 +810,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83D\uDEB6",
       title: "Caminata activa",
       title_en: "Active walk",
-      desc: "Camina a paso ligero (puedes hablar pero no cantar). Suma minutos a lo largo del día.",
-      desc_en: "Walk at a brisk pace (you can talk but not sing). Add up minutes throughout the day."
+      desc: "Caminar es el mejor punto de partida: mejora tu corazón y tus pulmones, que son los que más trabajan durante y después de la cirugía. Intenta acumular unos 30 minutos al día, a un ritmo en el que puedas hablar pero no cantar. Puedes repartirlo en 2 o 3 paseos cortos. Si te encuentras bien, cada semana añade unos minutos.",
+      desc_en: "Walking is the best starting point: it improves your heart and lungs, which work hardest during and after surgery. Try to build up about 30 minutes a day, at a pace where you can talk but not sing. You can split it into 2 or 3 short walks. If you feel well, add a few minutes each week."
     },
     {
       id: "fuerza",
@@ -816,8 +821,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83D\uDCAA",
       title: "Rutina de fuerza",
       title_en: "Strength routine",
-      desc: "Sentadillas a una silla, puntillas y elevaciones de brazos: 2 series de 10.",
-      desc_en: "Chair squats, calf raises and arm raises: 2 sets of 10."
+      desc: "Conservar y ganar músculo te da fuerza para levantarte, caminar y recuperarte antes tras la operación. Haz 2 series de 10: sentarte y levantarte de una silla sin usar las manos, ponerte de puntillas y elevar los brazos. Muévete despacio y no contengas la respiración; si puedes hablar mientras lo haces, vas a buen ritmo.",
+      desc_en: "Keeping and gaining muscle gives you the strength to stand up, walk and recover sooner after the operation. Do 2 sets of 10: sit down and stand up from a chair without using your hands, rise on your toes and lift your arms. Move slowly and do not hold your breath; if you can talk while doing it, your pace is good."
     },
     {
       id: "movilidad",
@@ -838,8 +843,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83E\uDDCD",
       title: "Equilibrio (con apoyo)",
       title_en: "Balance (with support)",
-      desc: "Junto a una silla o encimera y, a ser posible, acompañado: mantén el equilibrio sobre una pierna 10-20 s por lado. Ten SIEMPRE un punto de apoyo cerca para evitar caídas.",
-      desc_en: "Next to a chair or counter and, if possible, with company: balance on one leg for 10-20 s per side. ALWAYS keep a support nearby to avoid falls."
+      desc: "Trabajar el equilibrio reduce el riesgo de caídas, algo clave antes y después de la cirugía. Apóyate en una silla o encimera y, si puedes, hazlo acompañado. Mantente sobre una pierna 10-20 segundos por lado. Ten SIEMPRE un punto de apoyo firme al alcance de la mano.",
+      desc_en: "Working on balance reduces the risk of falls, which is key before and after surgery. Hold on to a chair or counter and, if you can, do it with company. Balance on one leg for 10-20 seconds per side. ALWAYS keep a firm support within reach."
     },
     {
       id: "inspiratorio",
@@ -852,8 +857,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83E\uDEC1",
       title: "Entrenamiento inspiratorio",
       title_en: "Inspiratory training",
-      desc: "Inspiraciones profundas y lentas (o con tu inspirómetro incentivador si tienes uno).",
-      desc_en: "Slow, deep breaths in (or with your incentive spirometer if you have one)."
+      desc: "Tus músculos de la respiración también se entrenan, y hacerlo antes reduce el riesgo de infecciones pulmonares tras la anestesia. Haz inspiraciones lentas y profundas llenando bien el pecho; si tienes un inspirómetro incentivador, úsalo como te enseñaron. Descansa unos segundos entre repeticiones para no marearte.",
+      desc_en: "Your breathing muscles can be trained too, and doing it beforehand lowers the risk of lung infections after anesthesia. Take slow, deep breaths in, filling your chest well; if you have an incentive spirometer, use it as you were shown. Rest a few seconds between repetitions so you do not get dizzy."
     },
     {
       id: "diafragmatica",
@@ -863,8 +868,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83C\uDF2C️",
       title: "Respiración diafragmática",
       title_en: "Diaphragmatic breathing",
-      desc: "5 minutos: inhala 4 s por la nariz, exhala 6 s por la boca, moviendo el abdomen.",
-      desc_en: "5 minutes: inhale 4 s through the nose, exhale 6 s through the mouth, moving your belly."
+      desc: "Respirar con el abdomen (y no solo con el pecho) mete más aire y ayuda a calmar los nervios. Pon una mano en la barriga: al inhalar 4 segundos por la nariz debe subir, y al exhalar 6 segundos por la boca debe bajar. Repite unos 5 minutos. Esta técnica te servirá también para relajarte el día de la cirugía.",
+      desc_en: "Breathing with your belly (not just your chest) brings in more air and helps calm your nerves. Put a hand on your tummy: breathing in for 4 seconds through the nose it should rise, and breathing out for 6 seconds through the mouth it should fall. Repeat for about 5 minutes. This technique will also help you relax on surgery day."
     },
     {
       id: "tos-eficaz",
@@ -885,8 +890,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83C\uDF73",
       title: "Proteína en cada comida",
       title_en: "Protein at every meal",
-      desc: "Incluye una fuente de proteína (huevo, legumbre, pescado, carne magra, lácteos) en cada comida principal.",
-      desc_en: "Include a protein source (egg, legumes, fish, lean meat, dairy) at every main meal."
+      desc: "La proteína es el material que tu cuerpo usa para cicatrizar y no perder músculo con el estrés de la cirugía. Incluye una fuente en cada comida principal: huevos, pescado, pollo, legumbres, yogur o queso. Repartirla a lo largo del día se aprovecha mejor que tomarla toda de golpe. Empieza ya en el desayuno.",
+      desc_en: "Protein is the material your body uses to heal and to avoid losing muscle under the stress of surgery. Include a source at every main meal: eggs, fish, chicken, legumes, yogurt or cheese. Spreading it through the day is used better than having it all at once. Start at breakfast."
     },
     {
       id: "hidratacion",
@@ -899,8 +904,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83D\uDCA7",
       title: "Hidratación",
       title_en: "Hydration",
-      desc: "Bebe agua a lo largo del día (salvo indicación médica de restricción).",
-      desc_en: "Drink water throughout the day (unless your doctor advised fluid restriction)."
+      desc: "Estar bien hidratado ayuda a tu circulación, tu digestión y tu concentración. Intenta unos 6-8 vasos de agua al día, salvo que tu médico te haya indicado limitar los líquidos. Lleva una botella a la vista como recordatorio. Ojo: el día de la operación sigue solo las normas de ayuno de tu centro.",
+      desc_en: "Being well hydrated helps your circulation, digestion and focus. Aim for about 6-8 glasses of water a day, unless your doctor has told you to limit fluids. Keep a bottle in sight as a reminder. Note: on the day of the operation follow only your hospital fasting rules."
     },
     {
       id: "fruta-verdura",
@@ -921,8 +926,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83E\uDDD8",
       title: "Relajación guiada",
       title_en: "Guided relaxation",
-      desc: "10 minutos de relajación, meditación o respiración consciente.",
-      desc_en: "10 minutes of relaxation, meditation or mindful breathing."
+      desc: 'Llegar más tranquilo a la cirugía se asocia con menos dolor y una recuperación más fácil. Dedica unos 10 minutos a una práctica que te calme: meditación guiada, atención plena (mindfulness) o relajar los músculos poco a poco, de los pies a la cabeza. No busques "dejar la mente en blanco"; solo vuelve, una y otra vez, a tu respiración.',
+      desc_en: "Arriving calmer for surgery is linked to less pain and an easier recovery. Spend about 10 minutes on a practice that soothes you: guided meditation, mindfulness or relaxing your muscles little by little, from feet to head. Do not try to empty your mind; just keep coming back, again and again, to your breathing."
     },
     {
       id: "sueno",
@@ -932,8 +937,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83D\uDE34",
       title: "Higiene del sueño",
       title_en: "Sleep hygiene",
-      desc: "Sin pantallas 30 min antes de dormir; apunta a 7-8 h de sueño.",
-      desc_en: "No screens 30 min before bed; aim for 7-8 h of sleep."
+      desc: "Dormir bien fortalece tus defensas y tu ánimo, y te prepara para el esfuerzo de la operación. Apunta a 7-8 horas: mantén un horario regular, evita la cafeína y las pantallas por la tarde-noche y crea una rutina tranquila antes de acostarte. Si el nerviosismo no te deja dormir en los días previos, coméntalo en tu consulta.",
+      desc_en: "Sleeping well strengthens your defenses and your mood, and prepares you for the effort of the operation. Aim for 7-8 hours: keep a regular schedule, avoid caffeine and screens in the evening and build a calm routine before bed. If nerves keep you awake in the days before, mention it at your appointment."
     },
     {
       id: "animo",
@@ -954,8 +959,8 @@ body.high-contrast .phase-focus { color: #111827; }
       icon: "\uD83E\uDDE9",
       title: "Gimnasia mental",
       title_en: "Brain training",
-      desc: "Dedica 10-15 min a un pasatiempo que te haga pensar: el juego de memoria de la app, un crucigrama, sudoku, cartas o sopa de letras.",
-      desc_en: "Spend 10-15 min on a puzzle that makes you think: the app's memory game, a crossword, sudoku, cards or word search."
+      desc: "Mantener la mente activa ayuda a prevenir la confusión (delírium) que a veces aparece tras la anestesia, sobre todo en personas mayores. Dedica 10-15 minutos a algo que te haga pensar: el juego de memoria de la app, crucigramas, sudokus, cartas, o leer y comentar una noticia. Hacerlo acompañado suma doble.",
+      desc_en: "Keeping your mind active helps prevent the confusion (delirium) that sometimes appears after anesthesia, especially in older people. Spend 10-15 minutes on something that makes you think: the app memory game, crosswords, sudokus, cards, or reading and discussing a news story. Doing it with company counts double."
     },
     {
       id: "lectura-conversa",
@@ -1027,59 +1032,178 @@ body.high-contrast .phase-focus { color: #111827; }
   var LESSONS = [
     {
       id: "l1",
-      title: "¿Qué es la prehabilitación?",
-      title_en: "What is prehabilitation?",
-      body: 'La prehabilitación es preparar tu cuerpo y tu mente ANTES de la cirugía para llegar en la mejor forma posible. Igual que un atleta entrena antes de una competición, tú te preparas para el "gran día". Cuanto mejor sea tu punto de partida, mejor toleras la anestesia y la cirugía, y más rápido te recuperas.',
-      body_en: 'Prehabilitation means preparing your body and mind BEFORE surgery so you arrive in the best possible shape. Just like an athlete trains before a competition, you prepare for the "big day". The better your starting point, the better you tolerate anesthesia and surgery, and the faster you recover.'
+      title: "¿Qué es la prehabilitación y por qué funciona?",
+      title_en: "What is prehabilitation and why does it work?",
+      body: `La prehabilitación consiste en preparar tu cuerpo y tu mente en las semanas previas a la operación para llegar lo más fuerte posible. La idea es sencilla: una cirugía es un esfuerzo físico importante, parecido a una carrera de fondo, y llegar entrenado ayuda a superarla mejor.
+
+La investigación en los últimos años es bastante consistente: las personas que se preparan antes suelen tener menos complicaciones (sobre todo pulmonares), pasan menos días ingresadas y recuperan antes su autonomía para las actividades del día a día. El beneficio es aún mayor en personas mayores o con poca reserva física.
+
+No hace falta hacerlo perfecto. Lo que de verdad marca la diferencia es la constancia: pequeños pasos, casi todos los días. Cada tarea que completas aquí es una inversión directa en tu recuperación.`,
+      body_en: `Prehabilitation means preparing your body and mind in the weeks before surgery so you arrive as strong as possible. The idea is simple: surgery is a major physical effort, similar to a long-distance race, and arriving trained helps you get through it better.
+
+Research in recent years is fairly consistent: people who prepare beforehand tend to have fewer complications (especially lung problems), spend fewer days in hospital and recover their day-to-day independence sooner. The benefit is even greater for older people or those with little physical reserve.
+
+You do not need to do it perfectly. What truly makes the difference is consistency: small steps, almost every day. Every task you complete here is a direct investment in your recovery.`
     },
     {
       id: "l2",
-      title: "Los 4 pilares que más importan",
-      title_en: "The 4 pillars that matter most",
-      body: "Ejercicio (capacidad física), respiración (músculos pulmonares), nutrición (proteína e hidratación) y bienestar mental (ansiedad y sueño). Sumar hábitos como dejar el tabaco potencia enormemente los resultados.",
-      body_en: "Exercise (physical capacity), breathing (lung muscles), nutrition (protein and hydration) and mental wellbeing (anxiety and sleep). Adding habits like quitting smoking greatly boosts the results."
+      title: "Los pilares de tu preparación",
+      title_en: "The pillars of your preparation",
+      body: `La prehabilitación se apoya en varios pilares que se refuerzan entre sí:
+
+• Ejercicio: mejora tu corazón, tus pulmones y tu fuerza muscular.
+• Respiración: entrena los músculos que más sufren con la anestesia.
+• Nutrición: aporta el "material" (sobre todo proteína) que tu cuerpo necesita para cicatrizar.
+• Bienestar mental y sueño: reducen el estrés y apoyan a tus defensas.
+
+A estos se suman hábitos decisivos como dejar el tabaco y reducir el alcohol. Trabajar varios a la vez —lo que los profesionales llaman prehabilitación "multimodal"— da mejores resultados que centrarse en uno solo. Por eso el programa combina un poco de cada uno cada día.`,
+      body_en: `Prehabilitation rests on several pillars that reinforce each other:
+
+• Exercise: improves your heart, lungs and muscle strength.
+• Breathing: trains the muscles that suffer most with anesthesia.
+• Nutrition: provides the material (especially protein) your body needs to heal.
+• Mental wellbeing and sleep: reduce stress and support your defenses.
+
+On top of these come decisive habits such as quitting tobacco and cutting down on alcohol. Working on several at once, what professionals call multimodal prehabilitation, gives better results than focusing on just one. That is why the program blends a little of each every day.`
     },
     {
       id: "l3",
       title: "Tu anestesia, paso a paso",
       title_en: "Your anesthesia, step by step",
-      body: "El día de la cirugía, el equipo de anestesia te monitorizará (corazón, oxígeno, presión). Con anestesia general dormirás profundamente y no sentirás dolor. Al despertar estarás en la sala de recuperación, vigilado de cerca. Preguntar tus dudas al anestesiólogo reduce mucho el miedo.",
-      body_en: "On surgery day, the anesthesia team will monitor you (heart, oxygen, blood pressure). Under general anesthesia you will sleep deeply and feel no pain. When you wake up you will be in the recovery room, closely watched. Asking the anesthesiologist your questions greatly reduces fear."
+      body: `Antes de la cirugía tendrás una consulta de preanestesia, donde revisan tu salud, tus medicamentos y tus alergias, y resuelven tus dudas. Es el mejor momento para preguntar todo lo que te preocupe.
+
+El día de la operación, el equipo de anestesia te vigila de forma continua (corazón, oxígeno, tensión, respiración). Con anestesia general estarás dormido profundamente y no sentirás ni recordarás nada del procedimiento. En otros casos puede usarse anestesia regional (se duerme solo una zona), a veces combinada con sedación.
+
+Al terminar despertarás en una sala de recuperación, atendido de cerca hasta que estés estable. Entender este recorrido reduce mucho el miedo: lo desconocido asusta más que lo que ya conocemos.`,
+      body_en: `Before surgery you will have a pre-anesthesia appointment, where they review your health, your medicines and your allergies, and answer your questions. It is the best moment to ask anything that worries you.
+
+On the day of the operation, the anesthesia team watches you continuously (heart, oxygen, blood pressure, breathing). Under general anesthesia you will be deeply asleep and will not feel or remember anything about the procedure. In other cases regional anesthesia may be used (only one area is numbed), sometimes combined with sedation.
+
+Afterwards you will wake up in a recovery room, closely looked after until you are stable. Understanding this journey greatly reduces fear: the unknown is scarier than what we already understand.`
     },
     {
       id: "l4",
       title: "Por qué entrenar la respiración",
       title_en: "Why train your breathing",
-      body: "Tras una anestesia general, los pulmones pueden colapsar zonas pequeñas (atelectasias). Entrenar la musculatura inspiratoria y practicar la respiración profunda reduce el riesgo de neumonía y otras complicaciones pulmonares.",
-      body_en: "After general anesthesia, small areas of the lungs can collapse (atelectasis). Training the inspiratory muscles and practising deep breathing reduces the risk of pneumonia and other lung complications."
+      body: `Durante y después de una anestesia general, es habitual que se cierren pequeñas zonas de los pulmones (se llama atelectasia). Si no se corrige, puede facilitar infecciones como la neumonía.
+
+Buenas noticias: los músculos de la respiración se entrenan, igual que cualquier otro. Practicar antes inspiraciones lentas y profundas, y usar el inspirómetro incentivador si te lo dan, hace que tus pulmones lleguen más preparados. Diversos estudios asocian este entrenamiento con menos complicaciones pulmonares tras la cirugía.
+
+Además, dominar la respiración lenta te dará una herramienta muy útil para calmar los nervios antes de entrar a quirófano y para manejar las molestias después.`,
+      body_en: `During and after general anesthesia, it is common for small areas of the lungs to close off (this is called atelectasis). If it is not corrected, it can make infections such as pneumonia more likely.
+
+Good news: the breathing muscles can be trained, just like any other. Practising slow, deep breaths beforehand, and using the incentive spirometer if you are given one, means your lungs arrive better prepared. Several studies link this training with fewer lung complications after surgery.
+
+On top of that, mastering slow breathing gives you a very useful tool to calm your nerves before going into the operating room and to cope with discomfort afterwards.`
     },
     {
       id: "l5",
-      title: "El poder de dejar de fumar",
-      title_en: "The power of quitting smoking",
-      body: "Dejar de fumar aunque sea 4 semanas antes reduce de forma notable las complicaciones de la herida y respiratorias. A las 12-24 h ya bajan los niveles de monóxido de carbono y mejora el oxígeno que llega a tus tejidos.",
-      body_en: "Quitting smoking even 4 weeks before markedly reduces wound and respiratory complications. Within 12-24 h carbon monoxide levels drop and the oxygen reaching your tissues improves."
+      title: "Tabaco y alcohol: el mayor cambio en menos tiempo",
+      title_en: "Tobacco and alcohol: the biggest change in the least time",
+      body: `Dejar de fumar antes de la cirugía es una de las decisiones con más impacto. En solo 12-24 horas baja el monóxido de carbono de la sangre y llega más oxígeno a tus tejidos. Dejarlo unas 4 semanas antes reduce de forma clara las complicaciones de la herida y respiratorias.
+
+Con el alcohol ocurre algo parecido: reducirlo o suspenderlo mejora la coagulación, la función del hígado y las defensas, y disminuye el riesgo de complicaciones.
+
+No tienes que hacerlo solo. Pide ayuda a tu equipo: existen consejos, apoyos y, si hace falta, tratamientos que hacen el proceso mucho más llevadero. Cualquier reducción suma, pero dejarlo por completo es lo ideal.`,
+      body_en: `Quitting smoking before surgery is one of the most impactful decisions. In just 12-24 hours the carbon monoxide in your blood drops and more oxygen reaches your tissues. Stopping about 4 weeks before clearly reduces wound and respiratory complications.
+
+Something similar happens with alcohol: reducing or stopping it improves clotting, liver function and your defenses, and lowers the risk of complications.
+
+You do not have to do it alone. Ask your team for help: there is advice, support and, if needed, treatments that make the process much easier. Any reduction helps, but stopping completely is ideal.`
     },
     {
       id: "l6",
-      title: "Proteína: el ladrillo de tu recuperación",
-      title_en: "Protein: the building block of recovery",
-      body: "La cirugía es un estrés que consume proteína para cicatrizar y mantener tus músculos. Reparte la proteína entre todas las comidas del día. Si tienes poco apetito, coméntalo con tu equipo: pueden recomendarte suplementos.",
-      body_en: "Surgery is a stress that consumes protein to heal and maintain your muscles. Spread protein across all your meals. If you have little appetite, tell your team: they may recommend supplements."
+      title: 'Nutrición: el "ladrillo" de tu recuperación',
+      title_en: "Nutrition: the building block of your recovery",
+      body: `La cirugía dispara las necesidades de proteína, porque tu cuerpo la usa para cicatrizar la herida, defenderse de infecciones y no perder músculo. Por eso muchos expertos recomiendan cuidar la alimentación como parte de la preparación.
+
+Elige proteínas de calidad y repártelas en todas las comidas, incluido el desayuno: huevos, pescado, pollo, legumbres, lácteos como yogur o queso. Repartirla a lo largo del día se aprovecha mejor que concentrarla en una sola comida.
+
+Si tienes poco apetito o has perdido peso sin querer, no lo dejes pasar: coméntalo con tu equipo. Pueden enriquecer tus platos o recomendarte suplementos nutricionales. Llegar bien nutrido es una de las mejores defensas frente a las complicaciones.`,
+      body_en: `Surgery raises your protein needs, because your body uses it to heal the wound, fight infections and avoid losing muscle. That is why many experts recommend looking after your diet as part of the preparation.
+
+Choose good-quality protein and spread it across all your meals, including breakfast: eggs, fish, chicken, legumes, dairy such as yogurt or cheese. Spreading it through the day is used better than concentrating it in a single meal.
+
+If you have little appetite or have lost weight without meaning to, do not ignore it: tell your team. They can enrich your meals or recommend nutritional supplements. Arriving well nourished is one of the best defenses against complications.`
     },
     {
       id: "l7",
-      title: "El ayuno preoperatorio moderno",
-      title_en: "Modern pre-op fasting",
-      body: 'Ya no es necesario "ayuno desde la medianoche" en la mayoría de casos. Muchos protocolos permiten líquidos claros hasta 2 h antes. SIEMPRE sigue exactamente las instrucciones concretas de tu centro: son tu norma.',
-      body_en: 'Fasting "from midnight" is no longer needed in most cases. Many protocols allow clear fluids up to 2 h before. ALWAYS follow the exact instructions from your hospital: they are your rule.'
+      title: "El ayuno moderno y la bebida de hidratos",
+      title_en: "Modern fasting and the carbohydrate drink",
+      body: `Durante años se pidió a los pacientes estar "en ayunas desde medianoche". Hoy sabemos que ese ayuno tan largo no aporta seguridad extra y sí más malestar (sed, hambre, debilidad).
+
+Muchos protocolos modernos permiten líquidos claros hasta unas 2 horas antes y, en casos seleccionados, una bebida rica en hidratos de carbono la noche anterior y unas horas antes. Esto puede reducir la sensación de sed y ansiedad y ayudar a tu cuerpo a afrontar mejor el estrés de la operación.
+
+Muy importante: esto depende de tu tipo de cirugía y de las normas de tu centro. NUNCA comas ni bebas nada por tu cuenta el día de la operación; sigue exactamente lo que te indiquen. Esa instrucción concreta es siempre tu norma.`,
+      body_en: `For years patients were told to fast "from midnight". We now know that such a long fast adds no extra safety and does cause more discomfort (thirst, hunger, weakness).
+
+Many modern protocols allow clear fluids up to about 2 hours before and, in selected cases, a carbohydrate-rich drink the night before and a few hours before. This can reduce thirst and anxiety and help your body cope better with the stress of the operation.
+
+Very important: this depends on your type of surgery and your hospital rules. NEVER eat or drink anything on your own on the day of the operation; follow exactly what you are told. That specific instruction is always your rule.`
     },
     {
       id: "l8",
-      title: "Domina la ansiedad preoperatoria",
-      title_en: "Master pre-op anxiety",
-      body: "Es normal tener miedo. Técnicas como la respiración 4-6, la relajación muscular progresiva y visualizar una recuperación exitosa reducen el estrés. Dormir bien la semana previa también ayuda a tu sistema inmune.",
-      body_en: "Feeling afraid is normal. Techniques like 4-6 breathing, progressive muscle relaxation and picturing a successful recovery reduce stress. Sleeping well the week before also helps your immune system."
+      title: "Calmar la ansiedad antes del quirófano",
+      title_en: "Calming anxiety before the operating room",
+      body: `Sentir miedo o nervios antes de una cirugía es completamente normal. La buena noticia es que puedes entrenar tu mente para llevarlo mejor, y hacerlo tiene premio: menos ansiedad se asocia con menos dolor percibido y una recuperación más llevadera.
+
+Prueba técnicas sencillas y con respaldo: la respiración lenta 4-6 (inhalar contando 4, exhalar contando 6), la relajación muscular progresiva (tensar y soltar grupos de músculos de los pies a la cabeza) y la visualización positiva (imaginarte recuperándote bien, en casa).
+
+Hablar de tus miedos también ayuda: comparte tus dudas con tu equipo y con tus seres queridos. Y cuida el sueño la semana previa, porque descansar refuerza tu ánimo y tus defensas.`,
+      body_en: `Feeling fear or nerves before surgery is completely normal. The good news is that you can train your mind to cope better, and it pays off: less anxiety is linked to less perceived pain and an easier recovery.
+
+Try simple, well-supported techniques: slow 4-6 breathing (breathe in counting to 4, out counting to 6), progressive muscle relaxation (tense and release muscle groups from feet to head) and positive visualization (picturing yourself recovering well, at home).
+
+Talking about your fears also helps: share your worries with your team and your loved ones. And look after your sleep the week before, because resting strengthens your mood and your defenses.`
+    },
+    {
+      id: "l9",
+      title: "Dormir bien: tu aliado silencioso",
+      title_en: "Sleeping well: your quiet ally",
+      body: `El sueño no es tiempo perdido: mientras duermes, tu cuerpo repara tejidos, ordena la memoria y refuerza el sistema inmune. Llegar descansado a la cirugía te ayuda a tolerar mejor el estrés y a recuperarte antes.
+
+Apunta a 7-8 horas la mayoría de las noches. Ayuda mucho mantener horarios regulares, recibir luz natural por la mañana, evitar la cafeína desde la tarde y dejar las pantallas (móvil, televisión) al menos 30-60 minutos antes de acostarte, porque su luz "engaña" a tu reloj interno.
+
+Crea una rutina tranquila antes de dormir: luz tenue, una ducha templada, lectura o respiración lenta. Si los nervios no te dejan dormir en los días previos, no te automediques: coméntalo en tu consulta.`,
+      body_en: `Sleep is not wasted time: while you sleep, your body repairs tissues, organizes memory and strengthens the immune system. Arriving rested for surgery helps you tolerate stress better and recover sooner.
+
+Aim for 7-8 hours most nights. It helps a lot to keep regular hours, get natural light in the morning, avoid caffeine from the afternoon on and put screens (phone, TV) away at least 30-60 minutes before bed, because their light tricks your internal clock.
+
+Create a calm bedtime routine: dim light, a warm shower, reading or slow breathing. If nerves keep you awake in the days before, do not self-medicate: mention it at your appointment.`
+    },
+    {
+      id: "l10",
+      title: "Mindfulness: entrena la calma",
+      title_en: "Mindfulness: train your calm",
+      body: `El mindfulness, o atención plena, es prestar atención al momento presente sin juzgarlo. No consiste en "dejar la mente en blanco", sino en darte cuenta de cuándo tu mente se va a las preocupaciones y traerla, con amabilidad, de vuelta a la respiración o a lo que estás haciendo.
+
+Practicado a diario, aunque sean 5-10 minutos, ayuda a bajar la ansiedad, mejora el sueño y puede reducir la percepción del dolor. Es como un músculo: cuanto más lo entrenas, más fácil te resulta calmarte cuando lo necesitas, por ejemplo el día de la cirugía.
+
+Empieza fácil: siéntate cómodo, cierra los ojos y sigue tu respiración durante unos minutos. Puedes apoyarte en audios o vídeos de meditación guiada; en la sección de Recursos tu equipo puede dejarte algunos.`,
+      body_en: `Mindfulness means paying attention to the present moment without judging it. It is not about emptying your mind, but about noticing when your mind drifts to worries and gently bringing it back to your breath or to what you are doing.
+
+Practised daily, even for 5-10 minutes, it helps lower anxiety, improves sleep and can reduce how much pain you feel. It is like a muscle: the more you train it, the easier it is to calm down when you need it, for example on the day of surgery.
+
+Start easy: sit comfortably, close your eyes and follow your breathing for a few minutes. You can lean on guided meditation audios or videos; in the Resources section your team can leave you some.`
+    },
+    {
+      id: "l11",
+      title: "¿Cuánto ejercicio y de qué intensidad?",
+      title_en: "How much exercise and how hard?",
+      body: `La recomendación general para prepararte combina ejercicio aeróbico y de fuerza, adaptado a tu punto de partida.
+
+• Aeróbico (caminar, bici estática): apunta a moverte casi todos los días, hasta sumar unos 150 minutos a la semana. Una buena guía de intensidad es la "prueba del habla": deberías poder hablar, pero no cantar.
+• Fuerza: 2-3 días por semana, trabajando piernas, brazos y tronco (levantarte de una silla, puntillas, elevaciones con una botella de agua).
+• Empieza suave y progresa poco a poco. Si tienes poca reserva o miedo a caerte, comienza sentado o con apoyo; es igual de válido.
+
+Señales para parar y consultar: dolor en el pecho, mareo, falta de aire desproporcionada o palpitaciones. Ajusta siempre la intensidad a lo que tu equipo médico te haya autorizado.`,
+      body_en: `The general recommendation to prepare combines aerobic and strength exercise, adapted to your starting point.
+
+• Aerobic (walking, stationary bike): aim to move almost every day, building up to about 150 minutes a week. A good intensity guide is the talk test: you should be able to talk, but not sing.
+• Strength: 2-3 days a week, working legs, arms and trunk (standing up from a chair, calf raises, lifting a water bottle).
+• Start gently and progress little by little. If you have little reserve or fear falling, begin seated or with support; it counts just the same.
+
+Signs to stop and seek advice: chest pain, dizziness, disproportionate breathlessness or palpitations. Always match the intensity to what your medical team has approved.`
     }
   ];
   var PREOP_CHECKLIST = [
@@ -2661,7 +2785,7 @@ LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista c
     const lessons = getLessons().map((l) => `
     <details class="card lesson ${read.has(l.id) ? "read" : ""}" data-lesson="${l.id}" data-speak-scope>
       <summary>${read.has(l.id) ? "✅" : "\uD83D\uDCD6"} ${esc(tr(l, "title"))}</summary>
-      <p class="speakable">${esc(tr(l, "body"))}</p>
+      <div class="speakable lesson-body">${formatBody(tr(l, "body"))}</div>
       <button class="btn ghost speak-btn" data-action="speak">${t("listen")}</button>
     </details>`).join("");
     const preop = getLang() === "en" ? PREOP_CHECKLIST_EN : PREOP_CHECKLIST;

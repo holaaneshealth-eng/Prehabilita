@@ -362,7 +362,7 @@ export function renderLearn(state) {
   const lessons = getLessons().map((l) => `
     <details class="card lesson ${read.has(l.id) ? 'read' : ''}" data-lesson="${l.id}" data-speak-scope>
       <summary>${read.has(l.id) ? '✅' : '📖'} ${esc(tr(l, 'title'))}</summary>
-      <p class="speakable">${esc(tr(l, 'body'))}</p>
+      <div class="speakable lesson-body">${formatBody(tr(l, 'body'))}</div>
       <button class="btn ghost speak-btn" data-action="speak">${t('listen')}</button>
     </details>`).join('');
 
