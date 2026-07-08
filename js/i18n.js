@@ -71,6 +71,7 @@ const UI = {
     mood_question: '¿Cómo te sientes hoy?',
     disclaimer_link: 'ⓘ Aviso médico importante',
     completed_excl: '¡completado!',
+    read_more: 'Ver más', read_less: 'Ver menos',
     // Plan
     plan_title: 'Tu programa de prehabilitación',
     // Progreso
@@ -290,6 +291,7 @@ const UI = {
     mood_question: 'How do you feel today?',
     disclaimer_link: 'ⓘ Important medical notice',
     completed_excl: 'completed!',
+    read_more: 'Read more', read_less: 'Read less',
     plan_title: 'Your prehabilitation program',
     st_level: 'Level', st_xp: 'Total XP', st_streak: 'Current streak', st_best: 'Best streak', st_days: 'Days completed', st_medals: 'Badges',
     chart_xp: '📈 Daily XP (last 14 days)',
@@ -493,6 +495,7 @@ const UI = {
     mood_question: 'Com et sents avui?',
     disclaimer_link: 'ⓘ Avís mèdic important',
     completed_excl: 'completat!',
+    read_more: 'Veure més', read_less: 'Veure menys',
     plan_title: 'El teu programa de prehabilitació',
     st_level: 'Nivell', st_xp: 'XP total', st_streak: 'Ratxa actual', st_best: 'Millor ratxa', st_days: 'Dies complets', st_medals: 'Medalles',
     chart_xp: '📈 XP diària (últims 14 dies)',

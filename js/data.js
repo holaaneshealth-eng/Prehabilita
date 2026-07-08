@@ -78,12 +78,36 @@ export function getLessons() {
   return LESSONS;
 }
 
+/** Mapa de posts por defecto para recuperar traducciones por id. */
+const DEFAULT_POST_MAP = new Map(DEFAULT_POSTS.map((p) => [p.id, p]));
+
+/**
+ * Fusiona los campos de traducción (título/cuerpo en/ca) del post por defecto
+ * correspondiente, para que las publicaciones sembradas antes de esta versión
+ * también se muestren traducidas. No sobrescribe los campos base (es).
+ */
+function withPostTranslations(p) {
+  const d = DEFAULT_POST_MAP.get(p.id);
+  if (!d) return p;
+  return {
+    ...p,
+    title_en: p.title_en || d.title_en,
+    title_ca: p.title_ca || d.title_ca,
+    body_en: p.body_en || d.body_en,
+    body_ca: p.body_ca || d.body_ca,
+  };
+}
+
 export function getPosts(state) {
-  return (state.library.posts || []).slice().sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+  return (state.library.posts || [])
+    .map(withPostTranslations)
+    .slice()
+    .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 }
 
 export function getPostById(state, id) {
-  return (state.library.posts || []).find((p) => p.id === id) || null;
+  const p = (state.library.posts || []).find((x) => x.id === id);
+  return p ? withPostTranslations(p) : null;
 }
 
 export function getResources(state) {

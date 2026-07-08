@@ -80,11 +80,17 @@ export const TASKS = [
   // --- Ejercicio físico ---
   { id: 'caminar', pillar: 'fisico', type: 'counter', unit: 'min', unit_en: 'min', unit_ca: 'min', target: 30, xp: 25, icon: '🚶',
     title: 'Caminata activa', title_en: 'Active walk', title_ca: 'Caminada activa',
+    summary: 'Camina unos 30 minutos al día, a un ritmo en el que puedas hablar pero no cantar.',
+    summary_en: 'Walk about 30 minutes a day, at a pace where you can talk but not sing.',
+    summary_ca: 'Camina uns 30 minuts al dia, a un ritme en què puguis parlar però no cantar.',
     desc: 'Caminar es el mejor punto de partida: mejora tu corazón y tus pulmones, que son los que más trabajan durante y después de la cirugía. Intenta acumular unos 30 minutos al día, a un ritmo en el que puedas hablar pero no cantar. Puedes repartirlo en 2 o 3 paseos cortos. Si te encuentras bien, cada semana añade unos minutos.',
     desc_en: 'Walking is the best starting point: it improves your heart and lungs, which work hardest during and after surgery. Try to build up about 30 minutes a day, at a pace where you can talk but not sing. You can split it into 2 or 3 short walks. If you feel well, add a few minutes each week.',
     desc_ca: 'Caminar és el millor punt de partida: millora el cor i els pulmons, que són els que més treballen durant i després de la cirurgia. Intenta acumular uns 30 minuts al dia, a un ritme en què puguis parlar però no cantar. Ho pots repartir en 2 o 3 passejades curtes. Si et trobes bé, cada setmana afegeix uns minuts.' },
   { id: 'fuerza', pillar: 'fisico', type: 'check', xp: 20, icon: '💪',
     title: 'Rutina de fuerza', title_en: 'Strength routine', title_ca: 'Rutina de força',
+    summary: 'Haz 2 series de 10 ejercicios sencillos de fuerza (levantarte de una silla, puntillas, elevar los brazos).',
+    summary_en: 'Do 2 sets of 10 simple strength exercises (standing up from a chair, calf raises, arm lifts).',
+    summary_ca: 'Fes 2 sèries de 10 exercicis senzills de força (aixecar-te d’una cadira, puntetes, elevar els braços).',
     desc: 'Conservar y ganar músculo te da fuerza para levantarte, caminar y recuperarte antes tras la operación. Haz 2 series de 10: sentarte y levantarte de una silla sin usar las manos, ponerte de puntillas y elevar los brazos. Muévete despacio y no contengas la respiración; si puedes hablar mientras lo haces, vas a buen ritmo.',
     desc_en: 'Keeping and gaining muscle gives you the strength to stand up, walk and recover sooner after the operation. Do 2 sets of 10: sit down and stand up from a chair without using your hands, rise on your toes and lift your arms. Move slowly and do not hold your breath; if you can talk while doing it, your pace is good.',
     desc_ca: 'Conservar i guanyar múscul et dona força per aixecar-te, caminar i recuperar-te abans després de l’operació. Fes 2 sèries de 10: seure i aixecar-te d’una cadira sense fer servir les mans, posar-te de puntetes i elevar els braços. Mou-te a poc a poc i no continguis la respiració; si pots parlar mentre ho fas, vas a bon ritme.' },
@@ -95,6 +101,9 @@ export const TASKS = [
     desc_ca: '5 minuts d’estiraments suaus de cames, esquena i espatlles.' },
   { id: 'equilibrio', pillar: 'fisico', type: 'check', xp: 15, icon: '🧍',
     title: 'Equilibrio (con apoyo)', title_en: 'Balance (with support)', title_ca: 'Equilibri (amb suport)',
+    summary: 'Mantente sobre una pierna 10-20 segundos por lado, siempre con un apoyo firme al alcance.',
+    summary_en: 'Balance on one leg for 10-20 seconds per side, always with a firm support within reach.',
+    summary_ca: 'Mantén-te sobre una cama 10-20 segons per costat, sempre amb un suport ferm a l’abast.',
     desc: 'Trabajar el equilibrio reduce el riesgo de caídas, algo clave antes y después de la cirugía. Apóyate en una silla o encimera y, si puedes, hazlo acompañado. Mantente sobre una pierna 10-20 segundos por lado. Ten SIEMPRE un punto de apoyo firme al alcance de la mano.',
     desc_en: 'Working on balance reduces the risk of falls, which is key before and after surgery. Hold on to a chair or counter and, if you can, do it with company. Balance on one leg for 10-20 seconds per side. ALWAYS keep a firm support within reach.',
     desc_ca: 'Treballar l’equilibri redueix el risc de caigudes, clau abans i després de la cirurgia. Recolza’t en una cadira o taulell i, si pots, fes-ho acompanyat. Mantén-te sobre una cama 10-20 segons per costat. Tingues SEMPRE un punt de suport ferm a l’abast de la mà.' },
@@ -102,11 +111,17 @@ export const TASKS = [
   // --- Respiratorio ---
   { id: 'inspiratorio', pillar: 'respiratorio', type: 'counter', unit: 'reps', unit_en: 'reps', unit_ca: 'reps', target: 30, xp: 25, icon: '🫁',
     title: 'Entrenamiento inspiratorio', title_en: 'Inspiratory training', title_ca: 'Entrenament inspiratori',
+    summary: 'Haz inspiraciones lentas y profundas para entrenar tus músculos respiratorios.',
+    summary_en: 'Take slow, deep breaths to train your breathing muscles.',
+    summary_ca: 'Fes inspiracions lentes i profundes per entrenar els teus músculs respiratoris.',
     desc: 'Tus músculos de la respiración también se entrenan, y hacerlo antes reduce el riesgo de infecciones pulmonares tras la anestesia. Haz inspiraciones lentas y profundas llenando bien el pecho; si tienes un inspirómetro incentivador, úsalo como te enseñaron. Descansa unos segundos entre repeticiones para no marearte.',
     desc_en: 'Your breathing muscles can be trained too, and doing it beforehand lowers the risk of lung infections after anesthesia. Take slow, deep breaths in, filling your chest well; if you have an incentive spirometer, use it as you were shown. Rest a few seconds between repetitions so you do not get dizzy.',
     desc_ca: 'Els teus músculs de la respiració també s’entrenen, i fer-ho abans redueix el risc d’infeccions pulmonars després de l’anestèsia. Fes inspiracions lentes i profundes omplint bé el pit; si tens un inspiròmetre incentivador, fes-lo servir com et van ensenyar. Descansa uns segons entre repeticions per no marejar-te.' },
   { id: 'diafragmatica', pillar: 'respiratorio', type: 'check', xp: 15, icon: '🌬️',
     title: 'Respiración diafragmática', title_en: 'Diaphragmatic breathing', title_ca: 'Respiració diafragmàtica',
+    summary: 'Respira con el abdomen unos 5 minutos: inhala 4 segundos y exhala 6.',
+    summary_en: 'Breathe with your belly for about 5 minutes: breathe in for 4 seconds and out for 6.',
+    summary_ca: 'Respira amb l’abdomen uns 5 minuts: inspira 4 segons i expira 6.',
     desc: 'Respirar con el abdomen (y no solo con el pecho) mete más aire y ayuda a calmar los nervios. Pon una mano en la barriga: al inhalar 4 segundos por la nariz debe subir, y al exhalar 6 segundos por la boca debe bajar. Repite unos 5 minutos. Esta técnica te servirá también para relajarte el día de la cirugía.',
     desc_en: 'Breathing with your belly (not just your chest) brings in more air and helps calm your nerves. Put a hand on your tummy: breathing in for 4 seconds through the nose it should rise, and breathing out for 6 seconds through the mouth it should fall. Repeat for about 5 minutes. This technique will also help you relax on surgery day.',
     desc_ca: 'Respirar amb l’abdomen (i no només amb el pit) fa entrar més aire i ajuda a calmar els nervis. Posa’t una mà a la panxa: en inspirar 4 segons pel nas ha de pujar, i en expirar 6 segons per la boca ha de baixar. Repeteix uns 5 minuts. Aquesta tècnica també et servirà per relaxar-te el dia de la cirurgia.' },
@@ -119,11 +134,17 @@ export const TASKS = [
   // --- Nutrición ---
   { id: 'proteina', pillar: 'nutricion', type: 'check', xp: 20, icon: '🍳',
     title: 'Proteína en cada comida', title_en: 'Protein at every meal', title_ca: 'Proteïna a cada àpat',
+    summary: 'Incluye una fuente de proteína en cada comida principal, empezando por el desayuno.',
+    summary_en: 'Include a source of protein at every main meal, starting with breakfast.',
+    summary_ca: 'Inclou una font de proteïna a cada àpat principal, començant per l’esmorzar.',
     desc: 'La proteína es el material que tu cuerpo usa para cicatrizar y no perder músculo con el estrés de la cirugía. Incluye una fuente en cada comida principal: huevos, pescado, pollo, legumbres, yogur o queso. Repartirla a lo largo del día se aprovecha mejor que tomarla toda de golpe. Empieza ya en el desayuno.',
     desc_en: 'Protein is the material your body uses to heal and to avoid losing muscle under the stress of surgery. Include a source at every main meal: eggs, fish, chicken, legumes, yogurt or cheese. Spreading it through the day is used better than having it all at once. Start at breakfast.',
     desc_ca: 'La proteïna és el material que el teu cos fa servir per cicatritzar i no perdre múscul amb l’estrès de la cirurgia. Inclou-ne una font a cada àpat principal: ous, peix, pollastre, llegums, iogurt o formatge. Repartir-la al llarg del dia s’aprofita millor que prendre-la tota de cop. Comença ja a l’esmorzar.' },
   { id: 'hidratacion', pillar: 'nutricion', type: 'counter', unit: 'vasos', unit_en: 'glasses', unit_ca: 'gots', target: 8, xp: 15, icon: '💧',
     title: 'Hidratación', title_en: 'Hydration', title_ca: 'Hidratació',
+    summary: 'Bebe unos 6-8 vasos de agua al día, salvo indicación médica de limitar líquidos.',
+    summary_en: 'Drink about 6-8 glasses of water a day, unless advised to limit fluids.',
+    summary_ca: 'Beu uns 6-8 gots d’aigua al dia, tret d’indicació mèdica de limitar líquids.',
     desc: 'Estar bien hidratado ayuda a tu circulación, tu digestión y tu concentración. Intenta unos 6-8 vasos de agua al día, salvo que tu médico te haya indicado limitar los líquidos. Lleva una botella a la vista como recordatorio. Ojo: el día de la operación sigue solo las normas de ayuno de tu centro.',
     desc_en: 'Being well hydrated helps your circulation, digestion and focus. Aim for about 6-8 glasses of water a day, unless your doctor has told you to limit fluids. Keep a bottle in sight as a reminder. Note: on the day of the operation follow only your hospital fasting rules.',
     desc_ca: 'Estar ben hidratat ajuda la teva circulació, la digestió i la concentració. Intenta uns 6-8 gots d’aigua al dia, tret que el teu metge t’hagi indicat limitar els líquids. Porta una ampolla a la vista com a recordatori. Compte: el dia de l’operació segueix només les normes de dejuni del teu centre.' },
@@ -136,11 +157,17 @@ export const TASKS = [
   // --- Bienestar mental ---
   { id: 'relajacion', pillar: 'mental', type: 'check', xp: 20, icon: '🧘',
     title: 'Relajación guiada', title_en: 'Guided relaxation', title_ca: 'Relaxació guiada',
+    summary: 'Dedica unos 10 minutos a una práctica que te calme: meditación, mindfulness o relajación muscular.',
+    summary_en: 'Spend about 10 minutes on a calming practice: meditation, mindfulness or muscle relaxation.',
+    summary_ca: 'Dedica uns 10 minuts a una pràctica que et calmi: meditació, mindfulness o relaxació muscular.',
     desc: 'Llegar más tranquilo a la cirugía se asocia con menos dolor y una recuperación más fácil. Dedica unos 10 minutos a una práctica que te calme: meditación guiada, atención plena (mindfulness) o relajar los músculos poco a poco, de los pies a la cabeza. No busques "dejar la mente en blanco"; solo vuelve, una y otra vez, a tu respiración.',
     desc_en: 'Arriving calmer for surgery is linked to less pain and an easier recovery. Spend about 10 minutes on a practice that soothes you: guided meditation, mindfulness or relaxing your muscles little by little, from feet to head. Do not try to empty your mind; just keep coming back, again and again, to your breathing.',
     desc_ca: 'Arribar més tranquil a la cirurgia s’associa amb menys dolor i una recuperació més fàcil. Dedica uns 10 minuts a una pràctica que et calmi: meditació guiada, atenció plena (mindfulness) o relaxar els músculs a poc a poc, dels peus al cap. No busquis "deixar la ment en blanc"; només torna, un cop i un altre, a la teva respiració.' },
   { id: 'sueno', pillar: 'mental', type: 'check', xp: 15, icon: '😴',
     title: 'Higiene del sueño', title_en: 'Sleep hygiene', title_ca: 'Higiene del son',
+    summary: 'Apunta a 7-8 horas de sueño con un horario regular y sin pantallas antes de acostarte.',
+    summary_en: 'Aim for 7-8 hours of sleep with a regular schedule and no screens before bed.',
+    summary_ca: 'Apunta a 7-8 hores de son amb un horari regular i sense pantalles abans d’anar a dormir.',
     desc: 'Dormir bien fortalece tus defensas y tu ánimo, y te prepara para el esfuerzo de la operación. Apunta a 7-8 horas: mantén un horario regular, evita la cafeína y las pantallas por la tarde-noche y crea una rutina tranquila antes de acostarte. Si el nerviosismo no te deja dormir en los días previos, coméntalo en tu consulta.',
     desc_en: 'Sleeping well strengthens your defenses and your mood, and prepares you for the effort of the operation. Aim for 7-8 hours: keep a regular schedule, avoid caffeine and screens in the evening and build a calm routine before bed. If nerves keep you awake in the days before, mention it at your appointment.',
     desc_ca: 'Dormir bé enforteix les teves defenses i el teu ànim, i et prepara per a l’esforç de l’operació. Apunta a 7-8 hores: mantén un horari regular, evita la cafeïna i les pantalles a la tarda-vespre i crea una rutina tranquil·la abans d’anar a dormir. Si el nerviosisme no et deixa dormir els dies previs, comenta-ho a la teva consulta.' },
@@ -153,6 +180,9 @@ export const TASKS = [
   // --- Salud cognitiva ---
   { id: 'gimnasia-mental', pillar: 'cognitivo', type: 'check', xp: 15, icon: '🧩',
     title: 'Gimnasia mental', title_en: 'Brain training', title_ca: 'Gimnàstica mental',
+    summary: 'Dedica 10-15 minutos a algo que te haga pensar: el juego de memoria, crucigramas o cartas.',
+    summary_en: 'Spend 10-15 minutes on something that makes you think: the memory game, crosswords or cards.',
+    summary_ca: 'Dedica 10-15 minuts a alguna cosa que et faci pensar: el joc de memòria, mots encreuats o cartes.',
     desc: 'Mantener la mente activa ayuda a prevenir la confusión (delírium) que a veces aparece tras la anestesia, sobre todo en personas mayores. Dedica 10-15 minutos a algo que te haga pensar: el juego de memoria de la app, crucigramas, sudokus, cartas, o leer y comentar una noticia. Hacerlo acompañado suma doble.',
     desc_en: 'Keeping your mind active helps prevent the confusion (delirium) that sometimes appears after anesthesia, especially in older people. Spend 10-15 minutes on something that makes you think: the app memory game, crosswords, sudokus, cards, or reading and discussing a news story. Doing it with company counts double.',
     desc_ca: 'Mantenir la ment activa ajuda a prevenir la confusió (deliri) que de vegades apareix després de l’anestèsia, sobretot en persones grans. Dedica 10-15 minuts a alguna cosa que et faci pensar: el joc de memòria de l’app, mots encreuats, sudokus, cartes, o llegir i comentar una notícia. Fer-ho acompanyat suma doble.' },
@@ -395,6 +425,8 @@ export const DEFAULT_POSTS = [
   {
     id: 'post-eras',
     title: '¿Qué es el protocolo ERAS y por qué te beneficia?',
+    title_en: 'What is the ERAS protocol and why does it benefit you?',
+    title_ca: 'Què és el protocol ERAS i per què et beneficia?',
     category: 'educacion', cover: '', author: 'Equipo de prehabilitación', date: '2026-01-01',
     body:
 `ERAS son las siglas en inglés de "recuperación intensificada tras la cirugía". Es un conjunto de medidas, respaldadas por la evidencia científica, que buscan que te recuperes antes y con menos complicaciones.
@@ -407,10 +439,34 @@ La idea central es sencilla: en lugar de esperar pasivamente a la operación, T�
 • Movilización precoz y control del dolor tras la cirugía.
 
 Cada tarea que completas en esta app es una pieza de ese rompecabezas. No se trata de hacerlo perfecto, sino de sumar pequeños pasos cada día.`,
+    body_en:
+`ERAS stands for "enhanced recovery after surgery". It is a set of measures, backed by scientific evidence, aimed at helping you recover sooner and with fewer complications.
+
+The core idea is simple: instead of passively waiting for the operation, YOU take an active part in your preparation. This includes:
+
+• Prehabilitation: improving your fitness, nutrition and mental wellbeing in the weeks before.
+• Optimizing habits: reducing or eliminating tobacco and alcohol.
+• Smart fasting: no long, needless hours without eating; a carbohydrate-rich drink is often allowed a few hours before.
+• Early mobilization and pain control after surgery.
+
+Every task you complete in this app is a piece of that puzzle. It is not about doing it perfectly, but about adding small steps every day.`,
+    body_ca:
+`ERAS són les sigles en anglès de "recuperació intensificada després de la cirurgia". És un conjunt de mesures, avalades per l’evidència científica, que busquen que et recuperis abans i amb menys complicacions.
+
+La idea central és senzilla: en lloc d’esperar passivament l’operació, TU participes activament en la teva preparació. Això inclou:
+
+• Prehabilitació: millorar la teva forma física, la teva nutrició i el teu benestar mental en les setmanes prèvies.
+• Optimitzar hàbits: reduir o eliminar tabac i alcohol.
+• Dejuni intel·ligent: res de llargues hores sense menjar sense necessitat; sovint es permet una beguda rica en hidrats de carboni unes hores abans.
+• Mobilització precoç i control del dolor després de la cirurgia.
+
+Cada tasca que completes en aquesta app és una peça d’aquest trencaclosques. No es tracta de fer-ho perfecte, sinó de sumar petits passos cada dia.`,
   },
   {
     id: 'post-carga',
     title: 'Carga de hidratos de carbono antes de la cirugía',
+    title_en: 'Carbohydrate loading before surgery',
+    title_ca: 'Càrrega d’hidrats de carboni abans de la cirurgia',
     category: 'nutricion', cover: '', author: 'Equipo de prehabilitación', date: '2026-01-02',
     body:
 `Durante mucho tiempo se pidió a los pacientes estar "en ayunas desde medianoche". Hoy sabemos que llegar al quirófano con las reservas de energía agotadas no ayuda.
@@ -418,10 +474,24 @@ Cada tarea que completas en esta app es una pieza de ese rompecabezas. No se tra
 Muchos protocolos ERAS recomiendan una bebida rica en hidratos de carbono la noche anterior y unas 2-3 horas antes de la cirugía (según indicación). Esto puede reducir la sensación de sed, hambre y ansiedad, y ayudar a tu cuerpo a afrontar mejor el estrés quirúrgico.
 
 IMPORTANTE: esto depende totalmente de tu tipo de cirugía y de las normas de tu centro. Nunca tomes nada por tu cuenta el día de la operación. Pregunta a tu equipo qué está permitido en tu caso concreto.`,
+    body_en:
+`For a long time patients were told to fast "from midnight". We now know that arriving at the operating room with your energy reserves exhausted does not help.
+
+Many ERAS protocols recommend a carbohydrate-rich drink the night before and about 2-3 hours before surgery (as advised). This can reduce the feeling of thirst, hunger and anxiety, and help your body cope better with surgical stress.
+
+IMPORTANT: this depends entirely on your type of surgery and your hospital rules. Never take anything on your own on the day of the operation. Ask your team what is allowed in your specific case.`,
+    body_ca:
+`Durant molt de temps es demanava als pacients estar "en dejú des de mitjanit". Avui sabem que arribar al quiròfan amb les reserves d’energia esgotades no ajuda.
+
+Molts protocols ERAS recomanen una beguda rica en hidrats de carboni la nit anterior i unes 2-3 hores abans de la cirurgia (segons indicació). Això pot reduir la sensació de set, gana i ansietat, i ajudar el teu cos a afrontar millor l’estrès quirúrgic.
+
+IMPORTANT: això depèn totalment del teu tipus de cirurgia i de les normes del teu centre. Mai prenguis res pel teu compte el dia de l’operació. Pregunta al teu equip què està permès en el teu cas concret.`,
   },
   {
     id: 'post-mindfulness',
     title: 'Prepara tu mente: mindfulness antes del quirófano',
+    title_en: 'Prepare your mind: mindfulness before the operating room',
+    title_ca: 'Prepara la teva ment: mindfulness abans del quiròfan',
     category: 'mental', cover: '', author: 'Equipo de prehabilitación', date: '2026-01-03',
     body:
 `Sentir nervios antes de una cirugía es completamente normal. La buena noticia es que puedes entrenar tu mente para afrontarlo mejor.
@@ -433,10 +503,32 @@ Prueba este ejercicio de 5 minutos:
 4. Si aparece un pensamiento, obsérvalo sin juzgarlo y vuelve a tu respiración.
 
 Practicar esto a diario reduce la ansiedad y puede disminuir la percepción de dolor tras la operación. Añade a tus recursos vídeos de meditación guiada que te resulten agradables y conviértelo en un hábito.`,
+    body_en:
+`Feeling nervous before surgery is completely normal. The good news is that you can train your mind to cope better.
+
+Try this 5-minute exercise:
+1. Sit comfortably and close your eyes.
+2. Breathe in through your nose, counting to 4.
+3. Breathe out slowly through your mouth, counting to 6.
+4. If a thought appears, observe it without judging it and return to your breathing.
+
+Practising this daily reduces anxiety and can lessen the perception of pain after the operation. Add guided meditation videos you find pleasant to your resources and turn it into a habit.`,
+    body_ca:
+`Sentir nervis abans d’una cirurgia és completament normal. La bona notícia és que pots entrenar la teva ment per afrontar-ho millor.
+
+Prova aquest exercici de 5 minuts:
+1. Seu còmode i tanca els ulls.
+2. Inspira pel nas comptant fins a 4.
+3. Expira a poc a poc per la boca comptant fins a 6.
+4. Si apareix un pensament, observa’l sense jutjar-lo i torna a la teva respiració.
+
+Practicar això cada dia redueix l’ansietat i pot disminuir la percepció de dolor després de l’operació. Afegeix als teus recursos vídeos de meditació guiada que et resultin agradables i converteix-ho en un hàbit.`,
   },
   {
     id: 'post-ejercicio',
     title: 'Ejercicio seguro en casa antes de la operación',
+    title_en: 'Safe exercise at home before the operation',
+    title_ca: 'Exercici segur a casa abans de l’operació',
     category: 'fisico', cover: '', author: 'Equipo de prehabilitación', date: '2026-01-04',
     body:
 `No necesitas un gimnasio para prepararte. La combinación más útil es:
@@ -446,10 +538,28 @@ Practicar esto a diario reduce la ansiedad y puede disminuir la percepción de d
 • Respiración: ejercicios inspiratorios diarios.
 
 Empieza suave y aumenta poco a poco. Si sientes dolor en el pecho, mareo o falta de aire desproporcionada, para y consulta con tu equipo médico. Adapta siempre la intensidad a lo que tu profesional te haya autorizado.`,
+    body_en:
+`You do not need a gym to prepare. The most useful combination is:
+
+• Aerobic: brisk walking, 20-30 minutes almost every day. You should be able to talk, but not sing.
+• Strength: 2-3 times a week. Standing up from a chair without hands, calf raises, arm lifts with a water bottle.
+• Breathing: daily inspiratory exercises.
+
+Start gently and increase little by little. If you feel chest pain, dizziness or disproportionate breathlessness, stop and consult your medical team. Always match the intensity to what your professional has approved.`,
+    body_ca:
+`No necessites un gimnàs per preparar-te. La combinació més útil és:
+
+• Aeròbic: caminar a pas lleuger, 20-30 minuts gairebé cada dia. Hauries de poder parlar, però no cantar.
+• Força: 2-3 vegades per setmana. Aixecar-te d’una cadira sense mans, posar-te de puntetes, elevacions de braços amb una ampolla d’aigua.
+• Respiració: exercicis inspiratoris diaris.
+
+Comença suau i augmenta a poc a poc. Si sents dolor al pit, mareig o falta d’aire desproporcionada, atura’t i consulta el teu equip mèdic. Ajusta sempre la intensitat al que el teu professional t’hagi autoritzat.`,
   },
   {
     id: 'post-silla',
     title: 'Ejercicios seguros en silla (para empezar sin riesgo)',
+    title_en: 'Safe chair exercises (to start without risk)',
+    title_ca: 'Exercicis segurs en cadira (per començar sense risc)',
     category: 'fisico', cover: '', author: 'Equipo de prehabilitación', date: '2026-01-05',
     body:
 `Si te cansas rápido, tienes poca fuerza o miedo a caerte, empieza por aquí. Son ejercicios muy seguros que puedes hacer sentado o con apoyo. Hazlos, si puedes, acompañado de un familiar.
@@ -465,10 +575,40 @@ DE PIE, CON LAS MANOS APOYADAS EN EL RESPALDO:
 • Flexiones contra la pared: 10 veces.
 
 Reglas de oro: nunca hagas equilibrio sin un apoyo cerca, para si te mareas o te falta el aire, e hidrátate. La constancia importa mucho más que la intensidad.`,
+    body_en:
+`If you tire quickly, have little strength or fear falling, start here. These are very safe exercises you can do seated or with support. If you can, do them with a relative.
+
+SEATED ON A FIRM CHAIR (no wheels):
+• Lift and straighten each leg: 10 times per leg.
+• Seated marching (lifting knees alternately): 1-2 minutes.
+• Open and close your arms, and raise them above your head: 10 times.
+
+STANDING, WITH YOUR HANDS ON THE BACKREST:
+• Stand up and sit down from the chair without using your hands: start with 5 and build up slowly.
+• Rise on your toes: 10 times.
+• Wall push-ups: 10 times.
+
+Golden rules: never balance without a support nearby, stop if you feel dizzy or short of breath, and stay hydrated. Consistency matters far more than intensity.`,
+    body_ca:
+`Si et canses ràpid, tens poca força o por de caure, comença per aquí. Són exercicis molt segurs que pots fer assegut o amb suport. Fes-los, si pots, acompanyat d’un familiar.
+
+ASSEGUT EN UNA CADIRA FERMA (sense rodes):
+• Aixecar i estirar cada cama: 10 vegades per cama.
+• Marxa asseguda (aixecar genolls alternant): 1-2 minuts.
+• Obrir i tancar els braços, i elevar-los per damunt del cap: 10 vegades.
+
+DE PEU, AMB LES MANS RECOLZADES AL RESPATLLER:
+• Aixecar-te i seure de la cadira sense fer servir les mans: comença amb 5 i puja a poc a poc.
+• Posar-te de puntetes: 10 vegades.
+• Flexions contra la paret: 10 vegades.
+
+Regles d’or: mai facis equilibri sense un suport a prop, atura’t si et mareges o et falta l’aire, i hidrata’t. La constància importa molt més que la intensitat.`,
   },
   {
     id: 'post-delirium',
     title: 'Prevenir la confusión tras la cirugía (delírium)',
+    title_en: 'Preventing confusion after surgery (delirium)',
+    title_ca: 'Prevenir la confusió després de la cirurgia (deliri)',
     category: 'cognitivo', cover: '', author: 'Equipo de prehabilitación', date: '2026-01-06',
     body:
 `El delírium es un estado de confusión aguda que puede aparecer en los días posteriores a una cirugía, sobre todo en personas mayores o frágiles. Es frecuente y casi siempre temporal, pero conviene prevenirlo porque asusta mucho y puede retrasar la recuperación.
@@ -481,10 +621,34 @@ QUÉ AYUDA A PREVENIRLO (antes y después):
 • Revisar con tu médico los fármacos que pueden favorecerlo.
 
 PARA LA FAMILIA, tras la operación: hablarle con calma, recordarle dónde está y qué día es, traer objetos familiares y acompañarle. Si notáis confusión, desorientación o cambios bruscos de comportamiento, avisad al personal sanitario: saben cómo manejarlo.`,
+    body_en:
+`Delirium is a state of acute confusion that can appear in the days after surgery, especially in older or frail people. It is common and almost always temporary, but it is worth preventing because it is very frightening and can delay recovery.
+
+WHAT HELPS PREVENT IT (before and after):
+• Keeping the mind active: reading, hobbies, the app memory game, conversation.
+• Sleeping well and respecting the day/night rhythm.
+• Wearing glasses and hearing aids if you use them (seeing and hearing well reduces disorientation).
+• Staying hydrated and eating properly.
+• Reviewing with your doctor the drugs that may favour it.
+
+FOR THE FAMILY, after the operation: speak calmly, remind them where they are and what day it is, bring familiar objects and keep them company. If you notice confusion, disorientation or sudden behaviour changes, tell the healthcare staff: they know how to handle it.`,
+    body_ca:
+`El deliri és un estat de confusió aguda que pot aparèixer en els dies posteriors a una cirurgia, sobretot en persones grans o fràgils. És freqüent i gairebé sempre temporal, però convé prevenir-lo perquè fa molta por i pot endarrerir la recuperació.
+
+QUÈ AJUDA A PREVENIR-LO (abans i després):
+• Mantenir la ment activa: lectura, passatemps, el joc de memòria de l’app, conversa.
+• Dormir bé i respectar el ritme dia/nit.
+• Portar ulleres i audiòfons si en fas servir (veure i sentir bé redueix la desorientació).
+• Hidratar-se i menjar adequadament.
+• Revisar amb el teu metge els fàrmacs que poden afavorir-lo.
+
+PER A LA FAMÍLIA, després de l’operació: parlar-li amb calma, recordar-li on és i quin dia és, portar objectes familiars i acompanyar-lo. Si noteu confusió, desorientació o canvis bruscos de comportament, aviseu el personal sanitari: saben com gestionar-ho.`,
   },
   {
     id: 'post-sno',
     title: 'Cuando la comida no basta: suplementos nutricionales',
+    title_en: 'When food is not enough: nutritional supplements',
+    title_ca: 'Quan el menjar no n’hi ha prou: suplements nutricionals',
     category: 'nutricion', cover: '', author: 'Equipo de prehabilitación', date: '2026-01-07',
     body:
 `La desnutrición "silenciosa" es muy común y debilita la cicatrización y las defensas. Muchas personas frágiles no llegan a sus necesidades de proteína solo con la dieta, sobre todo si tienen poco apetito.
@@ -494,10 +658,28 @@ PRIMERO, LA COMIDA REAL. Prioriza proteínas de alto valor: huevos, pescado, car
 TRUCOS SI COMES POCO: enriquece los platos (leche en polvo, huevo, aceite de oliva, queso rallado), come poco y a menudo, y aprovecha los momentos de más apetito.
 
 SUPLEMENTOS NUTRICIONALES ORALES (SNO): son batidos o preparados ricos en proteínas y calorías. Pueden ser muy útiles, pero deben indicarlos tu médico o tu nutricionista, que elegirán el tipo y la cantidad adecuados a tu caso. Coméntalo en tu consulta si te cuesta comer.`,
+    body_en:
+`"Silent" malnutrition is very common and weakens healing and defenses. Many frail people do not reach their protein needs through diet alone, especially if they have little appetite.
+
+FIRST, REAL FOOD. Prioritise high-value proteins: eggs, fish, lean meat, dairy (Greek yogurt, cheese, milk), legumes. Spread the protein across all meals, including breakfast.
+
+TRICKS IF YOU EAT LITTLE: enrich dishes (powdered milk, egg, olive oil, grated cheese), eat little and often, and make the most of the times you feel more appetite.
+
+ORAL NUTRITIONAL SUPPLEMENTS (ONS): these are shakes or preparations rich in protein and calories. They can be very useful, but they must be prescribed by your doctor or dietitian, who will choose the type and amount suitable for your case. Mention it at your appointment if you struggle to eat.`,
+    body_ca:
+`La desnutrició "silenciosa" és molt comuna i debilita la cicatrització i les defenses. Moltes persones fràgils no arriben a les seves necessitats de proteïna només amb la dieta, sobretot si tenen poca gana.
+
+PRIMER, EL MENJAR REAL. Prioritza proteïnes d’alt valor: ous, peix, carn magra, lactis (iogurt grec, formatge, llet), llegums. Reparteix la proteïna entre tots els àpats, inclòs l’esmorzar.
+
+TRUCS SI MENGES POC: enriqueix els plats (llet en pols, ou, oli d’oliva, formatge ratllat), menja poc i sovint, i aprofita els moments de més gana.
+
+SUPLEMENTS NUTRICIONALS ORALS (SNO): són batuts o preparats rics en proteïnes i calories. Poden ser molt útils, però els han d’indicar el teu metge o el teu nutricionista, que triaran el tipus i la quantitat adequats al teu cas. Comenta-ho a la teva consulta si et costa menjar.`,
   },
   {
     id: 'post-anemia',
     title: 'Anemia y medicación: dos cosas que revisar antes de operarte',
+    title_en: 'Anemia and medication: two things to check before your operation',
+    title_ca: 'Anèmia i medicació: dues coses per revisar abans d’operar-te',
     category: 'general', cover: '', author: 'Equipo de prehabilitación', date: '2026-01-08',
     body:
 `Dos aspectos médicos marcan una gran diferencia en cómo toleras la cirugía:
@@ -507,6 +689,22 @@ ANEMIA (pocos glóbulos rojos o poco hierro). Llegar anémico a la cirugía aume
 POLIFARMACIA (tomar muchos medicamentos). Algunos fármacos deben mantenerse y otros suspenderse antes de la operación (por ejemplo, ciertos anticoagulantes o antidiabéticos). Nunca los cambies por tu cuenta.
 
 LO MÁS ÚTIL QUE PUEDES HACER: llevar a la consulta de preanestesia una lista completa y actualizada de TODOS tus medicamentos (incluidos los de herbolario y los que compras sin receta) y de tus alergias. Puedes prepararla y descargarla desde la sección "Mi medicación y alergias" de esta app.`,
+    body_en:
+`Two medical aspects make a big difference in how you tolerate surgery:
+
+ANEMIA (few red blood cells or low iron). Arriving anemic to surgery increases the risk of needing a transfusion and of complications. It can often be corrected in the weeks before with iron or another treatment. If you have been told you have anemia or low iron, mention it as soon as possible at your appointment.
+
+POLYPHARMACY (taking many medications). Some drugs must be continued and others stopped before the operation (for example, certain anticoagulants or antidiabetics). Never change them on your own.
+
+THE MOST USEFUL THING YOU CAN DO: bring to the pre-anesthesia appointment a complete, up-to-date list of ALL your medications (including herbal and over-the-counter products) and your allergies. You can prepare and download it from the "My medication and allergies" section of this app.`,
+    body_ca:
+`Dos aspectes mèdics marquen una gran diferència en com toleres la cirurgia:
+
+ANÈMIA (pocs glòbuls vermells o poc ferro). Arribar anèmic a la cirurgia augmenta el risc de necessitar transfusió i de complicacions. Sovint es pot corregir en les setmanes prèvies amb ferro o un altre tractament. Si t’han dit que tens anèmia o el ferro baix, comenta-ho com més aviat millor a la teva consulta.
+
+POLIFARMÀCIA (prendre molts medicaments). Alguns fàrmacs s’han de mantenir i altres suspendre abans de l’operació (per exemple, certs anticoagulants o antidiabètics). Mai els canviïs pel teu compte.
+
+EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista completa i actualitzada de TOTS els teus medicaments (inclosos els d’herbolari i els que compres sense recepta) i de les teves al·lèrgies. Pots preparar-la i descarregar-la des de la secció "La meva medicació i al·lèrgies" d’aquesta app.`,
   },
 ];
 

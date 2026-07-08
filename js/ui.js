@@ -177,18 +177,35 @@ export function renderToday(state) {
   `;
 }
 
+/**
+ * Bloque de descripción de una tarea. Si la tarea tiene un resumen breve,
+ * se muestra el resumen (frase completa) con un botón para desplegar la
+ * explicación detallada. Si no, se muestra la descripción tal cual.
+ */
+function taskDescBlock(tk) {
+  const desc = tr(tk, 'desc');
+  const summary = tr(tk, 'summary');
+  if (summary && summary !== desc) {
+    return `<div class="task-desc has-detail">
+      <p class="task-summary">${esc(summary)}</p>
+      <div class="task-detail" hidden>${esc(desc)}</div>
+      <button type="button" class="task-more" data-action="toggle-desc" aria-expanded="false">${t('read_more')}</button>
+    </div>`;
+  }
+  return `<div class="task-desc">${esc(desc)}</div>`;
+}
+
 function renderTaskItem(tk, dayLog) {
   const v = dayLog.tasks[tk.id];
   const done = taskIsDone(tk, dayLog);
   const title = tr(tk, 'title');
-  const desc = tr(tk, 'desc');
   if (tk.type === 'check') {
     return `
       <div class="task ${done ? 'done' : ''}">
         <button class="task-check" data-action="toggle-task" data-task="${tk.id}" aria-pressed="${done}" aria-label="${esc(title)}">${done ? '✔' : ''}</button>
         <div class="task-body">
           <div class="task-title">${esc(tk.icon || '')} ${esc(title)}</div>
-          <div class="task-desc clampable" data-action="toggle-desc">${esc(desc)}</div>
+          ${taskDescBlock(tk)}
         </div>
         <div class="task-xp">+${tk.xp}</div>
       </div>`;
@@ -199,7 +216,7 @@ function renderTaskItem(tk, dayLog) {
     <div class="task counter ${done ? 'done' : ''}">
       <div class="task-body">
         <div class="task-title">${esc(tk.icon || '')} ${esc(title)} ${done ? '✔' : ''}</div>
-        <div class="task-desc">${esc(desc)}</div>
+        ${taskDescBlock(tk)}
         <div class="counter-row">
           <button class="stepper" data-action="counter-dec" data-task="${tk.id}" aria-label="−">−</button>
           <div class="counter-val">${cur} <small>/ ${tk.target} ${esc(tr(tk, 'unit'))}</small></div>
@@ -371,7 +388,7 @@ export function renderLearn(state) {
   const postCards = posts.length ? posts.map((p) => `
     <button class="post-card ${readPosts.has(p.id) ? 'read' : ''}" data-action="open-post" data-id="${p.id}">
       ${p.cover ? `<div class="post-cover" style="background-image:url('${esc(p.cover)}')"></div>` : `<div class="post-cover ph">📝</div>`}
-      <div class="post-info"><strong>${esc(p.title)}</strong><small class="muted">${esc(p.date || '')} · ${esc(p.category || 'general')}</small></div>
+      <div class="post-info"><strong>${esc(tr(p, 'title'))}</strong><small class="muted">${esc(p.date || '')} · ${esc(p.category || 'general')}</small></div>
     </button>`).join('') : `<p class="muted small">${t('learn_no_posts')}</p>`;
 
   const read = new Set(state.readLessons);
@@ -407,10 +424,10 @@ export function renderPost(state, id) {
     <article class="card post-full" data-speak-scope>
       ${p.cover ? `<div class="post-cover-full" style="background-image:url('${esc(p.cover)}')"></div>` : ''}
       <span class="post-tag">${pillar ? pillar.emoji + ' ' + esc(tr(pillar, 'name')) : esc(p.category || 'general')}</span>
-      <h2>${esc(p.title)}</h2>
+      <h2>${esc(tr(p, 'title'))}</h2>
       <div class="post-meta muted small">${esc(p.date || '')}${p.author ? ' · ' + esc(p.author) : ''}</div>
       <button class="btn ghost speak-btn" data-action="speak">${t('listen')}</button>
-      <div class="post-body speakable">${formatBody(p.body)}</div>
+      <div class="post-body speakable">${formatBody(tr(p, 'body'))}</div>
     </article>`;
 }
 

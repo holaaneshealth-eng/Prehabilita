@@ -182,7 +182,17 @@ function onClick(e) {
       break;
     }
 
-    case 'toggle-desc': el.classList.toggle('expanded'); break;
+    case 'toggle-desc': {
+      const wrap = el.closest('.task-desc');
+      if (wrap) {
+        const detail = wrap.querySelector('.task-detail');
+        const expanded = el.getAttribute('aria-expanded') === 'true';
+        if (detail) detail.hidden = expanded;
+        el.setAttribute('aria-expanded', String(!expanded));
+        el.textContent = expanded ? t('read_more') : t('read_less');
+      }
+      break;
+    }
     case 'open-pillar': openPillarInfo(el.dataset.pillar); break;
     case 'show-disclaimer': openModal(t('med_notice'), `<p>${ui.esc(getLang() === 'en' ? DISCLAIMER_EN : (getLang() === 'ca' ? DISCLAIMER_CA : DISCLAIMER))}</p>`); break;
     case 'export': doExport(); break;
@@ -271,7 +281,7 @@ function onChange(e) {
         state.settings.highContrast = el.checked;
         saveState(); applyDisplaySettings(); render(); return;
       case 'set-lang':
-        state.settings.lang = (el.value === 'en') ? 'en' : 'es';
+        state.settings.lang = ['es', 'en', 'ca'].includes(el.value) ? el.value : 'es';
         setLang(state.settings.lang);
         saveState(); render(); return;
     }
