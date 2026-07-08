@@ -366,16 +366,18 @@ export function renderResources(state) {
 
 function renderResourceCard(r) {
   const ytId = parseYouTubeId(r.url);
+  const title = tr(r, 'title');
+  const desc = tr(r, 'desc');
   if (ytId) {
     return `<section class="card resource">
-      <div class="resource-title">▶️ ${esc(r.title)}</div>
-      ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ''}
-      <div class="video"><iframe src="${youTubeEmbedUrl(ytId)}" title="${esc(r.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      <div class="resource-title">▶️ ${esc(title)}</div>
+      ${desc ? `<p class="muted small">${esc(desc)}</p>` : ''}
+      <div class="video"><iframe src="${youTubeEmbedUrl(ytId)}" title="${esc(title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
     </section>`;
   }
   return `<section class="card resource">
-    <div class="resource-title">🔗 ${esc(r.title)}</div>
-    ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ''}
+    <div class="resource-title">🔗 ${esc(title)}</div>
+    ${desc ? `<p class="muted small">${esc(desc)}</p>` : ''}
     <a class="btn ghost block" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${t('res_open')}</a>
   </section>`;
 }

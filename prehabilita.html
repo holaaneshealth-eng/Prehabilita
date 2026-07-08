@@ -2023,7 +2023,11 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       type: "link",
       url: "https://www.youtube.com/results?search_query=meditaci%C3%B3n+guiada+mindfulness+10+minutos",
       title: "Meditaciones guiadas de mindfulness",
-      desc: "Ejemplos de meditación guiada (10 min). Reemplázalo por tu vídeo favorito."
+      title_en: "Guided mindfulness meditations",
+      title_ca: "Meditacions guiades de mindfulness",
+      desc: "Ejemplos de meditación guiada (10 min). Reemplázalo por tu vídeo favorito.",
+      desc_en: "Examples of guided meditation (10 min). Replace it with your favorite video.",
+      desc_ca: "Exemples de meditació guiada (10 min). Substitueix-lo pel teu vídeo preferit."
     },
     {
       id: "res-nutricion",
@@ -2031,7 +2035,11 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       type: "link",
       url: "https://www.youtube.com/results?search_query=alimentaci%C3%B3n+rica+en+prote%C3%ADnas+recuperaci%C3%B3n",
       title: "Alimentación rica en proteínas",
-      desc: "Ideas de comidas ricas en proteína para tu prehabilitación."
+      title_en: "Protein-rich eating",
+      title_ca: "Alimentació rica en proteïnes",
+      desc: "Ideas de comidas ricas en proteína para tu prehabilitación.",
+      desc_en: "Meal ideas rich in protein for your prehabilitation.",
+      desc_ca: "Idees d’àpats rics en proteïna per a la teva prehabilitació."
     },
     {
       id: "res-ejercicio",
@@ -2039,7 +2047,11 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       type: "link",
       url: "https://www.youtube.com/results?search_query=ejercicios+en+casa+para+mayores+fuerza+suave",
       title: "Ejercicios de fuerza suaves en casa",
-      desc: "Rutinas sencillas de fuerza sin material."
+      title_en: "Gentle strength exercises at home",
+      title_ca: "Exercicis de força suaus a casa",
+      desc: "Rutinas sencillas de fuerza sin material.",
+      desc_en: "Simple strength routines with no equipment.",
+      desc_ca: "Rutines senzilles de força sense material."
     }
   ];
   var ALARM_SIGNS = [
@@ -2675,8 +2687,21 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
     const p = (state2.library.posts || []).find((x) => x.id === id);
     return p ? withPostTranslations(p) : null;
   }
+  var DEFAULT_RESOURCE_MAP = new Map(DEFAULT_RESOURCES.map((r) => [r.id, r]));
+  function withResourceTranslations(r) {
+    const d = DEFAULT_RESOURCE_MAP.get(r.id);
+    if (!d)
+      return r;
+    return {
+      ...r,
+      title_en: r.title_en || d.title_en,
+      title_ca: r.title_ca || d.title_ca,
+      desc_en: r.desc_en || d.desc_en,
+      desc_ca: r.desc_ca || d.desc_ca
+    };
+  }
   function getResources(state2) {
-    return state2.library.resources || [];
+    return (state2.library.resources || []).map(withResourceTranslations);
   }
   function getDailyGoal(state2) {
     return state2.settings?.dailyGoal || 60;
@@ -4059,16 +4084,18 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
   }
   function renderResourceCard(r) {
     const ytId = parseYouTubeId(r.url);
+    const title = tr(r, "title");
+    const desc = tr(r, "desc");
     if (ytId) {
       return `<section class="card resource">
-      <div class="resource-title">▶️ ${esc(r.title)}</div>
-      ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ""}
-      <div class="video"><iframe src="${youTubeEmbedUrl(ytId)}" title="${esc(r.title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
+      <div class="resource-title">▶️ ${esc(title)}</div>
+      ${desc ? `<p class="muted small">${esc(desc)}</p>` : ""}
+      <div class="video"><iframe src="${youTubeEmbedUrl(ytId)}" title="${esc(title)}" loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>
     </section>`;
     }
     return `<section class="card resource">
-    <div class="resource-title">\uD83D\uDD17 ${esc(r.title)}</div>
-    ${r.desc ? `<p class="muted small">${esc(r.desc)}</p>` : ""}
+    <div class="resource-title">\uD83D\uDD17 ${esc(title)}</div>
+    ${desc ? `<p class="muted small">${esc(desc)}</p>` : ""}
     <a class="btn ghost block" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${t("res_open")}</a>
   </section>`;
   }

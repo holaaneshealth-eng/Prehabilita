@@ -110,8 +110,28 @@ export function getPostById(state, id) {
   return p ? withPostTranslations(p) : null;
 }
 
+/** Mapa de recursos por defecto para recuperar traducciones por id. */
+const DEFAULT_RESOURCE_MAP = new Map(DEFAULT_RESOURCES.map((r) => [r.id, r]));
+
+/**
+ * Fusiona los campos de traducción (título/descripción en/ca) del recurso por
+ * defecto correspondiente, para que los recursos sembrados antes de esta
+ * versión también se muestren traducidos. No sobrescribe los campos base (es).
+ */
+function withResourceTranslations(r) {
+  const d = DEFAULT_RESOURCE_MAP.get(r.id);
+  if (!d) return r;
+  return {
+    ...r,
+    title_en: r.title_en || d.title_en,
+    title_ca: r.title_ca || d.title_ca,
+    desc_en: r.desc_en || d.desc_en,
+    desc_ca: r.desc_ca || d.desc_ca,
+  };
+}
+
 export function getResources(state) {
-  return state.library.resources || [];
+  return (state.library.resources || []).map(withResourceTranslations);
 }
 
 export function getDailyGoal(state) {
