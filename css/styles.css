@@ -485,3 +485,29 @@ body.high-contrast .phase-focus { color: #111827; }
 .reeval-card p { font-size: .9rem; margin-bottom: 10px; color: #334155; }
 body.high-contrast .cmp-up { color: #15803d; }
 body.high-contrast .cmp-down { color: #b91c1c; }
+
+
+/* ================= Maquetación "Hoy": descripciones compactas ================= */
+.task-desc.clampable {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  cursor: pointer;
+  position: relative;
+}
+.task-desc.clampable.expanded {
+  -webkit-line-clamp: unset;
+  display: block;
+}
+/* Sutil indicación de que se puede tocar para ampliar */
+.task-desc.clampable:not(.expanded)::after {
+  content: '⌄';
+  position: absolute;
+  right: 2px;
+  bottom: 0;
+  color: var(--accent);
+  background: var(--card);
+  padding-left: 6px;
+  font-weight: 700;
+}

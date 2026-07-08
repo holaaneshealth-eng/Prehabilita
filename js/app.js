@@ -7,7 +7,7 @@ import {
   listProfiles, getActiveProfileId, switchProfile, createProfile, renameProfile, deleteProfile,
   recordAssessment,
 } from './state.js';
-import { BADGES, DISCLAIMER, DISCLAIMER_EN, FRAIL_QUESTIONS, EDMONTON_QUESTIONS, MEMORY_EMOJIS } from './content.js';
+import { BADGES, DISCLAIMER, DISCLAIMER_EN, DISCLAIMER_CA, FRAIL_QUESTIONS, EDMONTON_QUESTIONS, MEMORY_EMOJIS } from './content.js';
 import { GAD7, PHQ9, DASI, bmiScore } from './scales.js';
 import {
   seedLibrary, getTasks, getTaskById, getAllTasksForEditor, getPillarById,
@@ -19,8 +19,13 @@ import * as ui from './ui.js';
 import * as editor from './editor.js';
 import * as charts from './charts.js';
 
-/** Helper de idioma para cadenas locales del controlador (es/en). */
-function L(es, en) { return getLang() === 'en' ? en : es; }
+/** Helper de idioma para cadenas locales del controlador (es/en/ca). */
+function L(es, en, ca) {
+  const l = getLang();
+  if (l === 'en') return en;
+  if (l === 'ca') return (ca != null ? ca : es);
+  return es;
+}
 
 let route = 'hoy';
 let editorTab = 'tareas';
@@ -177,8 +182,9 @@ function onClick(e) {
       break;
     }
 
+    case 'toggle-desc': el.classList.toggle('expanded'); break;
     case 'open-pillar': openPillarInfo(el.dataset.pillar); break;
-    case 'show-disclaimer': openModal(L('Aviso médico', 'Medical notice'), `<p>${ui.esc(getLang() === 'en' ? DISCLAIMER_EN : DISCLAIMER)}</p>`); break;
+    case 'show-disclaimer': openModal(t('med_notice'), `<p>${ui.esc(getLang() === 'en' ? DISCLAIMER_EN : (getLang() === 'ca' ? DISCLAIMER_CA : DISCLAIMER))}</p>`); break;
     case 'export': doExport(); break;
     case 'reset': confirmReset(); break;
     case 'close-modal': closeModal(); break;
@@ -358,7 +364,7 @@ function submitOnboarding(form) {
   saveState();
   route = 'hoy';
   render();
-  toast(L('🎉 ¡Bienvenido! Tu programa está listo. ¡Empieza a sumar puntos!', '🎉 Welcome! Your program is ready. Start earning points!'));
+  toast(t('welcome_toast'));
 }
 
 function submitProfile(form) {
@@ -622,7 +628,7 @@ function afterTaskChange(completedTask) {
 
 function handleEvents(events) {
   if (!events) return;
-  if (events.leveledUp) setTimeout(() => toast(L(`⬆️ ¡Subiste al nivel ${events.level}! Sigue así.`, `⬆️ You reached level ${events.level}! Keep it up.`), 'level'), 350);
+  if (events.leveledUp) setTimeout(() => toast(t('level_up', { n: events.level }), 'level'), 350);
   for (const b of events.newBadges) setTimeout(() => celebrateBadge(b), 600);
   if (events.challengeCompletedNow) setTimeout(() => toast(L(`🎯 ¡Reto semanal completado! +${events.challenge.xp} XP`, `🎯 Weekly challenge completed! +${events.challenge.xp} XP`), 'level'), 500);
 }
@@ -735,10 +741,10 @@ function celebrateBadge(b) {
       <div class="modal badge-modal">
         <div class="confetti">🎉</div>
         <div class="big-emoji">${b.emoji}</div>
-        <h2>${L('¡Medalla desbloqueada!', 'Badge unlocked!')}</h2>
+        <h2>${t('badge_unlocked')}</h2>
         <h3>${ui.esc(tr(b, 'name'))}</h3>
         <p class="muted">${ui.esc(tr(b, 'desc'))}</p>
-        <button class="btn primary" data-action="close-modal">${L('¡Genial!', 'Great!')}</button>
+        <button class="btn primary" data-action="close-modal">${t('great')}</button>
       </div>
     </div>`;
   const backdrop = root.querySelector('.modal-backdrop');
@@ -800,7 +806,7 @@ function speakFrom(el) {
   const text = (target.innerText || target.textContent || '').trim();
   if (!text) return;
   const u = new SpeechSynthesisUtterance(text);
-  u.lang = getLang() === 'en' ? 'en-US' : 'es-ES';
+  u.lang = getLang() === 'en' ? 'en-US' : (getLang() === 'ca' ? 'ca-ES' : 'es-ES');
   u.rate = 0.95;
   synth.speak(u);
   toast(L('🔊 Leyendo… (toca de nuevo para parar)', '🔊 Reading… (tap again to stop)'));
@@ -991,7 +997,7 @@ function finishMemory() {
   log.tasks['gimnasia-mental'] = true;
   const events = applyEngine(state);
   saveState();
-  if (!wasDone) setTimeout(() => toast(L('🧩 +15 XP · gimnasia mental completada', '🧩 +15 XP · brain training completed')), 200);
+  if (!wasDone) setTimeout(() => toast(t('game_xp_toast')), 200);
   handleEvents(events);
 }
 

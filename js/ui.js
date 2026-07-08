@@ -2,8 +2,9 @@
 // Renderizado de vistas (funciones puras que devuelven HTML). Bilingüe vía i18n.
 
 import {
-  PREOP_CHECKLIST, PREOP_CHECKLIST_EN, DISCLAIMER, DISCLAIMER_EN, ERAS_NOTE, ERAS_NOTE_EN,
-  ALARM_SIGNS, ALARM_SIGNS_EN, CAREGIVER_TIPS, FRAIL_QUESTIONS, frailResult, getPhase,
+  PREOP_CHECKLIST, PREOP_CHECKLIST_EN, PREOP_CHECKLIST_CA,
+  DISCLAIMER, DISCLAIMER_EN, DISCLAIMER_CA, ERAS_NOTE, ERAS_NOTE_EN, ERAS_NOTE_CA,
+  ALARM_SIGNS, ALARM_SIGNS_EN, ALARM_SIGNS_CA, CAREGIVER_TIPS, FRAIL_QUESTIONS, frailResult, getPhase,
   EDMONTON_QUESTIONS, edmontonResult, PRIVACY_POINTS,
 } from './content.js';
 import { todayKey, daysBetween, listProfiles, getActiveProfileId, assessmentHistory } from './state.js';
@@ -15,7 +16,7 @@ import {
   getTasks, getPillars, getPillarById, getLessons, getPosts, getPostById,
   getResources, getDailyGoal, parseYouTubeId, youTubeEmbedUrl,
 } from './data.js';
-import { t, tr, getLang, LANGS } from './i18n.js';
+import { t, tr, getLang, LANGS, pickArr } from './i18n.js';
 
 export function esc(s) {
   return String(s ?? '').replace(/[&<>"']/g, (c) => (
@@ -27,8 +28,8 @@ export function formatBody(body) {
   return esc(body).replace(/\n/g, '<br>');
 }
 
-function disc() { return getLang() === 'en' ? DISCLAIMER_EN : DISCLAIMER; }
-function erasNote() { return getLang() === 'en' ? ERAS_NOTE_EN : ERAS_NOTE; }
+function disc() { return pickArr([DISCLAIMER], [DISCLAIMER_EN], [DISCLAIMER_CA])[0]; }
+function erasNote() { return pickArr([ERAS_NOTE], [ERAS_NOTE_EN], [ERAS_NOTE_CA])[0]; }
 
 export function daysToSurgery(state) {
   const d = state.profile.surgeryDate;
@@ -187,7 +188,7 @@ function renderTaskItem(tk, dayLog) {
         <button class="task-check" data-action="toggle-task" data-task="${tk.id}" aria-pressed="${done}" aria-label="${esc(title)}">${done ? '✔' : ''}</button>
         <div class="task-body">
           <div class="task-title">${esc(tk.icon || '')} ${esc(title)}</div>
-          <div class="task-desc">${esc(desc)}</div>
+          <div class="task-desc clampable" data-action="toggle-desc">${esc(desc)}</div>
         </div>
         <div class="task-xp">+${tk.xp}</div>
       </div>`;
@@ -381,7 +382,7 @@ export function renderLearn(state) {
       <button class="btn ghost speak-btn" data-action="speak">${t('listen')}</button>
     </details>`).join('');
 
-  const preop = getLang() === 'en' ? PREOP_CHECKLIST_EN : PREOP_CHECKLIST;
+  const preop = pickArr(PREOP_CHECKLIST, PREOP_CHECKLIST_EN, PREOP_CHECKLIST_CA);
   const checklist = preop.map((c) => `<li>☐ ${esc(c)}</li>`).join('');
 
   return `
@@ -527,7 +528,7 @@ export function renderCaregiver() {
     <div class="ctip"><span class="ctip-ico">${tp.icon}</span>
       <div><strong>${esc(tr(tp, 'title'))}</strong><p class="muted small">${esc(tr(tp, 'text'))}</p></div>
     </div>`).join('');
-  const alarmsArr = getLang() === 'en' ? ALARM_SIGNS_EN : ALARM_SIGNS;
+  const alarmsArr = pickArr(ALARM_SIGNS, ALARM_SIGNS_EN, ALARM_SIGNS_CA);
   const alarms = alarmsArr.map((a) => `<li>${esc(a)}</li>`).join('');
   return `
     <div class="section-label">${t('care_title')}</div>
@@ -998,7 +999,7 @@ export function renderMust(state) {
 export function renderPrivacy(state) {
   const items = PRIVACY_POINTS.map((p) => `
     <div class="ctip"><span class="ctip-ico">${p.icon}</span>
-      <div><p class="small">${esc(getLang() === 'en' ? p.en : p.es)}</p></div>
+      <div><p class="small">${esc(getLang() === 'en' ? p.en : (getLang() === 'ca' ? p.ca : p.es))}</p></div>
     </div>`).join('');
   return `
     <div class="section-label">${t('privacy_title')}</div>
