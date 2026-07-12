@@ -733,6 +733,14 @@ export const DEFAULT_RESOURCES = [
     desc: 'Rutinas sencillas de fuerza sin material.',
     desc_en: 'Simple strength routines with no equipment.',
     desc_ca: 'Rutines senzilles de força sense material.' },
+  { id: 'res-ayuno', pillar: 'nutricion', type: 'link',
+    url: 'https://www.youtube.com/results?search_query=ayuno+preoperatorio+antes+de+cirug%C3%ADa',
+    title: 'Ayuno',
+    title_en: 'Fasting',
+    title_ca: 'Dejuni',
+    desc: 'Pautas de ayuno antes de la cirugía: cuántas horas sin comer ni beber. Sigue siempre las indicaciones de tu equipo médico.',
+    desc_en: 'Fasting guidelines before surgery: how many hours without eating or drinking. Always follow your medical team’s instructions.',
+    desc_ca: 'Pautes de dejuni abans de la cirurgia: quantes hores sense menjar ni beure. Segueix sempre les indicacions del teu equip mèdic.' },
 ];
 
 export const ALARM_SIGNS = [
