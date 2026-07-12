@@ -721,7 +721,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
 // Versión del catálogo de recursos por defecto. Al incrementarla, la migración
 // (syncDefaultResources en data.js) añade a las bibliotecas ya existentes los
 // recursos por defecto que falten por id, una sola vez.
-export const RESOURCES_VERSION = 1;
+export const RESOURCES_VERSION = 2;
 
 export const DEFAULT_RESOURCES = [
   { id: 'res-mindfulness', pillar: 'mental', type: 'link',
@@ -747,6 +747,13 @@ export const DEFAULT_RESOURCES = [
     desc: 'Guía práctica de ejercicio prequirúrgico: opción en casa y en gimnasio, con vídeos.',
     desc_en: 'Practical pre-surgery exercise guide: at-home and gym options, with videos.',
     desc_ca: 'Guia pràctica d’exercici prequirúrgic: opció a casa i al gimnàs, amb vídeos.' },
+  { id: 'res-respiratorio', pillar: 'respiratorio', type: 'guide', guideId: 'respiratorio',
+    title: 'Entrenamiento respiratorio antes de la cirugía',
+    title_en: 'Breathing training before surgery',
+    title_ca: 'Entrenament respiratori abans de la cirurgia',
+    desc: 'Ejercicios respiratorios sencillos para preparar tus pulmones: diafragmática, costal, tos eficaz e inspirómetro.',
+    desc_en: 'Simple breathing exercises to prepare your lungs: diaphragmatic, costal, effective cough and spirometer.',
+    desc_ca: 'Exercicis respiratoris senzills per preparar els pulmons: diafragmàtica, costal, tos eficaç i inspiròmetre.' },
   { id: 'res-ayuno', pillar: 'ayuno', type: 'guide', guideId: 'ayuno',
     title: 'Ayuno antes de la cirugía: guía según tu situación',
     title_en: 'Fasting before surgery: a guide for your situation',
@@ -1702,6 +1709,255 @@ export const EXERCISE_GUIDE = {
 <li><strong>Registra</strong> el que fas; veure el teu progrés motiva.</li>
 <li>Un mal dia no arruïna el pla: reprèn-lo l'endemà.</li></ul>
 <p><strong>Recorda:</strong> començar aviat, ser constant i no buscar la perfecció. Caminar, fer una mica de força i entrenar la respiració ja és una intervenció útil. Davant de qualsevol dubte o símptoma, consulta amb el teu equip.</p>`,
+    },
+  ],
+};
+
+// ---------------------------------------------------------------------------
+// RESPIRATORY_GUIDE: guía interna de entrenamiento respiratorio (prehabilitación).
+// Mismo formato de acordeón que las demás guías (.fasting-block/.fasting-body).
+// Contenido educativo; la pauta concreta la indica el equipo médico.
+// ---------------------------------------------------------------------------
+export const RESPIRATORY_GUIDE = {
+  intro: {
+    title: 'Entrenamiento respiratorio antes de la cirugía',
+    title_en: 'Breathing training before surgery',
+    title_ca: 'Entrenament respiratori abans de la cirurgia',
+    body: `<p>Los ejercicios respiratorios preparan tus pulmones para la anestesia y la cirugía. No se trata de "entrenar los pulmones" como en el deporte, sino de <strong>mejorar la ventilación, la mecánica respiratoria y tu capacidad de toser</strong> para recuperarte mejor.</p>
+<p>Durante y después de una anestesia general es habitual que se cierren pequeñas zonas del pulmón (atelectasia), lo que puede facilitar infecciones como la neumonía. Practicar estos ejercicios antes ayuda a prevenirlo, sobre todo en cirugía abdominal o torácica y en personas con problemas respiratorios.</p>
+<h4>Cómo y cuánto</h4>
+<ul><li><strong>Postura:</strong> sentado o tumbado con el cabecero elevado.</li>
+<li><strong>Pauta:</strong> 5-10 repeticiones de cada ejercicio, 3 veces al día.</li>
+<li><strong>Cuándo empezar:</strong> idealmente 2-4 semanas antes; combínalo con caminar a diario.</li>
+<li><strong>Evita</strong> hacerlo justo después de comer.</li></ul>
+<p><strong>Para y consulta</strong> si aparece mareo, falta de aire desproporcionada o dolor relevante.</p>`,
+    body_en: `<p>Breathing exercises get your lungs ready for anaesthesia and surgery. It's not about "training your lungs" like in sport, but about <strong>improving ventilation, breathing mechanics and your ability to cough</strong> so you recover better.</p>
+<p>During and after general anaesthesia it's common for small areas of the lung to close off (atelectasis), which can make infections such as pneumonia more likely. Practising these exercises beforehand helps prevent it, especially in abdominal or chest surgery and in people with breathing problems.</p>
+<h4>How and how much</h4>
+<ul><li><strong>Position:</strong> sitting or lying down with the head of the bed raised.</li>
+<li><strong>Dose:</strong> 5-10 repetitions of each exercise, 3 times a day.</li>
+<li><strong>When to start:</strong> ideally 2-4 weeks before; combine it with daily walking.</li>
+<li><strong>Avoid</strong> doing it right after eating.</li></ul>
+<p><strong>Stop and check with your team</strong> if you feel dizzy, unusually short of breath or in significant pain.</p>`,
+    body_ca: `<p>Els exercicis respiratoris preparen els teus pulmons per a l'anestèsia i la cirurgia. No es tracta d'"entrenar els pulmons" com en l'esport, sinó de <strong>millorar la ventilació, la mecànica respiratòria i la teva capacitat de tossir</strong> per recuperar-te millor.</p>
+<p>Durant i després d'una anestèsia general és habitual que es tanquin petites zones del pulmó (atelèctasi), cosa que pot facilitar infeccions com la pneumònia. Practicar aquests exercicis abans ajuda a prevenir-ho, sobretot en cirurgia abdominal o toràcica i en persones amb problemes respiratoris.</p>
+<h4>Com i quant</h4>
+<ul><li><strong>Postura:</strong> assegut o estirat amb la capçalera elevada.</li>
+<li><strong>Pauta:</strong> 5-10 repeticions de cada exercici, 3 vegades al dia.</li>
+<li><strong>Quan començar:</strong> idealment 2-4 setmanes abans; combina-ho amb caminar cada dia.</li>
+<li><strong>Evita</strong> fer-ho just després de menjar.</li></ul>
+<p><strong>Atura't i consulta</strong> si apareix mareig, falta d'aire desproporcionada o dolor rellevant.</p>`,
+  },
+  blocks: [
+    {
+      id: 'diafragmatica', open: true,
+      title: '1. Respiración diafragmática',
+      title_en: '1. Diaphragmatic breathing',
+      title_ca: '1. Respiració diafragmàtica',
+      body: `<p><strong>Para qué sirve:</strong> es el ejercicio base. Enseña a respirar con el diafragma (respiración "baja"), más eficiente y relajante.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Sentado o tumbado con el cabecero elevado, pon una mano en el pecho y otra en el abdomen.</li>
+<li>Inspira por la nariz 2-4 s notando que sube sobre todo el abdomen (la mano del pecho se mueve poco).</li>
+<li>Espira por la boca despacio, sin vaciar de golpe, dejando bajar el abdomen.</li>
+<li>Repite de forma tranquila, sin forzar.</li></ol>
+<p><strong>Cuida la técnica:</strong> si el pecho sube mucho, estás respirando demasiado "alto"; relaja los hombros y lleva el aire al abdomen.</p>
+<p><strong>Frecuencia:</strong> 5-10 repeticiones, 3 veces al día.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254664" title="Respiración diafragmática" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`,
+      body_en: `<p><strong>What it's for:</strong> the foundation exercise. It teaches you to breathe with the diaphragm ("low" breathing), which is more efficient and relaxing.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Sitting or lying with the head of the bed raised, put one hand on your chest and the other on your abdomen.</li>
+<li>Breathe in through your nose for 2-4 s, feeling mainly the abdomen rise (the chest hand barely moves).</li>
+<li>Breathe out slowly through your mouth, without emptying all at once, letting the abdomen fall.</li>
+<li>Repeat calmly, without forcing.</li></ol>
+<p><strong>Mind your technique:</strong> if the chest rises a lot, you're breathing too "high"; relax your shoulders and take the air to the abdomen.</p>
+<p><strong>Frequency:</strong> 5-10 repetitions, 3 times a day.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254664" title="Diaphragmatic breathing" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`,
+      body_ca: `<p><strong>Per a què serveix:</strong> és l'exercici base. Ensenya a respirar amb el diafragma (respiració "baixa"), més eficient i relaxant.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Assegut o estirat amb la capçalera elevada, posa una mà al pit i l'altra a l'abdomen.</li>
+<li>Inspira pel nas 2-4 s notant que puja sobretot l'abdomen (la mà del pit es mou poc).</li>
+<li>Espira per la boca a poc a poc, sense buidar de cop, deixant baixar l'abdomen.</li>
+<li>Repeteix de manera tranquil·la, sense forçar.</li></ol>
+<p><strong>Cuida la tècnica:</strong> si el pit puja molt, estàs respirant massa "alt"; relaxa les espatlles i porta l'aire a l'abdomen.</p>
+<p><strong>Freqüència:</strong> 5-10 repeticions, 3 vegades al dia.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254664" title="Respiració diafragmàtica" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`,
+    },
+    {
+      id: 'costal', open: false,
+      title: '2. Respiración costal',
+      title_en: '2. Rib (costal) breathing',
+      title_ca: '2. Respiració costal',
+      body: `<p><strong>Para qué sirve:</strong> moviliza mejor la caja torácica y mejora la conciencia respiratoria; útil si respiras de forma superficial.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Coloca las manos sobre las costillas inferiores, a los lados.</li>
+<li>Inspira por la nariz notando cómo se abren las costillas hacia los lados.</li>
+<li>Espira lentamente por la boca.</li>
+<li>Vuelve a la posición inicial sin perder el control.</li></ol>
+<p><strong>Cuida la técnica:</strong> busca la apertura lateral de las costillas, no subir los hombros.</p>
+<p><strong>Frecuencia:</strong> 5-10 repeticiones, 3 veces al día.</p>`,
+      body_en: `<p><strong>What it's for:</strong> it mobilises the rib cage better and improves breathing awareness; useful if you breathe shallowly.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Place your hands on your lower ribs, at the sides.</li>
+<li>Breathe in through your nose, feeling the ribs open outwards.</li>
+<li>Breathe out slowly through your mouth.</li>
+<li>Return to the starting position without losing control.</li></ol>
+<p><strong>Mind your technique:</strong> look for the ribs opening sideways, not the shoulders rising.</p>
+<p><strong>Frequency:</strong> 5-10 repetitions, 3 times a day.</p>`,
+      body_ca: `<p><strong>Per a què serveix:</strong> mobilitza millor la caixa toràcica i millora la consciència respiratòria; útil si respires de manera superficial.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Col·loca les mans sobre les costelles inferiors, als costats.</li>
+<li>Inspira pel nas notant com s'obren les costelles cap als costats.</li>
+<li>Espira lentament per la boca.</li>
+<li>Torna a la posició inicial sense perdre el control.</li></ol>
+<p><strong>Cuida la tècnica:</strong> busca l'obertura lateral de les costelles, no apujar les espatlles.</p>
+<p><strong>Freqüència:</strong> 5-10 repeticions, 3 vegades al dia.</p>`,
+    },
+    {
+      id: 'brazos', open: false,
+      title: '3. Expansiones costales con brazos',
+      title_en: '3. Chest expansion with arms',
+      title_ca: '3. Expansions costals amb braços',
+      body: `<p><strong>Para qué sirve:</strong> combina respiración y movilidad de hombros y tórax; hace el ejercicio más "guiado" y facilita respirar más profundo.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Inspira por la nariz mientras subes los brazos.</li>
+<li>Mantén el aire 2-3 s.</li>
+<li>Espira por la boca mientras bajas los brazos suavemente.</li></ol>
+<p><strong>Cuida la técnica:</strong> movimiento lento, sin tensión en el cuello.</p>
+<p><strong>Frecuencia:</strong> 5-10 repeticiones, 3 veces al día.</p>`,
+      body_en: `<p><strong>What it's for:</strong> it combines breathing with shoulder and chest mobility; it makes the exercise more "guided" and helps you breathe deeper.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Breathe in through your nose as you raise your arms.</li>
+<li>Hold the air for 2-3 s.</li>
+<li>Breathe out through your mouth as you gently lower your arms.</li></ol>
+<p><strong>Mind your technique:</strong> a slow movement, with no tension in the neck.</p>
+<p><strong>Frequency:</strong> 5-10 repetitions, 3 times a day.</p>`,
+      body_ca: `<p><strong>Per a què serveix:</strong> combina respiració i mobilitat d'espatlles i tòrax; fa l'exercici més "guiat" i facilita respirar més profund.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Inspira pel nas mentre puges els braços.</li>
+<li>Mantén l'aire 2-3 s.</li>
+<li>Espira per la boca mentre baixes els braços suaument.</li></ol>
+<p><strong>Cuida la tècnica:</strong> moviment lent, sense tensió al coll.</p>
+<p><strong>Freqüència:</strong> 5-10 repeticions, 3 vegades al dia.</p>`,
+    },
+    {
+      id: 'espiracion', open: false,
+      title: '4. Espiración controlada',
+      title_en: '4. Controlled exhalation',
+      title_ca: '4. Espiració controlada',
+      body: `<p><strong>Para qué sirve:</strong> controla el patrón respiratorio y evita la respiración rápida y superficial. También ayuda a calmarte si estás nervioso.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Inspira suave por la nariz.</li>
+<li>Espira por la boca de forma lenta y prolongada, como si quisieras empañar un cristal o mantener la llama de una vela sin apagarla.</li>
+<li>Mantén los hombros relajados.</li></ol>
+<p><strong>Cuida la técnica:</strong> no contengas el aire demasiado tiempo.</p>
+<p><strong>Frecuencia:</strong> intégrala dentro de los otros ejercicios, sobre todo entre repeticiones si te fatigas.</p>`,
+      body_en: `<p><strong>What it's for:</strong> it controls your breathing pattern and prevents fast, shallow breathing. It also helps calm you down if you're nervous.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Breathe in gently through your nose.</li>
+<li>Breathe out through your mouth slowly and steadily, as if fogging a window or keeping a candle flame alive without blowing it out.</li>
+<li>Keep your shoulders relaxed.</li></ol>
+<p><strong>Mind your technique:</strong> don't hold your breath for too long.</p>
+<p><strong>Frequency:</strong> integrate it within the other exercises, especially between repetitions if you tire.</p>`,
+      body_ca: `<p><strong>Per a què serveix:</strong> controla el patró respiratori i evita la respiració ràpida i superficial. També ajuda a calmar-te si estàs nerviós.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Inspira suau pel nas.</li>
+<li>Espira per la boca de manera lenta i perllongada, com si volguessis entelar un vidre o mantenir la flama d'una espelma sense apagar-la.</li>
+<li>Mantén les espatlles relaxades.</li></ol>
+<p><strong>Cuida la tècnica:</strong> no continguis l'aire massa temps.</p>
+<p><strong>Freqüència:</strong> integra-la dins dels altres exercicis, sobretot entre repeticions si et fatigues.</p>`,
+    },
+    {
+      id: 'tos', open: false,
+      title: '5. Tos eficaz',
+      title_en: '5. Effective cough',
+      title_ca: '5. Tos eficaç',
+      body: `<p><strong>Para qué sirve:</strong> aprender a toser bien antes de la cirugía mejora su ejecución después y reduce el miedo a toser por el dolor. Es clave para expulsar secreciones.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Inspira profundamente.</li>
+<li>Mantén el aire 1-2 s.</li>
+<li>Tose de forma breve, firme y controlada.</li>
+<li>Si hay dolor o cirugía abdominal, sujeta la zona con las manos o con una almohada.</li></ol>
+<p><strong>Cuida la técnica:</strong> es más una habilidad que aprendes que un ejercicio repetitivo.</p>
+<p><strong>Frecuencia:</strong> 1-3 maniobras de práctica por sesión.</p>`,
+      body_en: `<p><strong>What it's for:</strong> learning to cough well before surgery improves how you do it afterwards and reduces the fear of coughing because of pain. It's key to clearing secretions.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Breathe in deeply.</li>
+<li>Hold the air for 1-2 s.</li>
+<li>Cough in a short, firm and controlled way.</li>
+<li>If there's pain or abdominal surgery, support the area with your hands or a pillow.</li></ol>
+<p><strong>Mind your technique:</strong> it's more a skill you learn than a repetitive exercise.</p>
+<p><strong>Frequency:</strong> 1-3 practice manoeuvres per session.</p>`,
+      body_ca: `<p><strong>Per a què serveix:</strong> aprendre a tossir bé abans de la cirurgia millora com ho fas després i redueix la por de tossir pel dolor. És clau per expulsar secrecions.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Inspira profundament.</li>
+<li>Mantén l'aire 1-2 s.</li>
+<li>Tus de manera breu, ferma i controlada.</li>
+<li>Si hi ha dolor o cirurgia abdominal, subjecta la zona amb les mans o amb un coixí.</li></ol>
+<p><strong>Cuida la tècnica:</strong> és més una habilitat que aprens que un exercici repetitiu.</p>
+<p><strong>Freqüència:</strong> 1-3 maniobres de pràctica per sessió.</p>`,
+    },
+    {
+      id: 'inspirometro', open: false,
+      title: '6. Inspirómetro incentivador',
+      title_en: '6. Incentive spirometer',
+      title_ca: '6. Inspiròmetre incentivador',
+      body: `<p><strong>Para qué sirve:</strong> si tu centro lo utiliza, ayuda a hacer inspiraciones lentas y profundas y a medir tu progreso; especialmente útil en cirugía abdominal o torácica. La calidad del gesto importa más que la rapidez.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Espira primero fuera de la boquilla.</li>
+<li>Sella bien los labios alrededor del dispositivo.</li>
+<li>Inspira lento y profundo hasta alcanzar la marca objetivo que te hayan indicado.</li>
+<li>Mantén unos segundos la inspiración si te lo indican.</li>
+<li>Relaja y repite.</li></ol>
+<p><strong>Cuida la técnica:</strong> inspira despacio (no de golpe); prioriza llegar a la marca de forma sostenida.</p>
+<p><strong>Frecuencia:</strong> 5-10 inspiraciones, 3 veces al día, si dispones de él.</p>`,
+      body_en: `<p><strong>What it's for:</strong> if your centre uses one, it helps you take slow, deep breaths and track your progress; especially useful in abdominal or chest surgery. The quality of the movement matters more than speed.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Breathe out first, away from the mouthpiece.</li>
+<li>Seal your lips firmly around the device.</li>
+<li>Breathe in slowly and deeply until you reach the target mark you were given.</li>
+<li>Hold the breath for a few seconds if instructed.</li>
+<li>Relax and repeat.</li></ol>
+<p><strong>Mind your technique:</strong> breathe in slowly (not all at once); focus on reaching the mark in a sustained way.</p>
+<p><strong>Frequency:</strong> 5-10 breaths, 3 times a day, if you have one.</p>`,
+      body_ca: `<p><strong>Per a què serveix:</strong> si el teu centre l'utilitza, ajuda a fer inspiracions lentes i profundes i a mesurar el teu progrés; especialment útil en cirurgia abdominal o toràcica. La qualitat del gest importa més que la rapidesa.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Espira primer fora de la broqueta.</li>
+<li>Segella bé els llavis al voltant del dispositiu.</li>
+<li>Inspira lent i profund fins a arribar a la marca objectiu que t'hagin indicat.</li>
+<li>Mantén uns segons la inspiració si t'ho indiquen.</li>
+<li>Relaxa i repeteix.</li></ol>
+<p><strong>Cuida la tècnica:</strong> inspira a poc a poc (no de cop); prioritza arribar a la marca de manera sostinguda.</p>
+<p><strong>Freqüència:</strong> 5-10 inspiracions, 3 vegades al dia, si en disposes.</p>`,
+    },
+    {
+      id: 'pauta', open: false,
+      title: '📋 Tu pauta diaria y seguridad',
+      title_en: '📋 Your daily routine and safety',
+      title_ca: '📋 La teva pauta diària i seguretat',
+      body: `<p>Una pauta práctica, <strong>3 veces al día</strong>, sentado o tumbado con el cabecero elevado:</p>
+<ul><li>Respiración diafragmática: 5-10 repeticiones.</li>
+<li>Respiración costal: 5-10 repeticiones.</li>
+<li>Expansiones costales con brazos: 5-10 repeticiones.</li>
+<li>Espiración controlada: intercalada entre ejercicios.</li>
+<li>Tos eficaz: 1-3 maniobras de práctica.</li>
+<li>Inspirómetro incentivador: 5-10 inspiraciones lentas (si dispones de él).</li></ul>
+<p><strong>Seguridad:</strong> evita practicar justo después de comer y <strong>detente si aparece mareo, falta de aire desproporcionada o dolor relevante</strong>. Ante cualquier duda, consulta con tu equipo.</p>`,
+      body_en: `<p>A practical routine, <strong>3 times a day</strong>, sitting or lying with the head of the bed raised:</p>
+<ul><li>Diaphragmatic breathing: 5-10 repetitions.</li>
+<li>Rib (costal) breathing: 5-10 repetitions.</li>
+<li>Chest expansion with arms: 5-10 repetitions.</li>
+<li>Controlled exhalation: interspersed between exercises.</li>
+<li>Effective cough: 1-3 practice manoeuvres.</li>
+<li>Incentive spirometer: 5-10 slow breaths (if you have one).</li></ul>
+<p><strong>Safety:</strong> avoid practising right after eating and <strong>stop if you feel dizzy, unusually short of breath or in significant pain</strong>. If in doubt, check with your team.</p>`,
+      body_ca: `<p>Una pauta pràctica, <strong>3 vegades al dia</strong>, assegut o estirat amb la capçalera elevada:</p>
+<ul><li>Respiració diafragmàtica: 5-10 repeticions.</li>
+<li>Respiració costal: 5-10 repeticions.</li>
+<li>Expansions costals amb braços: 5-10 repeticions.</li>
+<li>Espiració controlada: intercalada entre exercicis.</li>
+<li>Tos eficaç: 1-3 maniobres de pràctica.</li>
+<li>Inspiròmetre incentivador: 5-10 inspiracions lentes (si en disposes).</li></ul>
+<p><strong>Seguretat:</strong> evita practicar just després de menjar i <strong>atura't si apareix mareig, falta d'aire desproporcionada o dolor rellevant</strong>. Davant de qualsevol dubte, consulta amb el teu equip.</p>`,
     },
   ],
 };
