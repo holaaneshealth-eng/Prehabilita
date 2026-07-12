@@ -413,6 +413,7 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
 .fasting-body p { margin: 10px 0; }
 .fasting-body p:first-child { margin-top: 0; }
 .fasting-body ul { margin: 8px 0; padding-left: 22px; list-style: disc; }
+.fasting-body ol { margin: 8px 0; padding-left: 22px; list-style: decimal; }
 .fasting-body li { margin: 5px 0; padding-left: 2px; }
 .tag-you { background: var(--accent); color: #fff; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
 .fasting-disclaimer { margin: 14px 4px 4px; }

@@ -1138,63 +1138,264 @@ export const EXERCISE_GUIDE = {
       title: '▶️ Ejercicios paso a paso (con vídeo)',
       title_en: '▶️ Step-by-step exercises (with video)',
       title_ca: '▶️ Exercicis pas a pas (amb vídeo)',
-      body: `<p>Vídeos breves con la técnica de cada ejercicio. Ve a tu ritmo y detente si algo duele.</p>
-<h4>1. Sentarse y levantarse de la silla</h4>
-<p>Fortalece las piernas para subir escaleras y levantarte con más facilidad. Siéntate y levántate de una silla estable con poca o ninguna ayuda de las manos. 2-3 series de 8-10.</p>
-<p class="muted small">(Vídeo próximamente.)</p>
+      body: `<p>Vídeos breves con la técnica de cada ejercicio. Ve a tu ritmo, cuida la postura y detente si algo duele.</p>
+<h4>1. Sentadilla a la silla</h4>
+<p><strong>Para qué sirve:</strong> fortalece muslos y glúteos; es el gesto de levantarte del sofá, del inodoro o de la cama, clave para tu autonomía tras la cirugía.</p>
+<p><strong>Nivel 1 · Levantarse de la silla</strong></p>
+<ol><li>Siéntate al borde de una silla estable, pies al ancho de las caderas y algo atrasados.</li>
+<li>Inclina el tronco adelante ("la nariz sobre los pies").</li>
+<li>Empuja con los talones y ponte de pie, sin impulso brusco.</li>
+<li>Baja despacio (3-4 s) hasta rozar la silla y repite.</li></ol>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254653" title="Levantarse de la silla" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<p><strong>Nivel 2 · Sentadilla con silla</strong> (cuando el nivel 1 te resulte fácil)</p>
+<ol><li>De pie delante de la silla, pies al ancho de las caderas.</li>
+<li>Lleva las caderas atrás y baja flexionando las rodillas, como si fueras a sentarte.</li>
+<li>Roza el asiento sin dejarte caer y sube empujando con los talones.</li></ol>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254666" title="Sentadilla con silla" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<p><strong>Cuida la técnica:</strong> rodillas alineadas con los pies (que no se metan hacia dentro), espalda neutra y talones apoyados. Usa las manos en los muslos o reposabrazos solo si lo necesitas.</p>
+<p><strong>Series:</strong> 2-3 series de 8-10 repeticiones, con ~1 min de descanso.</p>
 <h4>2. Elevación de talones</h4>
-<p>Fortalece las pantorrillas y mejora el equilibrio. De pie, con apoyo en una silla o pared, sube y baja los talones. 2-3 series de 10-15.</p>
-<p class="muted small">(Vídeo próximamente.)</p>
+<p><strong>Para qué sirve:</strong> fortalece las pantorrillas, mejora el equilibrio y favorece el retorno de la sangre de las piernas.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>De pie, con las manos apoyadas en una silla o pared.</li>
+<li>Sube lentamente sobre las puntas de los pies todo lo que puedas.</li>
+<li>Mantén 1 s arriba y baja despacio y controlado.</li></ol>
+<p><strong>Cuida la técnica:</strong> no rebotes, mantén el cuerpo erguido y el peso repartido en ambos pies.</p>
+<p><strong>Series:</strong> 2-3 series de 10-15 repeticiones.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254652" title="Elevación de talones" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
 <h4>3. Flexiones en pared</h4>
-<p>Trabaja pecho y brazos de forma suave. Apoya las manos en la pared y flexiona los codos acercando el pecho. 2-3 series de 8-12.</p>
-<p class="muted small">(Vídeo próximamente.)</p>
-<h4>4. Remo con banda o botellas</h4>
-<p>Fortalece la espalda y mejora la postura. Tira de una banda elástica (o de botellas de agua) llevando los codos hacia atrás. 2-3 series de 8-12.</p>
-<p class="muted small">(Vídeo próximamente.)</p>
-<h4>5. Equilibrio sobre una pierna</h4>
-<p>Reduce el riesgo de caídas, algo clave antes y después de la cirugía. Con un apoyo firme al alcance, mantente sobre una pierna 10-20 segundos por lado.</p>
-<p class="muted small">(Vídeo próximamente.)</p>
-<h4>6. Respiración diafragmática</h4>
-<p>Entrena la respiración que te ayudará tras la anestesia y a relajarte. Con una mano en el abdomen, inspira 4 s por la nariz (sube la barriga) y espira 6 s por la boca.</p>
-<p class="muted small">(Vídeo próximamente.)</p>`,
-      body_en: `<p>Short videos with the technique for each exercise. Go at your own pace and stop if anything hurts.</p>
-<h4>1. Sit-to-stand</h4>
-<p>Strengthens your legs for stairs and getting up more easily. Sit down and stand up from a stable chair with little or no help from your hands. 2-3 sets of 8-10.</p>
-<p class="muted small">(Video coming soon.)</p>
+<p><strong>Para qué sirve:</strong> fortalece pecho, hombros y brazos de forma suave, sin cargar las articulaciones.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Frente a la pared, apoya las manos a la altura del pecho, algo más anchas que los hombros.</li>
+<li>Da un paso atrás para inclinarte, manteniendo el cuerpo recto.</li>
+<li>Flexiona los codos acercando el pecho a la pared.</li>
+<li>Empuja para volver. Cuanto más atrás coloques los pies, más difícil.</li></ol>
+<p><strong>Cuida la técnica:</strong> cuerpo en línea (no saques la cadera), codos a unos 45°, cuello relajado.</p>
+<p><strong>Series:</strong> 2-3 series de 8-12 repeticiones.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254676" title="Flexiones en pared" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>4. Remo con banda elástica en el suelo</h4>
+<p><strong>Para qué sirve:</strong> fortalece la espalda y mejora la postura, contrarrestando la tendencia a encorvarse.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Sentado en el suelo con las piernas estiradas, pasa la banda por las plantas de los pies y sujeta un extremo en cada mano.</li>
+<li>Espalda recta y hombros bajos.</li>
+<li>Tira de la banda llevando los codos hacia atrás, pegados al cuerpo, juntando los omóplatos.</li>
+<li>Vuelve despacio, controlando la banda.</li></ol>
+<p><strong>Cuida la técnica:</strong> no encorves la espalda; el movimiento nace de juntar las escápulas, no de tirar solo con las manos; hombros lejos de las orejas.</p>
+<p><strong>Series:</strong> 2-3 series de 8-12 repeticiones.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254665" title="Remo con banda en el suelo" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>5. Apertura de hombros con banda (band pull-apart)</h4>
+<p><strong>Para qué sirve:</strong> fortalece la espalda alta (deltoides posterior, romboides y trapecio medio) y mejora la postura de los hombros. El motor del movimiento es la <strong>retracción escapular</strong> (juntar los omóplatos), no la fuerza de las manos.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>De pie, pies al ancho de la cadera, rodillas con una flexión mínima y abdomen firme.</li>
+<li>Sujeta la banda con las palmas hacia abajo (o mirándose entre sí) a la anchura de los hombros.</li>
+<li>Extiende los brazos frente a ti a la altura del pecho, con los hombros bajos y lejos de las orejas.</li>
+<li>Junta los omóplatos hacia atrás y abajo mientras abres los brazos hacia los lados, en cruz.</li>
+<li>Abre hasta que la banda roce tu pecho, sin que las manos suban por encima de la línea de los hombros.</li>
+<li>Regresa al frente de forma lenta y controlada, frenando la banda.</li></ol>
+<p><strong>Cuida la técnica:</strong> no subas los brazos por encima de la horizontal (protege el cuello); el trabajo sale de la espalda, no de las manos.</p>
+<p><strong>Series:</strong> 2-3 series de 10-15 repeticiones.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254651" title="Apertura de hombros con banda" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>6. Puente de glúteos</h4>
+<p><strong>Para qué sirve:</strong> fortalece glúteos, zona lumbar y core tumbado; ayuda al gesto de girarte y levantarte de la cama tras la cirugía.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Túmbate boca arriba, rodillas flexionadas y pies apoyados al ancho de las caderas; brazos a los lados.</li>
+<li>Aprieta los glúteos y eleva la cadera hasta alinear rodillas, caderas y hombros.</li>
+<li>Mantén 1-2 s arriba sin arquear en exceso la zona lumbar.</li>
+<li>Baja despacio.</li></ol>
+<p><strong>Cuida la técnica:</strong> empuja con los talones; el trabajo es del glúteo y el abdomen (no de la lumbar); no subas más de la cuenta.</p>
+<p><strong>Series:</strong> 2-3 series de 10-15 repeticiones.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254662" title="Puente de glúteos" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>7. Equilibrio sobre una pierna</h4>
+<p><strong>Para qué sirve:</strong> mejora el equilibrio y reduce el riesgo de caídas, algo clave antes y después de la cirugía.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Colócate junto a una encimera, silla o pared, con un apoyo firme al alcance de la mano.</li>
+<li>Levanta un pie del suelo y mantén el equilibrio sobre la otra pierna 10-20 s.</li>
+<li>Cambia de pierna. Para progresar, reduce poco a poco el apoyo de la mano.</li></ol>
+<p><strong>Cuida la técnica:</strong> mira a un punto fijo, ten SIEMPRE un apoyo cerca y hazlo acompañado si te da inseguridad.</p>
+<p><strong>Series:</strong> 2-3 repeticiones por pierna.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254650" title="Equilibrio sobre una pierna" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>8. Respiración diafragmática</h4>
+<p><strong>Para qué sirve:</strong> entrena la respiración profunda que ayuda a tus pulmones tras la anestesia y a reducir la ansiedad.</p>
+<p><strong>Cómo hacerlo:</strong></p>
+<ol><li>Sentado o tumbado cómodo, una mano en el pecho y otra en el abdomen.</li>
+<li>Inspira por la nariz 4 s notando que sube el abdomen (no el pecho).</li>
+<li>Espira lento por la boca 6 s.</li>
+<li>Repite 5-10 ciclos.</li></ol>
+<p><strong>Cuida la técnica:</strong> hombros relajados; que se mueva la barriga, no el pecho; sin forzar.</p>
+<p><strong>Series:</strong> 5-10 ciclos, 1-2 veces al día.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254664" title="Respiración diafragmática" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`,
+      body_en: `<p>Short videos with the technique for each exercise. Go at your own pace, mind your posture and stop if anything hurts.</p>
+<h4>1. Chair squat</h4>
+<p><strong>What it's for:</strong> strengthens thighs and glutes; it's the movement of getting up from the sofa, the toilet or the bed, key for your independence after surgery.</p>
+<p><strong>Level 1 · Sit-to-stand</strong></p>
+<ol><li>Sit on the edge of a stable chair, feet hip-width apart and slightly back.</li>
+<li>Lean your trunk forward ("nose over toes").</li>
+<li>Push through your heels and stand up, without jerking.</li>
+<li>Lower slowly (3-4 s) until you touch the chair and repeat.</li></ol>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254653" title="Sit-to-stand" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<p><strong>Level 2 · Squat to chair</strong> (once level 1 feels easy)</p>
+<ol><li>Stand in front of the chair, feet hip-width apart.</li>
+<li>Send your hips back and bend your knees, as if to sit.</li>
+<li>Touch the seat without dropping onto it and stand up pushing through your heels.</li></ol>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254666" title="Squat to chair" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<p><strong>Mind your technique:</strong> knees in line with your feet (don't let them cave in), neutral back and heels down. Use your hands on your thighs or armrests only if needed.</p>
+<p><strong>Sets:</strong> 2-3 sets of 8-10 reps, ~1 min rest.</p>
 <h4>2. Calf raises</h4>
-<p>Strengthens calves and improves balance. Standing, holding a chair or wall, raise and lower your heels. 2-3 sets of 10-15.</p>
-<p class="muted small">(Video coming soon.)</p>
+<p><strong>What it's for:</strong> strengthens calves, improves balance and helps blood return from the legs.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Standing, holding a chair or wall.</li>
+<li>Slowly rise onto the balls of your feet as high as you can.</li>
+<li>Hold 1 s at the top and lower slowly and controlled.</li></ol>
+<p><strong>Mind your technique:</strong> don't bounce, keep your body upright and your weight even on both feet.</p>
+<p><strong>Sets:</strong> 2-3 sets of 10-15 reps.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254652" title="Calf raises" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
 <h4>3. Wall push-ups</h4>
-<p>Works chest and arms gently. Place your hands on the wall and bend your elbows, bringing your chest closer. 2-3 sets of 8-12.</p>
-<p class="muted small">(Video coming soon.)</p>
-<h4>4. Row with a band or bottles</h4>
-<p>Strengthens your back and improves posture. Pull a resistance band (or water bottles) driving your elbows back. 2-3 sets of 8-12.</p>
-<p class="muted small">(Video coming soon.)</p>
-<h4>5. Single-leg balance</h4>
-<p>Reduces the risk of falls, which is key before and after surgery. With a firm support within reach, balance on one leg for 10-20 seconds per side.</p>
-<p class="muted small">(Video coming soon.)</p>
-<h4>6. Diaphragmatic breathing</h4>
-<p>Trains the breathing that will help you after anaesthesia and to relax. With one hand on your abdomen, breathe in for 4 s through the nose (belly rises) and out for 6 s through the mouth.</p>
-<p class="muted small">(Video coming soon.)</p>`,
-      body_ca: `<p>Vídeos breus amb la tècnica de cada exercici. Ves al teu ritme i atura't si alguna cosa fa mal.</p>
-<h4>1. Aixecar-se de la cadira</h4>
-<p>Enforteix les cames per pujar escales i aixecar-te amb més facilitat. Seu i aixeca't d'una cadira estable amb poca o cap ajuda de les mans. 2-3 sèries de 8-10.</p>
-<p class="muted small">(Vídeo pròximament.)</p>
+<p><strong>What it's for:</strong> strengthens chest, shoulders and arms gently, without loading the joints.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Facing the wall, place your hands at chest height, a little wider than your shoulders.</li>
+<li>Step back to lean, keeping your body straight.</li>
+<li>Bend your elbows, bringing your chest towards the wall.</li>
+<li>Push back to the start. The further back your feet, the harder it is.</li></ol>
+<p><strong>Mind your technique:</strong> body in a straight line (don't stick your hips out), elbows about 45°, neck relaxed.</p>
+<p><strong>Sets:</strong> 2-3 sets of 8-12 reps.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254676" title="Wall push-ups" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>4. Floor row with a resistance band</h4>
+<p><strong>What it's for:</strong> strengthens your back and improves posture, countering the tendency to hunch.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Sitting on the floor with legs extended, loop the band around the soles of your feet and hold one end in each hand.</li>
+<li>Back straight, shoulders down.</li>
+<li>Pull the band driving your elbows back, close to your body, squeezing your shoulder blades together.</li>
+<li>Return slowly, controlling the band.</li></ol>
+<p><strong>Mind your technique:</strong> don't hunch; the movement comes from squeezing the shoulder blades, not just pulling with the hands; shoulders away from the ears.</p>
+<p><strong>Sets:</strong> 2-3 sets of 8-12 reps.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254665" title="Floor band row" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>5. Band pull-apart (shoulder opening)</h4>
+<p><strong>What it's for:</strong> strengthens the upper back (rear deltoid, rhomboids and mid-trapezius) and improves shoulder posture. The driver is <strong>scapular retraction</strong> (squeezing the shoulder blades), not hand strength.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Stand with feet hip-width apart, knees slightly bent and core firm.</li>
+<li>Hold the band with palms down (or facing each other) at shoulder width.</li>
+<li>Extend your arms in front of you at chest height, shoulders down and away from your ears.</li>
+<li>Squeeze your shoulder blades back and down while opening your arms out to the sides.</li>
+<li>Open until the band touches your chest, without your hands rising above shoulder height.</li>
+<li>Return to the front slowly and controlled, resisting the band.</li></ol>
+<p><strong>Mind your technique:</strong> don't raise your arms above horizontal (protects your neck); the work comes from your back, not your hands.</p>
+<p><strong>Sets:</strong> 2-3 sets of 10-15 reps.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254651" title="Band pull-apart" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>6. Glute bridge</h4>
+<p><strong>What it's for:</strong> strengthens glutes, lower back and core lying down; helps with turning and getting out of bed after surgery.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Lie on your back, knees bent and feet flat hip-width apart; arms by your sides.</li>
+<li>Squeeze your glutes and lift your hips until knees, hips and shoulders are aligned.</li>
+<li>Hold 1-2 s at the top without over-arching your lower back.</li>
+<li>Lower slowly.</li></ol>
+<p><strong>Mind your technique:</strong> push through your heels; the work is from the glutes and abdomen (not the lower back); don't lift too high.</p>
+<p><strong>Sets:</strong> 2-3 sets of 10-15 reps.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254662" title="Glute bridge" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>7. Single-leg balance</h4>
+<p><strong>What it's for:</strong> improves balance and reduces the risk of falls, which is key before and after surgery.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Stand next to a counter, chair or wall, with a firm support within reach.</li>
+<li>Lift one foot off the floor and balance on the other leg for 10-20 s.</li>
+<li>Switch legs. To progress, gradually reduce the hand support.</li></ol>
+<p><strong>Mind your technique:</strong> look at a fixed point, ALWAYS keep a support nearby, and do it with company if you feel unsteady.</p>
+<p><strong>Sets:</strong> 2-3 reps per leg.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254650" title="Single-leg balance" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>8. Diaphragmatic breathing</h4>
+<p><strong>What it's for:</strong> trains the deep breathing that helps your lungs after anaesthesia and reduces anxiety.</p>
+<p><strong>How to do it:</strong></p>
+<ol><li>Sitting or lying comfortably, one hand on your chest and the other on your abdomen.</li>
+<li>Breathe in through your nose for 4 s, feeling your abdomen rise (not your chest).</li>
+<li>Breathe out slowly through your mouth for 6 s.</li>
+<li>Repeat 5-10 cycles.</li></ol>
+<p><strong>Mind your technique:</strong> shoulders relaxed; the belly moves, not the chest; don't force it.</p>
+<p><strong>Sets:</strong> 5-10 cycles, 1-2 times a day.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254664" title="Diaphragmatic breathing" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`,
+      body_ca: `<p>Vídeos breus amb la tècnica de cada exercici. Ves al teu ritme, cuida la postura i atura't si alguna cosa fa mal.</p>
+<h4>1. Sentadilla a la cadira</h4>
+<p><strong>Per a què serveix:</strong> enforteix cuixes i glutis; és el gest d'aixecar-te del sofà, del vàter o del llit, clau per a la teva autonomia després de la cirurgia.</p>
+<p><strong>Nivell 1 · Aixecar-se de la cadira</strong></p>
+<ol><li>Seu a la vora d'una cadira estable, peus a l'amplada dels malucs i una mica enrere.</li>
+<li>Inclina el tronc endavant ("el nas sobre els peus").</li>
+<li>Empeny amb els talons i posa't dret, sense impuls brusc.</li>
+<li>Baixa a poc a poc (3-4 s) fins a fregar la cadira i repeteix.</li></ol>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254653" title="Aixecar-se de la cadira" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<p><strong>Nivell 2 · Sentadilla amb cadira</strong> (quan el nivell 1 et resulti fàcil)</p>
+<ol><li>Dret davant de la cadira, peus a l'amplada dels malucs.</li>
+<li>Porta els malucs enrere i baixa flexionant els genolls, com si t'anessis a asseure.</li>
+<li>Frega el seient sense deixar-te caure i puja empenyent amb els talons.</li></ol>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254666" title="Sentadilla amb cadira" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<p><strong>Cuida la tècnica:</strong> genolls alineats amb els peus (que no s'entrin cap endins), esquena neutra i talons recolzats. Fes servir les mans a les cuixes o als reposabraços només si ho necessites.</p>
+<p><strong>Sèries:</strong> 2-3 sèries de 8-10 repeticions, amb ~1 min de descans.</p>
 <h4>2. Elevació de talons</h4>
-<p>Enforteix els bessons i millora l'equilibri. Dret, amb suport en una cadira o paret, puja i baixa els talons. 2-3 sèries de 10-15.</p>
-<p class="muted small">(Vídeo pròximament.)</p>
+<p><strong>Per a què serveix:</strong> enforteix els bessons, millora l'equilibri i afavoreix el retorn de la sang de les cames.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Dret, amb les mans recolzades en una cadira o paret.</li>
+<li>Puja lentament sobre les puntes dels peus tot el que puguis.</li>
+<li>Mantén 1 s a dalt i baixa a poc a poc i controlat.</li></ol>
+<p><strong>Cuida la tècnica:</strong> no rebotis, mantén el cos dret i el pes repartit en tots dos peus.</p>
+<p><strong>Sèries:</strong> 2-3 sèries de 10-15 repeticions.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254652" title="Elevació de talons" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
 <h4>3. Flexions a la paret</h4>
-<p>Treballa pit i braços de manera suau. Recolza les mans a la paret i flexiona els colzes acostant el pit. 2-3 sèries de 8-12.</p>
-<p class="muted small">(Vídeo pròximament.)</p>
-<h4>4. Rem amb banda o ampolles</h4>
-<p>Enforteix l'esquena i millora la postura. Estira una banda elàstica (o ampolles d'aigua) portant els colzes enrere. 2-3 sèries de 8-12.</p>
-<p class="muted small">(Vídeo pròximament.)</p>
-<h4>5. Equilibri sobre una cama</h4>
-<p>Redueix el risc de caigudes, clau abans i després de la cirurgia. Amb un suport ferm a l'abast, mantén-te sobre una cama 10-20 segons per costat.</p>
-<p class="muted small">(Vídeo pròximament.)</p>
-<h4>6. Respiració diafragmàtica</h4>
-<p>Entrena la respiració que t'ajudarà després de l'anestèsia i a relaxar-te. Amb una mà a l'abdomen, inspira 4 s pel nas (puja la panxa) i expira 6 s per la boca.</p>
-<p class="muted small">(Vídeo pròximament.)</p>`,
+<p><strong>Per a què serveix:</strong> enforteix pit, espatlles i braços de manera suau, sense carregar les articulacions.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>De cara a la paret, recolza les mans a l'altura del pit, una mica més amples que les espatlles.</li>
+<li>Fes un pas enrere per inclinar-te, mantenint el cos recte.</li>
+<li>Flexiona els colzes acostant el pit a la paret.</li>
+<li>Empeny per tornar. Com més enrere posis els peus, més difícil.</li></ol>
+<p><strong>Cuida la tècnica:</strong> cos en línia (no treguis el maluc), colzes a uns 45°, coll relaxat.</p>
+<p><strong>Sèries:</strong> 2-3 sèries de 8-12 repeticions.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254676" title="Flexions a la paret" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>4. Rem amb banda elàstica a terra</h4>
+<p><strong>Per a què serveix:</strong> enforteix l'esquena i millora la postura, contrarestant la tendència a encorbar-se.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Assegut a terra amb les cames estirades, passa la banda per les plantes dels peus i subjecta un extrem a cada mà.</li>
+<li>Esquena recta i espatlles baixes.</li>
+<li>Estira la banda portant els colzes enrere, arran del cos, ajuntant els omòplats.</li>
+<li>Torna a poc a poc, controlant la banda.</li></ol>
+<p><strong>Cuida la tècnica:</strong> no encorbis l'esquena; el moviment neix d'ajuntar les escàpules, no d'estirar només amb les mans; espatlles lluny de les orelles.</p>
+<p><strong>Sèries:</strong> 2-3 sèries de 8-12 repeticions.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254665" title="Rem amb banda a terra" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>5. Apertura d'espatlles amb banda (band pull-apart)</h4>
+<p><strong>Per a què serveix:</strong> enforteix l'esquena alta (deltoide posterior, romboides i trapezi mitjà) i millora la postura de les espatlles. El motor del moviment és la <strong>retracció escapular</strong> (ajuntar els omòplats), no la força de les mans.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Dret, peus a l'amplada del maluc, genolls amb una flexió mínima i abdomen ferm.</li>
+<li>Subjecta la banda amb els palmells cap avall (o mirant-se entre si) a l'amplada de les espatlles.</li>
+<li>Estén els braços davant teu a l'altura del pit, amb les espatlles baixes i lluny de les orelles.</li>
+<li>Ajunta els omòplats enrere i avall mentre obres els braços cap als costats, en creu.</li>
+<li>Obre fins que la banda fregui el pit, sense que les mans pugin per sobre de la línia de les espatlles.</li>
+<li>Torna al davant de manera lenta i controlada, frenant la banda.</li></ol>
+<p><strong>Cuida la tècnica:</strong> no pugis els braços per sobre de l'horitzontal (protegeix el coll); el treball surt de l'esquena, no de les mans.</p>
+<p><strong>Sèries:</strong> 2-3 sèries de 10-15 repeticions.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254651" title="Apertura d'espatlles amb banda" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>6. Pont de glutis</h4>
+<p><strong>Per a què serveix:</strong> enforteix glutis, zona lumbar i core estirat; ajuda al gest de girar-te i aixecar-te del llit després de la cirurgia.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Estira't de panxa enlaire, genolls flexionats i peus recolzats a l'amplada dels malucs; braços als costats.</li>
+<li>Estreny els glutis i eleva el maluc fins a alinear genolls, malucs i espatlles.</li>
+<li>Mantén 1-2 s a dalt sense arquejar en excés la zona lumbar.</li>
+<li>Baixa a poc a poc.</li></ol>
+<p><strong>Cuida la tècnica:</strong> empeny amb els talons; el treball és del gluti i l'abdomen (no de la lumbar); no pugis més del compte.</p>
+<p><strong>Sèries:</strong> 2-3 sèries de 10-15 repeticions.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254662" title="Pont de glutis" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>7. Equilibri sobre una cama</h4>
+<p><strong>Per a què serveix:</strong> millora l'equilibri i redueix el risc de caigudes, cosa clau abans i després de la cirurgia.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Col·loca't al costat d'una encimera, cadira o paret, amb un suport ferm a l'abast de la mà.</li>
+<li>Aixeca un peu de terra i mantén l'equilibri sobre l'altra cama 10-20 s.</li>
+<li>Canvia de cama. Per progressar, redueix a poc a poc el suport de la mà.</li></ol>
+<p><strong>Cuida la tècnica:</strong> mira a un punt fix, tingues SEMPRE un suport a prop i fes-ho acompanyat si et fa inseguretat.</p>
+<p><strong>Sèries:</strong> 2-3 repeticions per cama.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254650" title="Equilibri sobre una cama" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>
+<h4>8. Respiració diafragmàtica</h4>
+<p><strong>Per a què serveix:</strong> entrena la respiració profunda que ajuda els teus pulmons després de l'anestèsia i a reduir l'ansietat.</p>
+<p><strong>Com fer-ho:</strong></p>
+<ol><li>Assegut o estirat còmode, una mà al pit i l'altra a l'abdomen.</li>
+<li>Inspira pel nas 4 s notant que puja l'abdomen (no el pit).</li>
+<li>Expira lent per la boca 6 s.</li>
+<li>Repeteix 5-10 cicles.</li></ol>
+<p><strong>Cuida la tècnica:</strong> espatlles relaxades; que es mogui la panxa, no el pit; sense forçar.</p>
+<p><strong>Sèries:</strong> 5-10 cicles, 1-2 vegades al dia.</p>
+<div class="video"><iframe src="https://player.vimeo.com/video/1209254664" title="Respiració diafragmàtica" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`,
     },
     {
       id: 'seguridad', open: false,
