@@ -35,6 +35,16 @@ export const PILLARS = [
     why_ca: 'Un bon estat nutricional (sobretot prou proteïna) afavoreix la cicatrització i la resposta a l’estrès quirúrgic.',
   },
   {
+    id: 'ayuno', emoji: '⏳', color: '#ef4444',
+    name: 'Ayuno', name_en: 'Fasting', name_ca: 'Dejuni',
+    tagline: 'Prepárate para el ayuno previo a la cirugía.',
+    tagline_en: 'Get ready for pre-surgery fasting.',
+    tagline_ca: 'Prepara’t per al dejuni previ a la cirurgia.',
+    why: 'Seguir bien las pautas de ayuno reduce el riesgo de complicaciones anestésicas y evita retrasos o suspensiones de la cirugía.',
+    why_en: 'Following fasting guidelines properly reduces the risk of anaesthetic complications and avoids surgery delays or cancellations.',
+    why_ca: 'Seguir bé les pautes de dejuni redueix el risc de complicacions anestèsiques i evita retards o suspensions de la cirurgia.',
+  },
+  {
     id: 'mental', emoji: '🧘', color: '#f59e0b',
     name: 'Bienestar mental', name_en: 'Mental wellbeing', name_ca: 'Benestar mental',
     tagline: 'Reduce la ansiedad y duerme mejor.',
@@ -708,6 +718,11 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
   },
 ];
 
+// Versión del catálogo de recursos por defecto. Al incrementarla, la migración
+// (syncDefaultResources en data.js) añade a las bibliotecas ya existentes los
+// recursos por defecto que falten por id, una sola vez.
+export const RESOURCES_VERSION = 1;
+
 export const DEFAULT_RESOURCES = [
   { id: 'res-mindfulness', pillar: 'mental', type: 'link',
     url: 'https://www.youtube.com/results?search_query=meditaci%C3%B3n+guiada+mindfulness+10+minutos',
@@ -733,7 +748,7 @@ export const DEFAULT_RESOURCES = [
     desc: 'Rutinas sencillas de fuerza sin material.',
     desc_en: 'Simple strength routines with no equipment.',
     desc_ca: 'Rutines senzilles de força sense material.' },
-  { id: 'res-ayuno', pillar: 'nutricion', type: 'link',
+  { id: 'res-ayuno', pillar: 'ayuno', type: 'link',
     url: 'https://www.youtube.com/results?search_query=ayuno+preoperatorio+antes+de+cirug%C3%ADa',
     title: 'Ayuno',
     title_en: 'Fasting',

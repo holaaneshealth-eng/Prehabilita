@@ -8,6 +8,7 @@ import {
   LESSONS,
   DEFAULT_POSTS,
   DEFAULT_RESOURCES,
+  RESOURCES_VERSION,
 } from './content.js';
 
 /** Genera un identificador único legible. */
@@ -21,7 +22,30 @@ export function seedLibrary(state) {
   if (lib.seeded) return;
   if (!lib.posts || lib.posts.length === 0) lib.posts = DEFAULT_POSTS.map((p) => ({ ...p }));
   if (!lib.resources || lib.resources.length === 0) lib.resources = DEFAULT_RESOURCES.map((r) => ({ ...r }));
+  lib.resourcesVersion = RESOURCES_VERSION;
   lib.seeded = true;
+}
+
+/**
+ * Migración de recursos por defecto: añade a la biblioteca los recursos por
+ * defecto que falten por id (p. ej. recursos nuevos publicados tras la primera
+ * siembra), una sola vez por versión. Es idempotente y respeta futuras
+ * eliminaciones del profesional: al subir resourcesVersion no se vuelven a
+ * reañadir los que ya se introdujeron. Devuelve true si añadió algo.
+ */
+export function syncDefaultResources(state) {
+  const lib = state.library;
+  if (!lib) return false;
+  const current = lib.resourcesVersion || 0;
+  if (current >= RESOURCES_VERSION) return false;
+  if (!Array.isArray(lib.resources)) lib.resources = [];
+  const have = new Set(lib.resources.map((r) => r.id));
+  let added = 0;
+  for (const r of DEFAULT_RESOURCES) {
+    if (!have.has(r.id)) { lib.resources.push({ ...r }); added++; }
+  }
+  lib.resourcesVersion = RESOURCES_VERSION;
+  return added > 0;
 }
 
 /* ---------- Pilares ---------- */

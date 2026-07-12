@@ -10,7 +10,7 @@ import {
 import { BADGES, DISCLAIMER, DISCLAIMER_EN, DISCLAIMER_CA, FRAIL_QUESTIONS, EDMONTON_QUESTIONS, MEMORY_EMOJIS } from './content.js';
 import { GAD7, PHQ9, DASI, bmiScore } from './scales.js';
 import {
-  seedLibrary, getTasks, getTaskById, getAllTasksForEditor, getPillarById,
+  seedLibrary, syncDefaultResources, getTasks, getTaskById, getAllTasksForEditor, getPillarById,
   getResources, getPosts, getDailyGoal, uid,
 } from './data.js';
 import { applyEngine, recompute, dayXp, tasksDoneCount } from './gamification.js';
@@ -39,6 +39,7 @@ function init() {
   loadState();
   const state = getState();
   seedLibrary(state);
+  syncDefaultResources(state);
   recompute(state);
   saveState();
   applyDisplaySettings();
