@@ -4,8 +4,8 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <meta name="theme-color" content="#0f766e" />
-  <meta name="description" content="PreHabilítame: programa domiciliario y autogestionado de prehabilitacion anestesica." />
-  <title>PreHabilítame &middot; Prehabilitacion anestesica</title>
+  <meta name="description" content="PreHabilítame: programa domiciliario y autogestionado de prehabilitación anestésica antes de una cirugía de alta complejidad, con incentivos de gamificación." />
+  <title>PreHabilítame · Prehabilitación anestésica</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AB%81%3C/text%3E%3C/svg%3E" />
   <style>
 /* styles.css — PreHabilítame */
@@ -393,6 +393,14 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
 .print-doc { background: #fff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 18px; margin-top: 12px; }
 .print-doc h2 { font-size: 1.2rem; margin-bottom: 8px; }
 .print-doc h3 { font-size: .95rem; margin: 14px 0 4px; color: var(--accent); }
+.report-steps { margin: 10px 0 0; padding-left: 20px; }
+.report-steps li { margin: 4px 0; color: var(--muted); font-size: .9rem; }
+.email-note { margin-top: 6px; }
+.doc-header { margin-bottom: 10px; }
+.doc-meta { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.doc-meta td { padding: 4px 6px; border-bottom: 1px solid #e5e7eb; font-size: .92rem; vertical-align: top; }
+.doc-meta td:first-child { color: var(--muted); width: 45%; }
+.doc-meta td:last-child { font-weight: 600; }
 .med-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
 .med-table th, .med-table td { border: 1px solid #e2e8f0; padding: 7px 8px; text-align: left; font-size: .85rem; }
 .med-table th { background: #f8fafc; }
@@ -525,9 +533,19 @@ body.high-contrast .cmp-down { color: #b91c1c; }
   </style>
 </head>
 <body>
-  <div id="app"><noscript><div class="noscript">Esta aplicacion necesita JavaScript activado para funcionar.</div></noscript></div>
+  <!-- Splash / carga -->
+  <div id="app">
+    <noscript>
+      <div class="noscript">Esta aplicación necesita JavaScript activado para funcionar.</div>
+    </noscript>
+  </div>
+
+  <!-- Contenedor de notificaciones (toasts) -->
   <div id="toast-layer" class="toast-layer" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Contenedor de modales -->
   <div id="modal-root"></div>
+
   <script>
 (() => {
   var __defProp = Object.defineProperty;
@@ -843,6 +861,20 @@ body.high-contrast .cmp-down { color: #b91c1c; }
       why: "Un buen estado nutricional (sobre todo suficiente proteína) favorece la cicatrización y la respuesta al estrés quirúrgico.",
       why_en: "Good nutritional status (especially enough protein) supports healing and the response to surgical stress.",
       why_ca: "Un bon estat nutricional (sobretot prou proteïna) afavoreix la cicatrització i la resposta a l’estrès quirúrgic."
+    },
+    {
+      id: "ayuno",
+      emoji: "⏳",
+      color: "#ef4444",
+      name: "Ayuno",
+      name_en: "Fasting",
+      name_ca: "Dejuni",
+      tagline: "Prepárate para el ayuno previo a la cirugía.",
+      tagline_en: "Get ready for pre-surgery fasting.",
+      tagline_ca: "Prepara’t per al dejuni previ a la cirurgia.",
+      why: "Seguir bien las pautas de ayuno reduce el riesgo de complicaciones anestésicas y evita retrasos o suspensiones de la cirugía.",
+      why_en: "Following fasting guidelines properly reduces the risk of anaesthetic complications and avoids surgery delays or cancellations.",
+      why_ca: "Seguir bé les pautes de dejuni redueix el risc de complicacions anestèsiques i evita retards o suspensions de la cirurgia."
     },
     {
       id: "mental",
@@ -2016,6 +2048,7 @@ POLIFARMÀCIA (prendre molts medicaments). Alguns fàrmacs s’han de mantenir i
 EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista completa i actualitzada de TOTS els teus medicaments (inclosos els d’herbolari i els que compres sense recepta) i de les teves al·lèrgies. Pots preparar-la i descarregar-la des de la secció "La meva medicació i al·lèrgies" d’aquesta app.`
     }
   ];
+  var RESOURCES_VERSION = 1;
   var DEFAULT_RESOURCES = [
     {
       id: "res-mindfulness",
@@ -2052,6 +2085,18 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       desc: "Rutinas sencillas de fuerza sin material.",
       desc_en: "Simple strength routines with no equipment.",
       desc_ca: "Rutines senzilles de força sense material."
+    },
+    {
+      id: "res-ayuno",
+      pillar: "ayuno",
+      type: "link",
+      url: "https://www.youtube.com/results?search_query=ayuno+preoperatorio+antes+de+cirug%C3%ADa",
+      title: "Ayuno",
+      title_en: "Fasting",
+      title_ca: "Dejuni",
+      desc: "Pautas de ayuno antes de la cirugía: cuántas horas sin comer ni beber. Sigue siempre las indicaciones de tu equipo médico.",
+      desc_en: "Fasting guidelines before surgery: how many hours without eating or drinking. Always follow your medical team’s instructions.",
+      desc_ca: "Pautes de dejuni abans de la cirurgia: quantes hores sense menjar ni beure. Segueix sempre les indicacions del teu equip mèdic."
     }
   ];
   var ALARM_SIGNS = [
@@ -2634,7 +2679,28 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       lib.posts = DEFAULT_POSTS.map((p) => ({ ...p }));
     if (!lib.resources || lib.resources.length === 0)
       lib.resources = DEFAULT_RESOURCES.map((r) => ({ ...r }));
+    lib.resourcesVersion = RESOURCES_VERSION;
     lib.seeded = true;
+  }
+  function syncDefaultResources(state2) {
+    const lib = state2.library;
+    if (!lib)
+      return false;
+    const current = lib.resourcesVersion || 0;
+    if (current >= RESOURCES_VERSION)
+      return false;
+    if (!Array.isArray(lib.resources))
+      lib.resources = [];
+    const have = new Set(lib.resources.map((r) => r.id));
+    let added = 0;
+    for (const r of DEFAULT_RESOURCES) {
+      if (!have.has(r.id)) {
+        lib.resources.push({ ...r });
+        added++;
+      }
+    }
+    lib.resourcesVersion = RESOURCES_VERSION;
+    return added > 0;
   }
   function getPillars(state2) {
     const custom = state2.library.customPillars || [];
@@ -3153,6 +3219,19 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       report_title: "\uD83D\uDCC4 Informe de progreso",
       report_intro: "Un resumen de tu prehabilitación para compartir con tu equipo médico. Pulsa el botón para guardarlo en PDF o imprimirlo.",
       report_print: "\uD83D\uDDA8️ Imprimir / Guardar como PDF",
+      report_step_1: "Pulsa «Imprimir / Guardar como PDF» y guarda el archivo en tu dispositivo.",
+      report_step_2: "Pulsa «Enviar a mi equipo» y adjunta al correo el PDF que acabas de guardar.",
+      report_email_btn: "✉️ Enviar a mi equipo",
+      report_email_note: "Se abrirá tu app de correo con el mensaje preparado. Recuerda adjuntar el PDF antes de enviarlo.",
+      report_email_subject: "Informe de prehabilitación — {name} — Intervención: {date}",
+      report_email_body: `Hola,
+
+Os hago llegar mi informe de progreso de prehabilitación en PDF (adjunto).
+
+Paciente: {name}
+Fecha de la intervención: {date}
+
+Gracias.`,
       report_doc_title: "Informe de progreso · PreHabilítame",
       report_generated: "Generado el {date}",
       report_summary: "Resumen",
@@ -3428,6 +3507,19 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       report_title: "\uD83D\uDCC4 Progress report",
       report_intro: "A summary of your prehabilitation to share with your medical team. Tap the button to save it as PDF or print it.",
       report_print: "\uD83D\uDDA8️ Print / Save as PDF",
+      report_step_1: "Tap “Print / Save as PDF” and save the file to your device.",
+      report_step_2: "Tap “Send to my team” and attach the PDF you just saved to the email.",
+      report_email_btn: "✉️ Send to my team",
+      report_email_note: "Your email app will open with a ready-made message. Remember to attach the PDF before sending.",
+      report_email_subject: "Prehabilitation report — {name} — Surgery: {date}",
+      report_email_body: `Hello,
+
+I am sending you my prehabilitation progress report as a PDF (attached).
+
+Patient: {name}
+Surgery date: {date}
+
+Thank you.`,
       report_doc_title: "Progress report · PreHabilítame",
       report_generated: "Generated on {date}",
       report_summary: "Summary",
@@ -3703,6 +3795,19 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       report_title: "\uD83D\uDCC4 Informe de progrés",
       report_intro: "Un resum de la teva prehabilitació per compartir amb el teu equip mèdic. Prem el botó per desar-lo en PDF o imprimir-lo.",
       report_print: "\uD83D\uDDA8️ Imprimir / Desar com a PDF",
+      report_step_1: "Prem «Imprimir / Desar com a PDF» i desa el fitxer al teu dispositiu.",
+      report_step_2: "Prem «Enviar al meu equip» i adjunta al correu el PDF que acabes de desar.",
+      report_email_btn: "✉️ Enviar al meu equip",
+      report_email_note: "S’obrirà la teva app de correu amb el missatge preparat. Recorda adjuntar el PDF abans d’enviar-lo.",
+      report_email_subject: "Informe de prehabilitació — {name} — Intervenció: {date}",
+      report_email_body: `Hola,
+
+Us faig arribar el meu informe de progrés de prehabilitació en PDF (adjunt).
+
+Pacient: {name}
+Data de la intervenció: {date}
+
+Gràcies.`,
       report_doc_title: "Informe de progrés · PreHabilítame",
       report_generated: "Generat el {date}",
       report_summary: "Resum",
@@ -4398,17 +4503,36 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       return `<tr><td>${sc.icon} ${esc(tr(sc, "name"))}</td><td>${base.score}</td><td>${lastCell}</td><td>${r ? esc(tr(r, "label")) : ""}</td></tr>`;
     }).filter(Boolean).join("");
     const assessTable = assessRows ? `<h3>${t("report_assess")}</h3><table class="med-table"><thead><tr><th></th><th>${t("assess_baseline")}</th><th>${t("assess_latest")}</th><th></th></tr></thead><tbody>${assessRows}</tbody></table>` : `<h3>${t("report_frail")}</h3><p>${frailLine}</p>`;
+    const patientName = state2.profile.name || t("patient_default");
+    const surgeryDate = state2.profile.surgeryDate || "—";
+    const mailSubject = t("report_email_subject", { name: patientName, date: surgeryDate });
+    const mailBody = t("report_email_body", { name: patientName, date: surgeryDate });
+    const mailHref = `mailto:hola.aneshealth@gmail.com?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
     return `
     <div class="section-label">${t("report_title")}</div>
     <div class="no-print">
-      <section class="card"><p class="muted small">${t("report_intro")}</p></section>
+      <section class="card">
+        <p class="muted small">${t("report_intro")}</p>
+        <ol class="report-steps">
+          <li>${t("report_step_1")}</li>
+          <li>${t("report_step_2")}</li>
+        </ol>
+      </section>
       <button class="btn primary block" data-action="print-doc">${t("report_print")}</button>
+      <a class="btn ghost block" href="${mailHref}">${t("report_email_btn")}</a>
+      <p class="muted small email-note">${t("report_email_note")}</p>
     </div>
     <section class="print-doc">
-      <h2>${t("report_doc_title")}</h2>
-      <p class="muted small">${t("report_generated", { date: todayKey() })}</p>
-      <p><strong>${t("meds_patient")}:</strong> ${esc(state2.profile.name || "")} &nbsp;·&nbsp; <strong>${t("meds_surgery")}:</strong> ${esc(state2.profile.surgeryType || "—")}</p>
-      <p><strong>${t("report_days_to")}:</strong> ${dtsLine} &nbsp;·&nbsp; <strong>${t("meds_date")}:</strong> ${esc(state2.profile.surgeryDate || "—")}</p>
+      <div class="doc-header">
+        <h2>${t("report_doc_title")}</h2>
+        <p class="muted small">${t("report_generated", { date: todayKey() })}</p>
+        <table class="doc-meta"><tbody>
+          <tr><td>${t("meds_patient")}</td><td>${esc(patientName)}</td></tr>
+          <tr><td>${t("meds_surgery")}</td><td>${esc(state2.profile.surgeryType || "—")}</td></tr>
+          <tr><td>${t("meds_date")}</td><td>${esc(state2.profile.surgeryDate || "—")}</td></tr>
+          <tr><td>${t("report_days_to")}</td><td>${dtsLine}</td></tr>
+        </tbody></table>
+      </div>
       <h3>${t("report_summary")}</h3>
       <table class="med-table"><tbody>
         <tr><td>${t("report_level")}</td><td>${li.level}</td></tr>
@@ -5012,6 +5136,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
     loadState();
     const state2 = getState();
     seedLibrary(state2);
+    syncDefaultResources(state2);
     recompute(state2);
     saveState();
     applyDisplaySettings();
