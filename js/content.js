@@ -346,11 +346,11 @@ export const WEEKLY_CHALLENGES = [
 ];
 
 export const DISCLAIMER =
-  'PreHabilita es una herramienta educativa y de acompañamiento. No sustituye la valoración ni las indicaciones de tu equipo médico y anestésico. Ante cualquier duda, dolor o síntoma nuevo, consulta con tu profesional de salud. Sigue siempre las instrucciones concretas de tu centro (ayuno, medicación, ejercicio permitido).';
+  'PreHabilítame es una herramienta educativa y de acompañamiento. No sustituye la valoración ni las indicaciones de tu equipo médico y anestésico. Ante cualquier duda, dolor o síntoma nuevo, consulta con tu profesional de salud. Sigue siempre las instrucciones concretas de tu centro (ayuno, medicación, ejercicio permitido).';
 export const DISCLAIMER_EN =
-  'PreHabilita is an educational and support tool. It does not replace the assessment or instructions of your medical and anesthetic team. If you have any doubt, pain or new symptom, consult your healthcare professional. Always follow the specific instructions from your hospital (fasting, medication, permitted exercise).';
+  'PreHabilítame is an educational and support tool. It does not replace the assessment or instructions of your medical and anesthetic team. If you have any doubt, pain or new symptom, consult your healthcare professional. Always follow the specific instructions from your hospital (fasting, medication, permitted exercise).';
 export const DISCLAIMER_CA =
-  'PreHabilita és una eina educativa i d’acompanyament. No substitueix la valoració ni les indicacions del teu equip mèdic i anestèsic. Davant de qualsevol dubte, dolor o símptoma nou, consulta amb el teu professional de salut. Segueix sempre les instruccions concretes del teu centre (dejuni, medicació, exercici permès).';
+  'PreHabilítame és una eina educativa i d’acompanyament. No substitueix la valoració ni les indicacions del teu equip mèdic i anestèsic. Davant de qualsevol dubte, dolor o símptoma nou, consulta amb el teu professional de salut. Segueix sempre les instruccions concretes del teu centre (dejuni, medicació, exercici permès).';
 
 export const ERAS_NOTE =
   'Este programa sigue los principios de la recuperación intensificada (ERAS®): ' +

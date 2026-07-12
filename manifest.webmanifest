@@ -1,6 +1,6 @@
 {
-  "name": "PreHabilita · Prehabilitación anestésica",
-  "short_name": "PreHabilita",
+  "name": "PreHabilítame · Prehabilitación anestésica",
+  "short_name": "PreHabilítame",
   "description": "Programa domiciliario y autogestionado de prehabilitación antes de una cirugía de alta complejidad, con gamificación.",
   "start_url": "./index.html",
   "scope": "./",

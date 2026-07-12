@@ -70,7 +70,7 @@ export function renderHeader(state) {
       <div class="brand">
         <span class="brand-logo">🫁</span>
         <div>
-          <div class="brand-name">PreHabilita</div>
+          <div class="brand-name">PreHabilítame</div>
           <div class="brand-sub">${t('greeting', { name: esc(state.profile.name || t('patient_default')) })}</div>
         </div>
       </div>
@@ -518,7 +518,7 @@ export function renderOnboarding() {
   <div class="onboarding">
     <div class="onb-hero">
       <div class="onb-logo">🫁</div>
-      <h1>PreHabilita</h1>
+      <h1>PreHabilítame</h1>
       <p>${t('onb_tagline')}</p>
     </div>
     <form id="onb-form" class="card onb-form">

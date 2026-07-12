@@ -801,7 +801,7 @@ function fireReminder() {
   if (xp >= goal) body = '¡Ya has completado tu objetivo de hoy! 🎉 ¿Sumamos algo extra?';
   else body = `Te quedan ${pending} tareas (${Math.max(0, goal - xp)} XP) para completar tu día. ¡Tú puedes! 💪`;
   try {
-    new Notification('PreHabilita · tu prehabilitación te espera', { body, tag: 'prehabilita-reminder' });
+    new Notification('PreHabilítame · tu prehabilitación te espera', { body, tag: 'prehabilita-reminder' });
   } catch (_) { /* algunos navegadores requieren SW para notificar */ }
 }
 
