@@ -813,7 +813,7 @@ export const FASTING_GUIDE = {
 <p>Los horarios y cantidades exactos pueden variar: sigue siempre las indicaciones concretas de tu hospital.</p>
 <h4>Vídeo explicativo para pacientes sin diabetes ni medicación tipo GLP‑1</h4>
 <p>A continuación encontrarás un vídeo donde te explicamos, paso a paso, cómo debes ayunar si no tienes diabetes ni tomas medicación que ralentice el vaciamiento del estómago. Te ayudará a repasar los horarios y a resolver las dudas más frecuentes.</p>
-<p class="muted small">(Vídeo próximamente.)</p>`,
+<div class="video"><iframe src="https://player.vimeo.com/video/1209214235" title="Vídeo: ayuno antes de la cirugía" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`,
       body_en: `<p>If you don't have diabetes or special digestive problems, as a general rule:</p>
 <ul><li><strong>Clear liquids:</strong> allowed up to 2 hours before anaesthesia. Between 4 and 2 hours beforehand, have only a moderate amount.</li>
 <li><strong>Light meals</strong> (toast, fruit, cereal): stop well in advance (usually about 6 hours before).</li>
@@ -822,7 +822,7 @@ export const FASTING_GUIDE = {
 <p>Exact times and amounts may vary: always follow your hospital's specific instructions.</p>
 <h4>Explainer video for patients without diabetes or GLP‑1 medication</h4>
 <p>Below you'll find a video explaining, step by step, how to fast if you don't have diabetes and don't take medication that slows stomach emptying. It will help you review the timings and answer the most common questions.</p>
-<p class="muted small">(Video coming soon.)</p>`,
+<div class="video"><iframe src="https://player.vimeo.com/video/1209214236" title="Video: fasting before surgery" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`,
       body_ca: `<p>Si no tens diabetis ni problemes digestius especials, com a norma general:</p>
 <ul><li><strong>Líquids clars:</strong> permesos fins a 2 hores abans de l'anestèsia. Entre les 4 i les 2 hores prèvies, pren només una quantitat moderada.</li>
 <li><strong>Menjar lleuger</strong> (torrades, fruita, cereals): deixa'l amb prou antelació (habitualment unes 6 hores abans).</li>
@@ -831,7 +831,7 @@ export const FASTING_GUIDE = {
 <p>Els horaris i quantitats exactes poden variar: segueix sempre les indicacions concretes del teu hospital.</p>
 <h4>Vídeo explicatiu per a pacients sense diabetis ni medicació tipus GLP‑1</h4>
 <p>A continuació trobaràs un vídeo on t'expliquem, pas a pas, com has de dejunar si no tens diabetis ni prens medicació que alenteixi el buidatge de l'estómac. T'ajudarà a repassar els horaris i a resoldre els dubtes més freqüents.</p>
-<p class="muted small">(Vídeo pròximament.)</p>`,
+<div class="video"><iframe src="https://player.vimeo.com/video/1209214237" title="Vídeo: dejuni abans de la cirurgia" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`,
     },
     {
       id: 'diabetes', match: 'diabetes',
