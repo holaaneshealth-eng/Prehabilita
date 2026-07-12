@@ -701,17 +701,39 @@ export function renderReport(state) {
     ? `<h3>${t('report_assess')}</h3><table class="med-table"><thead><tr><th></th><th>${t('assess_baseline')}</th><th>${t('assess_latest')}</th><th></th></tr></thead><tbody>${assessRows}</tbody></table>`
     : `<h3>${t('report_frail')}</h3><p>${frailLine}</p>`;
 
+  // Entrega por correo: abre el cliente de correo con asunto y cuerpo prerrellenados
+  // (nombre del paciente y fecha de la intervención). El PDF se adjunta manualmente.
+  const patientName = state.profile.name || t('patient_default');
+  const surgeryDate = state.profile.surgeryDate || '—';
+  const mailSubject = t('report_email_subject', { name: patientName, date: surgeryDate });
+  const mailBody = t('report_email_body', { name: patientName, date: surgeryDate });
+  const mailHref = `mailto:hola.aneshealth@gmail.com?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
+
   return `
     <div class="section-label">${t('report_title')}</div>
     <div class="no-print">
-      <section class="card"><p class="muted small">${t('report_intro')}</p></section>
+      <section class="card">
+        <p class="muted small">${t('report_intro')}</p>
+        <ol class="report-steps">
+          <li>${t('report_step_1')}</li>
+          <li>${t('report_step_2')}</li>
+        </ol>
+      </section>
       <button class="btn primary block" data-action="print-doc">${t('report_print')}</button>
+      <a class="btn ghost block" href="${mailHref}">${t('report_email_btn')}</a>
+      <p class="muted small email-note">${t('report_email_note')}</p>
     </div>
     <section class="print-doc">
-      <h2>${t('report_doc_title')}</h2>
-      <p class="muted small">${t('report_generated', { date: todayKey() })}</p>
-      <p><strong>${t('meds_patient')}:</strong> ${esc(state.profile.name || '')} &nbsp;·&nbsp; <strong>${t('meds_surgery')}:</strong> ${esc(state.profile.surgeryType || '—')}</p>
-      <p><strong>${t('report_days_to')}:</strong> ${dtsLine} &nbsp;·&nbsp; <strong>${t('meds_date')}:</strong> ${esc(state.profile.surgeryDate || '—')}</p>
+      <div class="doc-header">
+        <h2>${t('report_doc_title')}</h2>
+        <p class="muted small">${t('report_generated', { date: todayKey() })}</p>
+        <table class="doc-meta"><tbody>
+          <tr><td>${t('meds_patient')}</td><td>${esc(patientName)}</td></tr>
+          <tr><td>${t('meds_surgery')}</td><td>${esc(state.profile.surgeryType || '—')}</td></tr>
+          <tr><td>${t('meds_date')}</td><td>${esc(state.profile.surgeryDate || '—')}</td></tr>
+          <tr><td>${t('report_days_to')}</td><td>${dtsLine}</td></tr>
+        </tbody></table>
+      </div>
       <h3>${t('report_summary')}</h3>
       <table class="med-table"><tbody>
         <tr><td>${t('report_level')}</td><td>${li.level}</td></tr>

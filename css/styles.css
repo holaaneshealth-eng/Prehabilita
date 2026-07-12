@@ -383,6 +383,14 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
 .print-doc { background: #fff; border: 1px dashed #cbd5e1; border-radius: 14px; padding: 18px; margin-top: 12px; }
 .print-doc h2 { font-size: 1.2rem; margin-bottom: 8px; }
 .print-doc h3 { font-size: .95rem; margin: 14px 0 4px; color: var(--accent); }
+.report-steps { margin: 10px 0 0; padding-left: 20px; }
+.report-steps li { margin: 4px 0; color: var(--muted); font-size: .9rem; }
+.email-note { margin-top: 6px; }
+.doc-header { margin-bottom: 10px; }
+.doc-meta { width: 100%; border-collapse: collapse; margin-top: 8px; }
+.doc-meta td { padding: 4px 6px; border-bottom: 1px solid #e5e7eb; font-size: .92rem; vertical-align: top; }
+.doc-meta td:first-child { color: var(--muted); width: 45%; }
+.doc-meta td:last-child { font-weight: 600; }
 .med-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
 .med-table th, .med-table td { border: 1px solid #e2e8f0; padding: 7px 8px; text-align: left; font-size: .85rem; }
 .med-table th { background: #f8fafc; }
