@@ -5,7 +5,7 @@ import {
   PREOP_CHECKLIST, PREOP_CHECKLIST_EN, PREOP_CHECKLIST_CA,
   DISCLAIMER, DISCLAIMER_EN, DISCLAIMER_CA, ERAS_NOTE, ERAS_NOTE_EN, ERAS_NOTE_CA,
   ALARM_SIGNS, ALARM_SIGNS_EN, ALARM_SIGNS_CA, CAREGIVER_TIPS, FRAIL_QUESTIONS, frailResult, getPhase,
-  EDMONTON_QUESTIONS, edmontonResult, PRIVACY_POINTS,
+  EDMONTON_QUESTIONS, edmontonResult, PRIVACY_POINTS, FASTING_GUIDE,
 } from './content.js';
 import { todayKey, daysBetween, listProfiles, getActiveProfileId, assessmentHistory } from './state.js';
 import { GAD7, PHQ9, DASI, MUST, FREQ_OPTIONS, MUST_WEIGHTLOSS, SCALE_LIST, scaleMeta, resultForScale } from './scales.js';
@@ -368,6 +368,13 @@ function renderResourceCard(r) {
   const ytId = parseYouTubeId(r.url);
   const title = tr(r, 'title');
   const desc = tr(r, 'desc');
+  if (r.type === 'guide' || r.guideId) {
+    return `<section class="card resource">
+      <div class="resource-title">📄 ${esc(title)}</div>
+      ${desc ? `<p class="muted small">${esc(desc)}</p>` : ''}
+      <button class="btn ghost block" data-action="nav" data-view="ayuno-guide">${t('res_open')}</button>
+    </section>`;
+  }
   if (ytId) {
     return `<section class="card resource">
       <div class="resource-title">▶️ ${esc(title)}</div>
@@ -380,6 +387,53 @@ function renderResourceCard(r) {
     ${desc ? `<p class="muted small">${esc(desc)}</p>` : ''}
     <a class="btn ghost block" href="${esc(r.url)}" target="_blank" rel="noopener noreferrer">${t('res_open')}</a>
   </section>`;
+}
+
+/* ---------- Vista: GUÍA DE AYUNO (recurso interno con cuestionario) ---------- */
+
+export function renderFastingGuide(state) {
+  const g = FASTING_GUIDE;
+  const f = state.fasting || {};
+  const isRisk = !!(f.pregnancy || f.reflux || f.gastricSurgery);
+  const anyFlag = !!(f.diabetes || f.glp1 || isRisk);
+  const isOpen = (m) => {
+    if (m === 'none') return !anyFlag;
+    if (m === 'diabetes') return !!f.diabetes;
+    if (m === 'glp1') return !!f.glp1;
+    if (m === 'risk') return isRisk;
+    return false;
+  };
+  const chk = (flag, label) => `
+      <label class="fasting-opt">
+        <input type="checkbox" data-action="toggle-fasting" data-flag="${flag}" ${f[flag] ? 'checked' : ''} />
+        <span>${esc(label)}</span>
+      </label>`;
+  const blocks = g.blocks.map((b) => {
+    const open = isOpen(b.match);
+    return `<details class="fasting-block${open ? ' is-active' : ''}"${open ? ' open' : ''}>
+      <summary>${open ? `<span class="tag-you">${t('fasting_for_you')}</span> ` : ''}${esc(tr(b, 'title'))}</summary>
+      <div class="fasting-body">${tr(b, 'body')}</div>
+    </details>`;
+  }).join('');
+  return `
+    <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t('back')}</button>
+    <div class="section-label">${esc(tr(g.intro, 'title'))}</div>
+    <section class="card">${tr(g.intro, 'body')}</section>
+    <section class="card fasting-quiz">
+      <h3>${t('fasting_quiz_title')}</h3>
+      <p class="muted small">${t('fasting_quiz_help')}</p>
+      ${chk('diabetes', t('fasting_q_diabetes'))}
+      ${chk('glp1', t('fasting_q_glp1'))}
+      ${chk('pregnancy', t('fasting_q_pregnancy'))}
+      ${chk('reflux', t('fasting_q_reflux'))}
+      ${chk('gastricSurgery', t('fasting_q_gastric'))}
+    </section>
+    ${blocks}
+    <details class="fasting-block is-active" open>
+      <summary>${esc(tr(g.final, 'title'))}</summary>
+      <div class="fasting-body">${tr(g.final, 'body')}</div>
+    </details>
+    <p class="muted small fasting-disclaimer">${t('fasting_disclaimer')}</p>`;
 }
 
 /* ---------- Vista: APRENDE ---------- */
@@ -709,6 +763,18 @@ export function renderReport(state) {
   const mailBody = t('report_email_body', { name: patientName, date: surgeryDate });
   const mailHref = `mailto:hola.aneshealth@gmail.com?subject=${encodeURIComponent(mailSubject)}&body=${encodeURIComponent(mailBody)}`;
 
+  // Banderas del cuestionario de ayuno, para el equipo de anestesia.
+  const ff = state.fasting || {};
+  const fastingFlags = [];
+  if (ff.diabetes) fastingFlags.push(t('fasting_flag_diabetes'));
+  if (ff.glp1) fastingFlags.push(t('fasting_flag_glp1'));
+  if (ff.pregnancy) fastingFlags.push(t('fasting_flag_pregnancy'));
+  if (ff.reflux) fastingFlags.push(t('fasting_flag_reflux'));
+  if (ff.gastricSurgery) fastingFlags.push(t('fasting_flag_gastric'));
+  const fastingHtml = fastingFlags.length
+    ? `<h3>${t('report_fasting')}</h3><p>${fastingFlags.map(esc).join(' · ')}</p>`
+    : '';
+
   return `
     <div class="section-label">${t('report_title')}</div>
     <div class="no-print">
@@ -744,6 +810,7 @@ export function renderReport(state) {
       <h3>${t('report_adherence')}</h3>
       <table class="med-table"><tbody>${adhRows}</tbody></table>
       ${assessTable}
+      ${fastingHtml}
       <h3>${t('report_badges')} (${earned.length})</h3><p class="rep-badges">${badgeList}</p>
       <p class="doc-foot">${t('report_foot')}</p>
     </section>`;

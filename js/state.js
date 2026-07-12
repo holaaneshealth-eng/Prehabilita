@@ -45,6 +45,8 @@ function defaultState() {
     assessments: { frail: [], edmonton: [], gad7: [], phq9: [], dasi: [], must: [] },
     games: { memory: { wins: 0, bestMoves: null } },
     library: { seeded: false, tasks: [], taskOverrides: {}, resources: [], posts: [] },
+    // Banderas del cuestionario de ayuno (guía "Ayuno"): perfil del paciente.
+    fasting: { diabetes: false, glp1: false, pregnancy: false, reflux: false, gastricSurgery: false },
     settings: {
       lang: 'es',
       reducedMotion: false, largeText: false, highContrast: false,

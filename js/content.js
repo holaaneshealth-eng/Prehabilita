@@ -748,15 +748,215 @@ export const DEFAULT_RESOURCES = [
     desc: 'Rutinas sencillas de fuerza sin material.',
     desc_en: 'Simple strength routines with no equipment.',
     desc_ca: 'Rutines senzilles de força sense material.' },
-  { id: 'res-ayuno', pillar: 'ayuno', type: 'link',
-    url: 'https://www.youtube.com/results?search_query=ayuno+preoperatorio+antes+de+cirug%C3%ADa',
-    title: 'Ayuno',
-    title_en: 'Fasting',
-    title_ca: 'Dejuni',
-    desc: 'Pautas de ayuno antes de la cirugía: cuántas horas sin comer ni beber. Sigue siempre las indicaciones de tu equipo médico.',
-    desc_en: 'Fasting guidelines before surgery: how many hours without eating or drinking. Always follow your medical team’s instructions.',
-    desc_ca: 'Pautes de dejuni abans de la cirurgia: quantes hores sense menjar ni beure. Segueix sempre les indicacions del teu equip mèdic.' },
+  { id: 'res-ayuno', pillar: 'ayuno', type: 'guide', guideId: 'ayuno',
+    title: 'Ayuno antes de la cirugía: guía según tu situación',
+    title_en: 'Fasting before surgery: a guide for your situation',
+    title_ca: 'Dejuni abans de la cirurgia: guia segons la teva situació',
+    desc: 'Guía personalizada de ayuno preoperatorio según tu perfil (sano, diabetes, GLP‑1, riesgo incrementado).',
+    desc_en: 'Personalised preoperative fasting guide based on your profile (healthy, diabetes, GLP‑1, increased risk).',
+    desc_ca: 'Guia personalitzada de dejuni preoperatori segons el teu perfil (sa, diabetis, GLP‑1, risc incrementat).' },
 ];
+
+// Guía interactiva de ayuno preoperatorio. Contenido educativo; no sustituye las
+// indicaciones concretas del hospital/equipo de anestesia. Los bloques se abren y
+// se destacan según las casillas que marque el paciente (state.fasting).
+export const FASTING_GUIDE = {
+  intro: {
+    title: 'Ayuno antes de la cirugía: guía según tu situación',
+    title_en: 'Fasting before surgery: a guide for your situation',
+    title_ca: 'Dejuni abans de la cirurgia: guia segons la teva situació',
+    body: `<p>El ayuno antes de una anestesia es importante porque, mientras estás dormido o sedado, el contenido del estómago podría pasar a los pulmones y causar complicaciones graves como una neumonía. Llegar con el estómago vacío hace que tu operación sea mucho más segura.</p>
+<p>El objetivo de tu equipo de anestesia es que te operes en las condiciones más seguras y controladas posibles. El día de la cirugía, tu anestesista revisará contigo a qué hora fue tu última comida o bebida y confirmará si el ayuno es seguro.</p>
+<p>Marca abajo tu situación y resaltaremos el apartado que más te interesa. Puedes abrir también el resto de apartados si quieres leerlos.</p>
+<h4>¿Qué es un "líquido claro"?</h4>
+<p>Son líquidos transparentes, sin pulpa ni grasa, a través de los cuales casi se puede ver. Por ejemplo:</p>
+<ul><li>Agua y refrescos incoloros (tipo Sprite®, 7‑Up®, tónica, gaseosa sin limón).</li>
+<li>Zumo de manzana o de uva sin pulpa.</li>
+<li>Café o té solos (sin leche, crema ni sucedáneos).</li>
+<li>Bebidas isotónicas claras (evita las de color rojo, azul o morado).</li></ul>
+<h4>¿Qué NO es un líquido claro?</h4>
+<p>Todo lo que sea espeso, con grasa o con "cuerpo": leche y lácteos, bebidas vegetales, batidos y smoothies, zumos espesos o con pulpa (como el de naranja), café o té con leche o crema, chocolate, gelatinas, bebidas proteicas y fórmulas de nutrición enteral.</p>`,
+    body_en: `<p>Fasting before anaesthesia matters because, while you are asleep or sedated, the contents of your stomach could pass into your lungs and cause serious complications such as pneumonia. Arriving with an empty stomach makes your operation much safer.</p>
+<p>Your anaesthesia team's goal is for you to have surgery in the safest, most controlled conditions possible. On the day of surgery, your anaesthetist will check with you when you last ate or drank and confirm whether your fast is safe.</p>
+<p>Tick your situation below and we will highlight the section most relevant to you. You can also open the other sections if you want to read them.</p>
+<h4>What is a "clear liquid"?</h4>
+<p>They are transparent liquids, with no pulp or fat, that you can almost see through. For example:</p>
+<ul><li>Water and colourless soft drinks (such as Sprite®, 7‑Up®, tonic, clear soda).</li>
+<li>Apple or grape juice without pulp.</li>
+<li>Black coffee or tea (no milk, cream or creamers).</li>
+<li>Clear sports drinks (avoid red, blue or purple ones).</li></ul>
+<h4>What is NOT a clear liquid?</h4>
+<p>Anything thick, fatty or with "body": milk and dairy, plant-based drinks, milkshakes and smoothies, thick or pulpy juices (like orange juice), coffee or tea with milk or cream, chocolate, jelly, protein drinks and enteral nutrition formulas.</p>`,
+    body_ca: `<p>El dejuni abans d'una anestèsia és important perquè, mentre estàs adormit o sedat, el contingut de l'estómac podria passar als pulmons i causar complicacions greus com una pneumònia. Arribar amb l'estómac buit fa que la teva operació sigui molt més segura.</p>
+<p>L'objectiu del teu equip d'anestèsia és que t'operis en les condicions més segures i controlades possibles. El dia de la cirurgia, el teu anestesista revisarà amb tu a quina hora va ser el teu darrer àpat o beguda i confirmarà si el dejuni és segur.</p>
+<p>Marca a sota la teva situació i destacarem l'apartat que més t'interessa. També pots obrir la resta d'apartats si vols llegir-los.</p>
+<h4>Què és un "líquid clar"?</h4>
+<p>Són líquids transparents, sense polpa ni greix, a través dels quals gairebé es pot veure. Per exemple:</p>
+<ul><li>Aigua i refrescos incolors (tipus Sprite®, 7‑Up®, tònica, gasosa sense llimona).</li>
+<li>Suc de poma o de raïm sense polpa.</li>
+<li>Cafè o te sols (sense llet, crema ni succedanis).</li>
+<li>Begudes isotòniques clares (evita les de color vermell, blau o morat).</li></ul>
+<h4>Què NO és un líquid clar?</h4>
+<p>Tot el que sigui espès, amb greix o amb "cos": llet i lactis, begudes vegetals, batuts i smoothies, sucs espessos o amb polpa (com el de taronja), cafè o te amb llet o crema, xocolata, gelatines, begudes proteiques i fórmules de nutrició enteral.</p>`,
+  },
+  blocks: [
+    {
+      id: 'sano', match: 'none',
+      title: 'Si no tienes enfermedades digestivas ni diabetes',
+      title_en: "If you don't have digestive conditions or diabetes",
+      title_ca: 'Si no tens malalties digestives ni diabetis',
+      body: `<p>Si no tienes diabetes ni problemas digestivos especiales, como norma general:</p>
+<ul><li><strong>Líquidos claros:</strong> permitidos hasta 2 horas antes de la anestesia. Entre las 4 y las 2 horas previas, toma solo una cantidad moderada.</li>
+<li><strong>Comida ligera</strong> (tostadas, fruta, cereales): déjala con suficiente antelación (habitualmente unas 6 horas antes).</li>
+<li><strong>Comida copiosa, grasa o con mucha proteína</strong> (carne, fritos): déjala antes todavía (habitualmente unas 8 horas antes).</li></ul>
+<p>Además, puedes tomar una <strong>bebida rica en carbohidratos</strong> hasta 2 horas antes (una bebida comercial tipo Nutricia PreOp® o una mezcla de maltodextrina en agua). Puede ayudarte a disminuir el hambre, reducir la ansiedad y mantener la energía protegiendo tu musculatura.</p>
+<p>Los horarios y cantidades exactos pueden variar: sigue siempre las indicaciones concretas de tu hospital.</p>
+<h4>Vídeo explicativo para pacientes sin diabetes ni medicación tipo GLP‑1</h4>
+<p>A continuación encontrarás un vídeo donde te explicamos, paso a paso, cómo debes ayunar si no tienes diabetes ni tomas medicación que ralentice el vaciamiento del estómago. Te ayudará a repasar los horarios y a resolver las dudas más frecuentes.</p>
+<p class="muted small">(Vídeo próximamente.)</p>`,
+      body_en: `<p>If you don't have diabetes or special digestive problems, as a general rule:</p>
+<ul><li><strong>Clear liquids:</strong> allowed up to 2 hours before anaesthesia. Between 4 and 2 hours beforehand, have only a moderate amount.</li>
+<li><strong>Light meals</strong> (toast, fruit, cereal): stop well in advance (usually about 6 hours before).</li>
+<li><strong>Large, fatty or high-protein meals</strong> (meat, fried food): stop even earlier (usually about 8 hours before).</li></ul>
+<p>You may also have a <strong>carbohydrate-rich drink</strong> up to 2 hours before (a commercial drink such as Nutricia PreOp® or a maltodextrin-in-water mix). It can help reduce hunger and anxiety and keep your energy up while protecting your muscles.</p>
+<p>Exact times and amounts may vary: always follow your hospital's specific instructions.</p>
+<h4>Explainer video for patients without diabetes or GLP‑1 medication</h4>
+<p>Below you'll find a video explaining, step by step, how to fast if you don't have diabetes and don't take medication that slows stomach emptying. It will help you review the timings and answer the most common questions.</p>
+<p class="muted small">(Video coming soon.)</p>`,
+      body_ca: `<p>Si no tens diabetis ni problemes digestius especials, com a norma general:</p>
+<ul><li><strong>Líquids clars:</strong> permesos fins a 2 hores abans de l'anestèsia. Entre les 4 i les 2 hores prèvies, pren només una quantitat moderada.</li>
+<li><strong>Menjar lleuger</strong> (torrades, fruita, cereals): deixa'l amb prou antelació (habitualment unes 6 hores abans).</li>
+<li><strong>Menjar copiós, gras o amb molta proteïna</strong> (carn, fregits): deixa'l encara abans (habitualment unes 8 hores abans).</li></ul>
+<p>A més, pots prendre una <strong>beguda rica en carbohidrats</strong> fins a 2 hores abans (una beguda comercial tipus Nutricia PreOp® o una barreja de maltodextrina en aigua). Pot ajudar-te a disminuir la gana, reduir l'ansietat i mantenir l'energia protegint la teva musculatura.</p>
+<p>Els horaris i quantitats exactes poden variar: segueix sempre les indicacions concretes del teu hospital.</p>
+<h4>Vídeo explicatiu per a pacients sense diabetis ni medicació tipus GLP‑1</h4>
+<p>A continuació trobaràs un vídeo on t'expliquem, pas a pas, com has de dejunar si no tens diabetis ni prens medicació que alenteixi el buidatge de l'estómac. T'ajudarà a repassar els horaris i a resoldre els dubtes més freqüents.</p>
+<p class="muted small">(Vídeo pròximament.)</p>`,
+    },
+    {
+      id: 'diabetes', match: 'diabetes',
+      title: 'Si tienes diabetes y NO tomas medicación tipo GLP‑1 (Ozempic®, Trulicity®…)',
+      title_en: "If you have diabetes and do NOT take GLP‑1 medication (Ozempic®, Trulicity®…)",
+      title_ca: 'Si tens diabetis i NO prens medicació tipus GLP‑1 (Ozempic®, Trulicity®…)',
+      body: `<p>Si tienes diabetes, el ayuno se adapta para <strong>evitar hipoglucemias</strong> (bajadas de azúcar), <strong>evitar descompensaciones</strong> del azúcar en sangre y mantener un aporte de carbohidratos controlado, según las indicaciones de tu equipo.</p>
+<p><strong>Tiempos de ayuno:</strong> para los sólidos son similares a los de una persona sin diabetes (comida ligera y, con más antelación, comida copiosa), y los líquidos claros suelen permitirse hasta unas 2 horas antes, siempre según lo que te indique tu equipo médico.</p>
+<h4>Tu medicación para la diabetes</h4>
+<ul><li><strong>Insulina lenta o intermedia:</strong> lo habitual es ajustar (reducir) la dosis —por ejemplo, en torno al 80% de la dosis habitual la noche previa o la mañana de la cirugía—, según lo que indiquen endocrinología y anestesia.</li>
+<li><strong>Insulina rápida:</strong> por lo general no se administra durante el ayuno, porque no estás tomando carbohidratos; solo se usa para corregir glucemias muy altas si tu médico lo ha indicado.</li>
+<li><strong>Antidiabéticos orales (pastillas):</strong> no todos se manejan igual. El servicio de anestesia y/o endocrinología te dirá exactamente qué hacer con cada uno.</li></ul>
+<h4>Si controlas tu glucosa en casa</h4>
+<ul><li>Si tu glucosa está <strong>baja</strong>, el equipo puede recomendarte tomar una pequeña cantidad de zumo claro y repetir la medición a los pocos minutos.</li>
+<li>Si tu glucosa está <strong>muy alta</strong>, es posible que debas corregirla con la dosis de insulina rápida que te haya indicado tu médico.</li></ul>
+<p><strong>Importante:</strong> ante cualquier duda, consulta siempre con tu equipo médico antes de cambiar dosis por tu cuenta.</p>`,
+      body_en: `<p>If you have diabetes, fasting is adapted to <strong>avoid hypoglycaemia</strong> (low blood sugar), <strong>avoid decompensation</strong> of blood sugar, and keep carbohydrate intake controlled, according to your team's instructions.</p>
+<p><strong>Fasting times:</strong> for solids they are similar to someone without diabetes (light meal, and heavy meal earlier still), and clear liquids are usually allowed up to about 2 hours before, always as your medical team advises.</p>
+<h4>Your diabetes medication</h4>
+<ul><li><strong>Long or intermediate-acting insulin:</strong> the dose is usually adjusted (reduced) — for example, to around 80% of the usual dose the night before or the morning of surgery — as endocrinology and anaesthesia advise.</li>
+<li><strong>Rapid-acting insulin:</strong> it is generally not given during fasting, because you are not taking carbohydrates; it is only used to correct very high blood sugar if your doctor has instructed it.</li>
+<li><strong>Oral antidiabetics (tablets):</strong> they are not all handled the same way. The anaesthesia and/or endocrinology team will tell you exactly what to do with each one.</li></ul>
+<h4>If you check your glucose at home</h4>
+<ul><li>If your glucose is <strong>low</strong>, the team may advise you to have a small amount of clear juice and repeat the reading a few minutes later.</li>
+<li>If your glucose is <strong>very high</strong>, you may need to correct it with the dose of rapid-acting insulin your doctor has indicated.</li></ul>
+<p><strong>Important:</strong> if in doubt, always check with your medical team before changing any dose on your own.</p>`,
+      body_ca: `<p>Si tens diabetis, el dejuni s'adapta per <strong>evitar hipoglucèmies</strong> (baixades de sucre), <strong>evitar descompensacions</strong> del sucre a la sang i mantenir un aport de carbohidrats controlat, segons les indicacions del teu equip.</p>
+<p><strong>Temps de dejuni:</strong> per als sòlids són similars als d'una persona sense diabetis (menjar lleuger i, amb més antelació, menjar copiós), i els líquids clars solen permetre's fins a unes 2 hores abans, sempre segons el que t'indiqui el teu equip mèdic.</p>
+<h4>La teva medicació per a la diabetis</h4>
+<ul><li><strong>Insulina lenta o intermèdia:</strong> el més habitual és ajustar (reduir) la dosi —per exemple, al voltant del 80% de la dosi habitual la nit prèvia o el matí de la cirurgia—, segons el que indiquin endocrinologia i anestèsia.</li>
+<li><strong>Insulina ràpida:</strong> en general no s'administra durant el dejuni, perquè no estàs prenent carbohidrats; només s'utilitza per corregir glucèmies molt altes si el teu metge ho ha indicat.</li>
+<li><strong>Antidiabètics orals (pastilles):</strong> no tots es gestionen igual. El servei d'anestèsia i/o endocrinologia et dirà exactament què fer amb cadascun.</li></ul>
+<h4>Si controles la teva glucosa a casa</h4>
+<ul><li>Si la teva glucosa està <strong>baixa</strong>, l'equip pot recomanar-te prendre una petita quantitat de suc clar i repetir la mesura al cap de pocs minuts.</li>
+<li>Si la teva glucosa està <strong>molt alta</strong>, és possible que l'hagis de corregir amb la dosi d'insulina ràpida que t'hagi indicat el teu metge.</li></ul>
+<p><strong>Important:</strong> davant de qualsevol dubte, consulta sempre amb el teu equip mèdic abans de canviar dosis pel teu compte.</p>`,
+    },
+    {
+      id: 'glp1', match: 'glp1',
+      title: 'Si tomas medicación tipo GLP‑1 para la diabetes o para perder peso (Ozempic®, Trulicity®…)',
+      title_en: 'If you take GLP‑1 medication for diabetes or weight loss (Ozempic®, Trulicity®…)',
+      title_ca: 'Si prens medicació tipus GLP‑1 per a la diabetis o per perdre pes (Ozempic®, Trulicity®…)',
+      body: `<p>Los medicamentos tipo <strong>GLP‑1 semanal</strong> (como Ozempic®, Trulicity®, Bydureon BCise®, Mounjaro®, Wegovy®, Rybelsus®, Zepbound®) <strong>ralentizan el vaciamiento del estómago</strong>, por lo que puede tardar más en quedar vacío.</p>
+<ul><li><strong>Alimentos sólidos:</strong> el ayuno debe ser más largo que en una persona estándar. En muchos centros se recomienda estar <strong>24 horas sin sólidos</strong> antes de la cirugía, si así te lo ha indicado el hospital.</li>
+<li><strong>Líquidos claros:</strong> siguen permitidos hasta aproximadamente 2 horas antes, con un límite de volumen razonable entre las 4 y las 2 horas previas.</li></ul>
+<p>Necesitar un ayuno más largo <strong>no significa que estés peor</strong>: simplemente, esta medicación obliga a extremar las precauciones para que el estómago esté realmente vacío y la anestesia sea más segura.</p>
+<p>Si además tienes <strong>diabetes</strong>, sigue también las recomendaciones del apartado de diabetes (ajuste de insulina y medicación), sumando el ayuno prolongado de sólidos por el GLP‑1.</p>
+<p>La decisión de suspender o no el GLP‑1 y los tiempos exactos de ayuno deben tomarse <strong>junto a tu equipo médico</strong>.</p>`,
+      body_en: `<p><strong>Weekly GLP‑1</strong> medications (such as Ozempic®, Trulicity®, Bydureon BCise®, Mounjaro®, Wegovy®, Rybelsus®, Zepbound®) <strong>slow down stomach emptying</strong>, so your stomach may take longer to empty.</p>
+<ul><li><strong>Solid food:</strong> the fast must be longer than for a standard patient. Many centres recommend <strong>24 hours with no solids</strong> before surgery, if your hospital has told you so.</li>
+<li><strong>Clear liquids:</strong> still allowed up to about 2 hours before, with a reasonable volume limit between 4 and 2 hours beforehand.</li></ul>
+<p>Needing a longer fast <strong>does not mean you are worse off</strong>: this medication simply means taking extra precautions so the stomach is truly empty and anaesthesia is safer.</p>
+<p>If you also have <strong>diabetes</strong>, follow the diabetes section too (insulin and medication adjustments), on top of the prolonged solid fast for GLP‑1.</p>
+<p>The decision on whether to pause GLP‑1 and the exact fasting times must be made <strong>together with your medical team</strong>.</p>`,
+      body_ca: `<p>Els medicaments tipus <strong>GLP‑1 setmanal</strong> (com Ozempic®, Trulicity®, Bydureon BCise®, Mounjaro®, Wegovy®, Rybelsus®, Zepbound®) <strong>alenteixen el buidatge de l'estómac</strong>, de manera que pot trigar més a quedar buit.</p>
+<ul><li><strong>Aliments sòlids:</strong> el dejuni ha de ser més llarg que en una persona estàndard. En molts centres es recomana estar <strong>24 hores sense sòlids</strong> abans de la cirurgia, si així t'ho ha indicat l'hospital.</li>
+<li><strong>Líquids clars:</strong> continuen permesos fins a aproximadament 2 hores abans, amb un límit de volum raonable entre les 4 i les 2 hores prèvies.</li></ul>
+<p>Necessitar un dejuni més llarg <strong>no vol dir que estiguis pitjor</strong>: simplement, aquesta medicació obliga a extremar les precaucions perquè l'estómac estigui realment buit i l'anestèsia sigui més segura.</p>
+<p>Si a més tens <strong>diabetis</strong>, segueix també les recomanacions de l'apartat de diabetis (ajust d'insulina i medicació), sumant el dejuni prolongat de sòlids pel GLP‑1.</p>
+<p>La decisió de suspendre o no el GLP‑1 i els temps exactes de dejuni s'han de prendre <strong>juntament amb el teu equip mèdic</strong>.</p>`,
+    },
+    {
+      id: 'riesgo', match: 'risk',
+      title: 'Si tienes embarazo avanzado, reflujo gastroesofágico o una cirugía gástrica previa',
+      title_en: 'If you have advanced pregnancy, acid reflux or previous stomach surgery',
+      title_ca: 'Si tens embaràs avançat, reflux gastroesofàgic o una cirurgia gàstrica prèvia',
+      body: `<p>Algunas situaciones se consideran de <strong>riesgo incrementado</strong> para el ayuno:</p>
+<ul><li>Embarazo de más de 20 semanas.</li>
+<li>Reflujo gastroesofágico significativo.</li>
+<li>Cirugía gástrica previa (bariátrica, por úlcera, por tumores, etc.).</li></ul>
+<p>En estos casos el tránsito digestivo suele ser más lento y el riesgo de que el contenido del estómago pase a los pulmones es mayor. Por eso:</p>
+<ul><li><strong>Cualquier comida o bebida que no sea un líquido claro:</strong> debe suspenderse con más antelación (habitualmente unas 8 horas antes de la cirugía, si así está indicado).</li>
+<li><strong>Líquidos claros:</strong> se permiten hasta unas 2 horas antes de la anestesia, siguiendo las recomendaciones del hospital.</li></ul>
+<p>En muchos casos puedes tomar una <strong>bebida rica en carbohidratos</strong> (tipo Nutricia PreOp® o una mezcla de maltodextrina en agua) hasta 2 horas antes, para disminuir el hambre y la ansiedad y proteger tus músculos, siempre que lo haya autorizado tu equipo médico.</p>
+<p>Sigue exactamente las instrucciones de tu <strong>anestesista</strong> y de tu <strong>obstetra o cirujano</strong> en estas situaciones.</p>`,
+      body_en: `<p>Some situations are considered <strong>increased risk</strong> for fasting:</p>
+<ul><li>Pregnancy beyond 20 weeks.</li>
+<li>Significant acid reflux (gastro-oesophageal reflux).</li>
+<li>Previous stomach surgery (bariatric, ulcer, tumour, etc.).</li></ul>
+<p>In these cases digestion tends to be slower and the risk of stomach contents passing into the lungs is higher. Therefore:</p>
+<ul><li><strong>Any food or drink that is not a clear liquid:</strong> must be stopped further in advance (usually about 8 hours before surgery, if so indicated).</li>
+<li><strong>Clear liquids:</strong> allowed up to about 2 hours before anaesthesia, following your hospital's recommendations.</li></ul>
+<p>In many cases you can have a <strong>carbohydrate-rich drink</strong> (such as Nutricia PreOp® or a maltodextrin-in-water mix) up to 2 hours before, to reduce hunger and anxiety and protect your muscles, as long as your medical team has authorised it.</p>
+<p>Follow exactly the instructions of your <strong>anaesthetist</strong> and your <strong>obstetrician or surgeon</strong> in these situations.</p>`,
+      body_ca: `<p>Algunes situacions es consideren de <strong>risc incrementat</strong> per al dejuni:</p>
+<ul><li>Embaràs de més de 20 setmanes.</li>
+<li>Reflux gastroesofàgic significatiu.</li>
+<li>Cirurgia gàstrica prèvia (bariàtrica, per úlcera, per tumors, etc.).</li></ul>
+<p>En aquests casos el trànsit digestiu sol ser més lent i el risc que el contingut de l'estómac passi als pulmons és més gran. Per això:</p>
+<ul><li><strong>Qualsevol menjar o beguda que no sigui un líquid clar:</strong> s'ha de suspendre amb més antelació (habitualment unes 8 hores abans de la cirurgia, si així està indicat).</li>
+<li><strong>Líquids clars:</strong> es permeten fins a unes 2 hores abans de l'anestèsia, seguint les recomanacions de l'hospital.</li></ul>
+<p>En molts casos pots prendre una <strong>beguda rica en carbohidrats</strong> (tipus Nutricia PreOp® o una barreja de maltodextrina en aigua) fins a 2 hores abans, per disminuir la gana i l'ansietat i protegir els teus músculs, sempre que ho hagi autoritzat el teu equip mèdic.</p>
+<p>Segueix exactament les instruccions del teu <strong>anestesista</strong> i del teu <strong>obstetra o cirurgià</strong> en aquestes situacions.</p>`,
+    },
+  ],
+  final: {
+    title: 'Tu medicación y el equilibrio del ayuno',
+    title_en: 'Your medication and the balance of fasting',
+    title_ca: "La teva medicació i l'equilibri del dejuni",
+    body: `<p><strong>Tu medicación habitual:</strong> por lo general se toma con un pequeño sorbo de agua, salvo que tu médico te haya indicado otra cosa.</p>
+<p><strong>Ayunar "de más" tampoco es bueno.</strong> Pasar demasiadas horas sin comer ni beber puede causar:</p>
+<ul><li>Cansancio, sensación de debilidad y mareos.</li>
+<li>Deshidratación.</li>
+<li>Más ansiedad antes de la cirugía.</li>
+<li>Una recuperación más lenta después de la operación.</li></ul>
+<p>Y si te equivocas o tienes dudas sobre si has ayunado correctamente, tranquilidad: el equipo de anestesia revisará tu situación el día de la intervención y decidirá si es seguro continuar, te explicará los riesgos o reprogramará la cirugía si fuera necesario.</p>
+<p><strong>Recuerda:</strong> ante cualquier duda, no intentes compensar por tu cuenta comiendo o dejando de comer más. Llama al hospital o consulta con tu anestesista para recibir instrucciones personalizadas.</p>`,
+    body_en: `<p><strong>Your usual medication:</strong> generally taken with a small sip of water, unless your doctor has told you otherwise.</p>
+<p><strong>Over-fasting is not good either.</strong> Going too many hours without eating or drinking can cause:</p>
+<ul><li>Tiredness, weakness and dizziness.</li>
+<li>Dehydration.</li>
+<li>More anxiety before surgery.</li>
+<li>A slower recovery after the operation.</li></ul>
+<p>And if you make a mistake or are unsure whether you have fasted correctly, don't worry: the anaesthesia team will review your situation on the day of the procedure and decide whether it is safe to continue, explain the risks, or reschedule surgery if necessary.</p>
+<p><strong>Remember:</strong> if in doubt, do not try to compensate on your own by eating or not eating more. Call the hospital or ask your anaesthetist for personalised instructions.</p>`,
+    body_ca: `<p><strong>La teva medicació habitual:</strong> en general es pren amb un petit glop d'aigua, tret que el teu metge t'hagi indicat una altra cosa.</p>
+<p><strong>Dejunar "de més" tampoc és bo.</strong> Passar massa hores sense menjar ni beure pot causar:</p>
+<ul><li>Cansament, sensació de debilitat i marejos.</li>
+<li>Deshidratació.</li>
+<li>Més ansietat abans de la cirurgia.</li>
+<li>Una recuperació més lenta després de l'operació.</li></ul>
+<p>I si t'equivoques o tens dubtes sobre si has dejunat correctament, tranquil·litat: l'equip d'anestèsia revisarà la teva situació el dia de la intervenció i decidirà si és segur continuar, t'explicarà els riscos o reprogramarà la cirurgia si fos necessari.</p>
+<p><strong>Recorda:</strong> davant de qualsevol dubte, no intentis compensar pel teu compte menjant o deixant de menjar més. Truca a l'hospital o consulta amb el teu anestesista per rebre instruccions personalitzades.</p>`,
+  },
+};
 
 export const ALARM_SIGNS = [
   'Dolor en el pecho, palpitaciones o falta de aire en reposo.',

@@ -147,6 +147,14 @@ function withResourceTranslations(r) {
   if (!d) return r;
   return {
     ...r,
+    // Refresca campos estructurales de los recursos POR DEFECTO (no de los
+    // creados por el profesional), para propagar mejoras de contenido —p. ej.
+    // que "Ayuno" pase de enlace a guía interna— a bibliotecas ya sembradas.
+    type: d.type || r.type,
+    guideId: d.guideId != null ? d.guideId : r.guideId,
+    pillar: d.pillar || r.pillar,
+    title: d.title || r.title,
+    desc: d.desc || r.desc,
     title_en: r.title_en || d.title_en,
     title_ca: r.title_ca || d.title_ca,
     desc_en: r.desc_en || d.desc_en,

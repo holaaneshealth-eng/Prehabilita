@@ -395,6 +395,25 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
 .doc-meta td { padding: 4px 6px; border-bottom: 1px solid #e5e7eb; font-size: .92rem; vertical-align: top; }
 .doc-meta td:first-child { color: var(--muted); width: 45%; }
 .doc-meta td:last-child { font-weight: 600; }
+
+/* Guía de ayuno (recurso interno con cuestionario + acordeón) */
+.fasting-quiz h3 { font-size: 1rem; margin-bottom: 4px; }
+.fasting-opt { display: flex; align-items: flex-start; gap: 10px; padding: 9px 0; border-top: 1px solid #eef2f7; cursor: pointer; }
+.fasting-opt:first-of-type { border-top: 0; }
+.fasting-opt input { margin-top: 2px; width: 18px; height: 18px; flex: 0 0 auto; accent-color: var(--accent); }
+.fasting-block { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); margin: 10px 0; overflow: hidden; }
+.fasting-block > summary { list-style: none; cursor: pointer; padding: 14px 16px; font-weight: 700; color: var(--ink); display: flex; align-items: center; gap: 8px; }
+.fasting-block > summary::-webkit-details-marker { display: none; }
+.fasting-block > summary::after { content: '⌄'; margin-left: auto; opacity: .5; font-size: 1.2rem; }
+.fasting-block[open] > summary::after { content: '⌃'; }
+.fasting-block.is-active { border: 2px solid var(--accent); }
+.fasting-block .fasting-body { padding: 0 16px 16px; }
+.fasting-block .fasting-body h4 { font-size: .95rem; margin: 12px 0 4px; color: var(--accent); }
+.fasting-block .fasting-body ul { margin: 6px 0 6px 18px; }
+.fasting-block .fasting-body li { margin: 4px 0; }
+.fasting-block .fasting-body p { margin: 8px 0; }
+.tag-you { background: var(--accent); color: #fff; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
+.fasting-disclaimer { margin: 14px 4px 4px; }
 .med-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
 .med-table th, .med-table td { border: 1px solid #e2e8f0; padding: 7px 8px; text-align: left; font-size: .85rem; }
 .med-table th { background: #f8fafc; }

@@ -85,6 +85,7 @@ function render() {
   let body = '';
   switch (route) {
     case 'recursos': body = ui.renderResources(state); break;
+    case 'ayuno-guide': body = ui.renderFastingGuide(state); break;
     case 'progreso': body = ui.renderProgress(state, charts); break;
     case 'aprende': body = ui.renderLearn(state); break;
     case 'post': body = ui.renderPost(state, currentPostId); break;
@@ -284,6 +285,10 @@ function onChange(e) {
       case 'set-lang':
         state.settings.lang = ['es', 'en', 'ca'].includes(el.value) ? el.value : 'es';
         setLang(state.settings.lang);
+        saveState(); render(); return;
+      case 'toggle-fasting':
+        if (!state.fasting) state.fasting = {};
+        state.fasting[el.dataset.flag] = el.checked;
         saveState(); render(); return;
     }
   }
