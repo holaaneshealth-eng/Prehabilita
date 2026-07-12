@@ -418,7 +418,7 @@ export function renderFastingGuide(state) {
   return `
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t('back')}</button>
     <div class="section-label">${esc(tr(g.intro, 'title'))}</div>
-    <section class="card">${tr(g.intro, 'body')}</section>
+    <section class="card fasting-body">${tr(g.intro, 'body')}</section>
     <section class="card fasting-quiz">
       <h3>${t('fasting_quiz_title')}</h3>
       <p class="muted small">${t('fasting_quiz_help')}</p>

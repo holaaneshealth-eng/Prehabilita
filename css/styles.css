@@ -408,10 +408,12 @@ body.high-contrast .btn.ghost { border: 1.5px solid #0f172a; }
 .fasting-block[open] > summary::after { content: '⌃'; }
 .fasting-block.is-active { border: 2px solid var(--accent); }
 .fasting-block .fasting-body { padding: 0 16px 16px; }
-.fasting-block .fasting-body h4 { font-size: .95rem; margin: 12px 0 4px; color: var(--accent); }
-.fasting-block .fasting-body ul { margin: 6px 0 6px 18px; }
-.fasting-block .fasting-body li { margin: 4px 0; }
-.fasting-block .fasting-body p { margin: 8px 0; }
+.fasting-body h4 { font-size: .95rem; margin: 16px 0 4px; color: var(--accent); }
+.fasting-body h4:first-child { margin-top: 0; }
+.fasting-body p { margin: 10px 0; }
+.fasting-body p:first-child { margin-top: 0; }
+.fasting-body ul { margin: 8px 0; padding-left: 22px; list-style: disc; }
+.fasting-body li { margin: 5px 0; padding-left: 2px; }
 .tag-you { background: var(--accent); color: #fff; font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .3px; padding: 3px 8px; border-radius: 999px; white-space: nowrap; }
 .fasting-disclaimer { margin: 14px 4px 4px; }
 .med-table { width: 100%; border-collapse: collapse; margin-top: 4px; }
