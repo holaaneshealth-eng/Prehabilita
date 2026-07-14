@@ -4948,6 +4948,10 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       mental_library: "Biblioteca del programa",
       mental_mark_seen: "Marcar como vista",
       mental_unsee: "✓ Vista (quitar)",
+      mental_practice_title: "Práctica de hoy",
+      mental_practice_msg: "Dedica unos minutos a la respiración (abajo, en Práctica diaria). Cada práctica es un entrenamiento que te llevas al quirófano.",
+      mental_sp_locked: "Estas sesiones se desbloquean tras hacer el cuestionario de bienestar.",
+      mental_sp_postponed: "De momento posponemos estas sesiones más exigentes. Ahora es mejor cuidarte con las prácticas de calma y, si lo necesitas, apoyarte en tu equipo.",
       report_fasting: "Ayuno: situación indicada",
       fasting_flag_diabetes: "Diabetes",
       fasting_flag_glp1: "Medicación GLP‑1",
@@ -5285,6 +5289,10 @@ Gracias.`,
       mental_library: "Programme library",
       mental_mark_seen: "Mark as viewed",
       mental_unsee: "✓ Viewed (remove)",
+      mental_practice_title: "Today's practice",
+      mental_practice_msg: "Spend a few minutes on breathing (below, in Daily practice). Every practice is training you take to theatre.",
+      mental_sp_locked: "These sessions unlock after you complete the wellbeing questionnaire.",
+      mental_sp_postponed: "For now we are postponing these more demanding sessions. Right now it is better to look after yourself with the calm practices and, if you need it, lean on your team.",
       report_fasting: "Fasting: reported situation",
       fasting_flag_diabetes: "Diabetes",
       fasting_flag_glp1: "GLP‑1 medication",
@@ -5622,6 +5630,10 @@ Thank you.`,
       mental_library: "Biblioteca del programa",
       mental_mark_seen: "Marcar com a vista",
       mental_unsee: "✓ Vista (treure)",
+      mental_practice_title: "Pràctica d’avui",
+      mental_practice_msg: "Dedica uns minuts a la respiració (a sota, a Pràctica diària). Cada pràctica és un entrenament que et portes al quiròfan.",
+      mental_sp_locked: "Aquestes sessions es desbloquegen després de fer el qüestionari de benestar.",
+      mental_sp_postponed: "De moment posposem aquestes sessions més exigents. Ara és millor cuidar-te amb les pràctiques de calma i, si ho necessites, recolzar-te en el teu equip.",
       report_fasting: "Dejuni: situació indicada",
       fasting_flag_diabetes: "Diabetis",
       fasting_flag_glp1: "Medicació GLP‑1",
@@ -6334,10 +6346,34 @@ Gràcies.`,
     }).join("");
     return `<div class="section-label">\uD83C\uDFAC ${t("mental_library")}</div>${items}`;
   }
+  function renderMentalPractice() {
+    return `<section class="card">
+      <div class="section-label" style="margin:0 0 6px">\uD83E\uDEC1 ${t("mental_practice_title")}</div>
+      <p class="muted small">${t("mental_practice_msg")}</p>
+    </section>`;
+  }
+  function renderMentalDeepening(state2, block) {
+    const lvl = state2.cribado && state2.cribado.result ? state2.cribado.result.level : null;
+    if (lvl === "verde" || lvl === "ambar") {
+      return `<details class="fasting-block">
+      <summary>${esc(tr(block, "title"))}</summary>
+      <div class="fasting-body">${tr(block, "body")}</div>
+    </details>`;
+    }
+    const msg = lvl === "rojo" || lvl === "crisis" ? t("mental_sp_postponed") : t("mental_sp_locked");
+    const cta = lvl === "rojo" || lvl === "crisis" ? "" : `<button class="btn ghost block" data-action="start-cribado">\uD83D\uDCDD ${t("crib_start")}</button>`;
+    return `<section class="card">
+      <div class="section-label" style="margin:0 0 6px">${esc(tr(block, "title"))}</div>
+      <p class="muted small">${msg}</p>
+      ${cta}
+    </section>`;
+  }
   function renderMentalGuide(state2) {
     const g = MENTAL_GUIDE;
     const rec = recommendedMentalPiece(state2);
     const blocks = g.blocks.filter((b) => b.id !== "programa").map((b) => {
+      if (b.id === "profundizacion")
+        return renderMentalDeepening(state2, b);
       const open = !!b.open;
       return `<details class="fasting-block"${open ? " open" : ""}>
       <summary>${esc(tr(b, "title"))}</summary>
@@ -6348,6 +6384,7 @@ Gràcies.`,
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t("back")}</button>
     <div class="section-label">${esc(tr(g.intro, "title"))}</div>
     ${renderMentalToday(state2, rec)}
+    ${renderMentalPractice()}
     <button class="btn block" data-action="nav" data-view="pausa">\uD83D\uDD4A️ ${t("mental_pause")}</button>
     <button class="btn ghost block" data-action="start-cribado">\uD83D\uDCDD ${t("crib_start")}</button>
     <section class="card fasting-body">${tr(g.intro, "body")}</section>

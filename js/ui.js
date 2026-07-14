@@ -537,11 +537,39 @@ function renderMentalPieces(state, rec) {
   return `<div class="section-label">🎬 ${t('mental_library')}</div>${items}`;
 }
 
+/** Práctica diaria: sugerencia neutra de respiración (P1), sin rachas. */
+function renderMentalPractice() {
+  return `<section class="card">
+      <div class="section-label" style="margin:0 0 6px">🫁 ${t('mental_practice_title')}</div>
+      <p class="muted small">${t('mental_practice_msg')}</p>
+    </section>`;
+}
+
+/** Profundización ACT (SP1–SP3): visible solo VERDE/ÁMBAR; invitación si no hay
+ *  cribado; posposición amable en ROJO/CRISIS. */
+function renderMentalDeepening(state, block) {
+  const lvl = (state.cribado && state.cribado.result) ? state.cribado.result.level : null;
+  if (lvl === 'verde' || lvl === 'ambar') {
+    return `<details class="fasting-block">
+      <summary>${esc(tr(block, 'title'))}</summary>
+      <div class="fasting-body">${tr(block, 'body')}</div>
+    </details>`;
+  }
+  const msg = (lvl === 'rojo' || lvl === 'crisis') ? t('mental_sp_postponed') : t('mental_sp_locked');
+  const cta = (lvl === 'rojo' || lvl === 'crisis') ? '' : `<button class="btn ghost block" data-action="start-cribado">📝 ${t('crib_start')}</button>`;
+  return `<section class="card">
+      <div class="section-label" style="margin:0 0 6px">${esc(tr(block, 'title'))}</div>
+      <p class="muted small">${msg}</p>
+      ${cta}
+    </section>`;
+}
+
 export function renderMentalGuide(state) {
   const g = MENTAL_GUIDE;
   const rec = recommendedMentalPiece(state);
-  // El bloque 'programa' se sustituye por la biblioteca estructurada (MENTAL_PIECES).
+  // 'programa' -> biblioteca estructurada; 'profundizacion' -> gating por triaje.
   const blocks = g.blocks.filter((b) => b.id !== 'programa').map((b) => {
+    if (b.id === 'profundizacion') return renderMentalDeepening(state, b);
     const open = !!b.open;
     return `<details class="fasting-block"${open ? ' open' : ''}>
       <summary>${esc(tr(b, 'title'))}</summary>
@@ -552,6 +580,7 @@ export function renderMentalGuide(state) {
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t('back')}</button>
     <div class="section-label">${esc(tr(g.intro, 'title'))}</div>
     ${renderMentalToday(state, rec)}
+    ${renderMentalPractice()}
     <button class="btn block" data-action="nav" data-view="pausa">🕊️ ${t('mental_pause')}</button>
     <button class="btn ghost block" data-action="start-cribado">📝 ${t('crib_start')}</button>
     <section class="card fasting-body">${tr(g.intro, 'body')}</section>
