@@ -730,29 +730,20 @@ export function renderCribadoInforme(state) {
   const code = (state.cribado && state.cribado.code) || 'PREHAB-0000';
   if (!r) return `<button class="btn ghost back-btn" data-action="nav" data-view="bienestar-guide">${t('back')}</button><section class="card"><p>${t('crib_none')}</p></section>`;
   const lvlName = (lv) => ({ verde: 'VERDE', ambar: 'ÁMBAR', rojo: 'ROJO', crisis: 'CRISIS' }[lv] || lv || '—');
-  const hist = (state.mental && state.mental.history) || [];
-  const base = hist.length > 1 ? hist[0] : null;
-  const cell = (v, max) => (v != null ? v + ' / ' + max : '—');
-  const row = (label, cur, bas, max) => (base
-    ? `<tr><td>${label}</td><td>${cell(bas, max)}</td><td>${cell(cur, max)}</td></tr>`
-    : `<tr><td>${label}</td><td>${cell(cur, max)}</td></tr>`);
-  const rows = [
-    row(t('crib_r_distress'), r.dt, base && base.dt, 10),
-    row('PHQ-9', r.phq9, base && base.phq9, 27),
-    row('GAD-7', r.gad7, base && base.gad7, 21),
-    row('APAIS · ' + t('crib_r_anx'), r.apaisAnx, base && base.apaisAnx, 20),
-    (base
-      ? `<tr><td>${t('crib_r_level')}</td><td><strong>${lvlName(base.level)}</strong></td><td><strong>${lvlName(r.level)}</strong></td></tr>`
-      : `<tr><td>${t('crib_r_level')}</td><td><strong>${lvlName(r.level)}</strong></td></tr>`),
-  ].join('');
-  const thead = base ? `<thead><tr><th></th><th>${t('crib_r_baseline')} · ${esc(base.date)}</th><th>${t('crib_r_current')} · ${esc(r.date || '')}</th></tr></thead>` : '';
+  const hist = ((state.mental && state.mental.history) || []).slice();
+  if (!hist.length) hist.push({ date: r.date || '', level: r.level, dt: r.dt, phq9: r.phq9, gad7: r.gad7, apaisAnx: r.apaisAnx });
+  const c = (v, max) => (v != null ? v + '/' + max : '—');
+  const rows = hist.map((h) => `<tr><td>${esc(h.date || '')}</td><td><strong>${lvlName(h.level)}</strong></td><td>${c(h.dt, 10)}</td><td>${c(h.phq9, 27)}</td><td>${c(h.gad7, 21)}</td><td>${c(h.apaisAnx, 20)}</td></tr>`).join('');
+  const thead = `<thead><tr><th>${t('crib_r_date')}</th><th>${t('crib_r_level')}</th><th>${t('crib_r_dt')}</th><th>PHQ-9</th><th>GAD-7</th><th>APAIS</th></tr></thead>`;
   return `
     <button class="btn ghost back-btn" data-action="nav" data-view="cribado">${t('back')}</button>
     <div class="section-label">📄 ${t('crib_report_title')}</div>
     <section class="card">
       <p class="muted small">${t('crib_report_anon')}</p>
-      <p><strong>${t('crib_r_code')}:</strong> ${esc(code)} · <strong>${t('crib_r_date')}:</strong> ${esc(r.date || '')}</p>
+      <p><strong>${t('crib_r_code')}:</strong> ${esc(code)}</p>
+      <p class="muted small">${t('crib_evo_title')}</p>
       <table class="med-table">${thead}<tbody>${rows}</tbody></table>
+      <p class="muted small">${t('crib_evo_legend')}</p>
     </section>
     <button class="btn primary block" data-action="share-cribado">${t('crib_share')}</button>
     <button class="btn ghost block" data-action="print-doc">${t('crib_print')}</button>

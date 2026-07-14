@@ -4462,8 +4462,6 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
   }
   var SCALE_LIST = [
     { id: "dasi", icon: "\uD83C\uDFC3", route: "dasi", name: "Capacidad funcional (DASI)", name_en: "Functional capacity (DASI)", name_ca: "Capacitat funcional (DASI)", higherBetter: true },
-    { id: "gad7", icon: "\uD83D\uDE30", route: "gad7", name: "Ansiedad (GAD-7)", name_en: "Anxiety (GAD-7)", name_ca: "Ansietat (GAD-7)", higherBetter: false },
-    { id: "phq9", icon: "\uD83C\uDF27️", route: "phq9", name: "Estado de ánimo (PHQ-9)", name_en: "Mood (PHQ-9)", name_ca: "Estat d’ànim (PHQ-9)", higherBetter: false },
     { id: "must", icon: "\uD83E\uDD57", route: "must", name: "Riesgo nutricional (MUST)", name_en: "Nutrition risk (MUST)", name_ca: "Risc nutricional (MUST)", higherBetter: false },
     { id: "frail", icon: "\uD83E\uDDED", route: "fragilidad", name: "Fragilidad rápida (FRAIL)", name_en: "Quick frailty (FRAIL)", name_ca: "Fragilitat ràpida (FRAIL)", higherBetter: false },
     { id: "edmonton", icon: "\uD83D\uDCCB", route: "edmonton", name: "Fragilidad (Edmonton)", name_en: "Frailty (Edmonton)", name_ca: "Fragilitat (Edmonton)", higherBetter: false }
@@ -4966,6 +4964,9 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       mental_evo_checks: "repasos",
       crib_r_baseline: "Inicial",
       crib_r_current: "Actual",
+      crib_r_dt: "Malestar",
+      crib_evo_title: "Evolución de tus cuestionarios de bienestar a lo largo del programa:",
+      crib_evo_legend: "Malestar 0–10 · PHQ-9 0–27 (ánimo) · GAD-7 0–21 (ansiedad) · APAIS 4–20 (ansiedad quirúrgica). Cribado orientativo, no diagnóstico.",
       report_fasting: "Ayuno: situación indicada",
       fasting_flag_diabetes: "Diabetes",
       fasting_flag_glp1: "Medicación GLP‑1",
@@ -5321,6 +5322,9 @@ Gracias.`,
       mental_evo_checks: "check-ins",
       crib_r_baseline: "Baseline",
       crib_r_current: "Current",
+      crib_r_dt: "Distress",
+      crib_evo_title: "Progress of your wellbeing questionnaires throughout the programme:",
+      crib_evo_legend: "Distress 0–10 · PHQ-9 0–27 (mood) · GAD-7 0–21 (anxiety) · APAIS 4–20 (surgical anxiety). Guidance screening, not diagnostic.",
       report_fasting: "Fasting: reported situation",
       fasting_flag_diabetes: "Diabetes",
       fasting_flag_glp1: "GLP‑1 medication",
@@ -5676,6 +5680,9 @@ Thank you.`,
       mental_evo_checks: "repassos",
       crib_r_baseline: "Inicial",
       crib_r_current: "Actual",
+      crib_r_dt: "Malestar",
+      crib_evo_title: "Evolució dels teus qüestionaris de benestar al llarg del programa:",
+      crib_evo_legend: "Malestar 0–10 · PHQ-9 0–27 (ànim) · GAD-7 0–21 (ansietat) · APAIS 4–20 (ansietat quirúrgica). Cribratge orientatiu, no diagnòstic.",
       report_fasting: "Dejuni: situació indicada",
       fasting_flag_diabetes: "Diabetis",
       fasting_flag_glp1: "Medicació GLP‑1",
@@ -6568,25 +6575,21 @@ Gràcies.`,
     if (!r)
       return `<button class="btn ghost back-btn" data-action="nav" data-view="bienestar-guide">${t("back")}</button><section class="card"><p>${t("crib_none")}</p></section>`;
     const lvlName = (lv) => ({ verde: "VERDE", ambar: "ÁMBAR", rojo: "ROJO", crisis: "CRISIS" })[lv] || lv || "—";
-    const hist = state2.mental && state2.mental.history || [];
-    const base = hist.length > 1 ? hist[0] : null;
-    const cell = (v, max) => v != null ? v + " / " + max : "—";
-    const row = (label, cur, bas, max) => base ? `<tr><td>${label}</td><td>${cell(bas, max)}</td><td>${cell(cur, max)}</td></tr>` : `<tr><td>${label}</td><td>${cell(cur, max)}</td></tr>`;
-    const rows = [
-      row(t("crib_r_distress"), r.dt, base && base.dt, 10),
-      row("PHQ-9", r.phq9, base && base.phq9, 27),
-      row("GAD-7", r.gad7, base && base.gad7, 21),
-      row("APAIS · " + t("crib_r_anx"), r.apaisAnx, base && base.apaisAnx, 20),
-      base ? `<tr><td>${t("crib_r_level")}</td><td><strong>${lvlName(base.level)}</strong></td><td><strong>${lvlName(r.level)}</strong></td></tr>` : `<tr><td>${t("crib_r_level")}</td><td><strong>${lvlName(r.level)}</strong></td></tr>`
-    ].join("");
-    const thead = base ? `<thead><tr><th></th><th>${t("crib_r_baseline")} · ${esc(base.date)}</th><th>${t("crib_r_current")} · ${esc(r.date || "")}</th></tr></thead>` : "";
+    const hist = (state2.mental && state2.mental.history || []).slice();
+    if (!hist.length)
+      hist.push({ date: r.date || "", level: r.level, dt: r.dt, phq9: r.phq9, gad7: r.gad7, apaisAnx: r.apaisAnx });
+    const c = (v, max) => v != null ? v + "/" + max : "—";
+    const rows = hist.map((h) => `<tr><td>${esc(h.date || "")}</td><td><strong>${lvlName(h.level)}</strong></td><td>${c(h.dt, 10)}</td><td>${c(h.phq9, 27)}</td><td>${c(h.gad7, 21)}</td><td>${c(h.apaisAnx, 20)}</td></tr>`).join("");
+    const thead = `<thead><tr><th>${t("crib_r_date")}</th><th>${t("crib_r_level")}</th><th>${t("crib_r_dt")}</th><th>PHQ-9</th><th>GAD-7</th><th>APAIS</th></tr></thead>`;
     return `
     <button class="btn ghost back-btn" data-action="nav" data-view="cribado">${t("back")}</button>
     <div class="section-label">\uD83D\uDCC4 ${t("crib_report_title")}</div>
     <section class="card">
       <p class="muted small">${t("crib_report_anon")}</p>
-      <p><strong>${t("crib_r_code")}:</strong> ${esc(code)} · <strong>${t("crib_r_date")}:</strong> ${esc(r.date || "")}</p>
+      <p><strong>${t("crib_r_code")}:</strong> ${esc(code)}</p>
+      <p class="muted small">${t("crib_evo_title")}</p>
       <table class="med-table">${thead}<tbody>${rows}</tbody></table>
+      <p class="muted small">${t("crib_evo_legend")}</p>
     </section>
     <button class="btn primary block" data-action="share-cribado">${t("crib_share")}</button>
     <button class="btn ghost block" data-action="print-doc">${t("crib_print")}</button>
