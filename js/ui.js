@@ -585,6 +585,29 @@ function renderRecribadoCard(state) {
     </section>`;
 }
 
+/** Cuestionario inicial (basal): clasifica al entrar, sin bloquear el resto.
+ *  Si ya hay basal, muestra estado + evolución (fechas) y opción de repetir. */
+function renderMentalBaseline(state) {
+  const hist = (state.mental && state.mental.history) || [];
+  if (!hist.length) {
+    return `<section class="card" style="border-left:4px solid var(--accent)">
+      <div class="section-label" style="margin:0 0 6px">🧭 ${t('mental_baseline_title')}</div>
+      <p class="muted small">${t('mental_baseline_invite')}</p>
+      <button class="btn primary block" data-action="start-cribado" data-mode="full">${t('crib_start')}</button>
+    </section>`;
+  }
+  const base = hist[0]; const last = hist[hist.length - 1];
+  const evo = hist.length > 1
+    ? `<p class="muted small">${t('mental_evo_base')}: ${esc(base.date)} · ${t('mental_evo_last')}: ${esc(last.date)} · ${hist.length} ${t('mental_evo_checks')}</p>`
+    : `<p class="muted small">${t('mental_baseline_done')}: ${esc(base.date)}</p>`;
+  return `<section class="card">
+      <div class="section-label" style="margin:0 0 6px">🧭 ${t('mental_baseline_title')}</div>
+      ${evo}
+      <button class="btn ghost block" data-action="nav" data-view="cribado-informe">${t('crib_download')}</button>
+      <button class="btn ghost block" data-action="start-cribado" data-mode="full">${t('mental_repeat')}</button>
+    </section>`;
+}
+
 export function renderMentalGuide(state) {
   const g = MENTAL_GUIDE;
   const rec = recommendedMentalPiece(state);
@@ -600,11 +623,11 @@ export function renderMentalGuide(state) {
   return `
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t('back')}</button>
     <div class="section-label">${esc(tr(g.intro, 'title'))}</div>
+    ${renderMentalBaseline(state)}
     ${renderMentalToday(state, rec)}
     ${renderRecribadoCard(state)}
     ${renderMentalPractice()}
     <button class="btn block" data-action="nav" data-view="pausa">🕊️ ${t('mental_pause')}</button>
-    <button class="btn ghost block" data-action="start-cribado">📝 ${t('crib_start')}</button>
     <section class="card fasting-body">${tr(g.intro, 'body')}</section>
     ${renderMentalPieces(state, rec)}
     ${blocks}
@@ -706,22 +729,30 @@ export function renderCribadoInforme(state) {
   const r = (state.cribado && state.cribado.result);
   const code = (state.cribado && state.cribado.code) || 'PREHAB-0000';
   if (!r) return `<button class="btn ghost back-btn" data-action="nav" data-view="bienestar-guide">${t('back')}</button><section class="card"><p>${t('crib_none')}</p></section>`;
-  const lvl = { verde: 'VERDE', ambar: 'ÁMBAR', rojo: 'ROJO', crisis: 'CRISIS' }[r.level] || r.level;
+  const lvlName = (lv) => ({ verde: 'VERDE', ambar: 'ÁMBAR', rojo: 'ROJO', crisis: 'CRISIS' }[lv] || lv || '—');
+  const hist = (state.mental && state.mental.history) || [];
+  const base = hist.length > 1 ? hist[0] : null;
+  const cell = (v, max) => (v != null ? v + ' / ' + max : '—');
+  const row = (label, cur, bas, max) => (base
+    ? `<tr><td>${label}</td><td>${cell(bas, max)}</td><td>${cell(cur, max)}</td></tr>`
+    : `<tr><td>${label}</td><td>${cell(cur, max)}</td></tr>`);
   const rows = [
-    `<tr><td>${t('crib_r_distress')}</td><td>${r.dt != null ? r.dt + ' / 10' : '—'}</td></tr>`,
-    `<tr><td>PHQ-9</td><td>${r.phq9 != null ? r.phq9 + ' / 27' : '—'}</td></tr>`,
-    `<tr><td>GAD-7</td><td>${r.gad7 != null ? r.gad7 + ' / 21' : '—'}</td></tr>`,
-    `<tr><td>APAIS · ${t('crib_r_anx')}</td><td>${r.apaisAnx != null ? r.apaisAnx + ' / 20' : '—'}</td></tr>`,
-    `<tr><td>APAIS · ${t('crib_r_info')}</td><td>${r.apaisInfo != null ? r.apaisInfo + ' / 10' : '—'}</td></tr>`,
-    `<tr><td>${t('crib_r_level')}</td><td><strong>${lvl}</strong></td></tr>`,
+    row(t('crib_r_distress'), r.dt, base && base.dt, 10),
+    row('PHQ-9', r.phq9, base && base.phq9, 27),
+    row('GAD-7', r.gad7, base && base.gad7, 21),
+    row('APAIS · ' + t('crib_r_anx'), r.apaisAnx, base && base.apaisAnx, 20),
+    (base
+      ? `<tr><td>${t('crib_r_level')}</td><td><strong>${lvlName(base.level)}</strong></td><td><strong>${lvlName(r.level)}</strong></td></tr>`
+      : `<tr><td>${t('crib_r_level')}</td><td><strong>${lvlName(r.level)}</strong></td></tr>`),
   ].join('');
+  const thead = base ? `<thead><tr><th></th><th>${t('crib_r_baseline')} · ${esc(base.date)}</th><th>${t('crib_r_current')} · ${esc(r.date || '')}</th></tr></thead>` : '';
   return `
     <button class="btn ghost back-btn" data-action="nav" data-view="cribado">${t('back')}</button>
     <div class="section-label">📄 ${t('crib_report_title')}</div>
     <section class="card">
       <p class="muted small">${t('crib_report_anon')}</p>
       <p><strong>${t('crib_r_code')}:</strong> ${esc(code)} · <strong>${t('crib_r_date')}:</strong> ${esc(r.date || '')}</p>
-      <table class="med-table"><tbody>${rows}</tbody></table>
+      <table class="med-table">${thead}<tbody>${rows}</tbody></table>
     </section>
     <button class="btn primary block" data-action="share-cribado">${t('crib_share')}</button>
     <button class="btn ghost block" data-action="print-doc">${t('crib_print')}</button>

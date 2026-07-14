@@ -1015,6 +1015,9 @@ function finishCribado(state) {
   // Registro de recribados (para recordatorios in-app; nunca seguimiento externo).
   if (!state.mental) state.mental = {};
   state.mental.lastCheckDate = todayKey();
+  // Historial longitudinal (basal = primero) para seguimiento y evolución.
+  if (!state.mental.history) state.mental.history = [];
+  state.mental.history.push({ date: todayKey(), mode: state.cribado.mode || 'full', level: triage.level, dt: a.dt != null ? a.dt : null, phq9: phq9Total, gad7: gad7Total, apaisAnx });
   if (state.cribado.reckey) {
     if (!state.mental.done) state.mental.done = {};
     state.mental.done[state.cribado.reckey] = true;

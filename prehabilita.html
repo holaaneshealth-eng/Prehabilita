@@ -4957,6 +4957,15 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       recrib_weekly: "Ha pasado una semana desde tu último repaso: unas pocas preguntas para ver cómo vas.",
       recrib_preop: "Tu cirugía es muy pronto: un repaso breve sobre cómo llegas.",
       recrib_postop: "Tras la cirugía: un repaso breve de cómo te encuentras estos días.",
+      mental_baseline_title: "Cuestionario inicial",
+      mental_baseline_done: "Cuestionario inicial hecho el",
+      mental_repeat: "Repetir el cuestionario",
+      mental_baseline_invite: "Un cuestionario inicial (unos 5 min) nos ayuda a personalizar tu experiencia y a seguir tu evolución. No bloquea el resto: puedes ver los vídeos y hacer las prácticas cuando quieras.",
+      mental_evo_base: "Inicial",
+      mental_evo_last: "Último",
+      mental_evo_checks: "repasos",
+      crib_r_baseline: "Inicial",
+      crib_r_current: "Actual",
       report_fasting: "Ayuno: situación indicada",
       fasting_flag_diabetes: "Diabetes",
       fasting_flag_glp1: "Medicación GLP‑1",
@@ -5303,6 +5312,15 @@ Gracias.`,
       recrib_weekly: "A week has passed since your last check-in: a few questions to see how you are doing.",
       recrib_preop: "Your surgery is very soon: a quick check-in on how you are arriving.",
       recrib_postop: "After surgery: a quick check-in on how you are feeling these days.",
+      mental_baseline_title: "Initial questionnaire",
+      mental_baseline_done: "Initial questionnaire done on",
+      mental_repeat: "Repeat the questionnaire",
+      mental_baseline_invite: "An initial questionnaire (about 5 min) helps us personalise your experience and track your progress. It does not block anything else: you can watch the videos and do the practices anytime.",
+      mental_evo_base: "Baseline",
+      mental_evo_last: "Latest",
+      mental_evo_checks: "check-ins",
+      crib_r_baseline: "Baseline",
+      crib_r_current: "Current",
       report_fasting: "Fasting: reported situation",
       fasting_flag_diabetes: "Diabetes",
       fasting_flag_glp1: "GLP‑1 medication",
@@ -5649,6 +5667,15 @@ Thank you.`,
       recrib_weekly: "Ha passat una setmana des del teu últim repàs: unes poques preguntes per veure com vas.",
       recrib_preop: "La teva cirurgia és molt aviat: un repàs breu sobre com hi arribes.",
       recrib_postop: "Després de la cirurgia: un repàs breu de com et trobes aquests dies.",
+      mental_baseline_title: "Qüestionari inicial",
+      mental_baseline_done: "Qüestionari inicial fet el",
+      mental_repeat: "Repetir el qüestionari",
+      mental_baseline_invite: "Un qüestionari inicial (uns 5 min) ens ajuda a personalitzar la teva experiència i a seguir la teva evolució. No bloqueja la resta: pots veure els vídeos i fer les pràctiques quan vulguis.",
+      mental_evo_base: "Inicial",
+      mental_evo_last: "Últim",
+      mental_evo_checks: "repassos",
+      crib_r_baseline: "Inicial",
+      crib_r_current: "Actual",
       report_fasting: "Dejuni: situació indicada",
       fasting_flag_diabetes: "Diabetis",
       fasting_flag_glp1: "Medicació GLP‑1",
@@ -6407,6 +6434,25 @@ Gràcies.`,
       <button class="btn block" data-action="start-cribado" data-mode="${due.mode}" data-reckey="${due.key}">${t("recrib_do")}</button>
     </section>`;
   }
+  function renderMentalBaseline(state2) {
+    const hist = state2.mental && state2.mental.history || [];
+    if (!hist.length) {
+      return `<section class="card" style="border-left:4px solid var(--accent)">
+      <div class="section-label" style="margin:0 0 6px">\uD83E\uDDED ${t("mental_baseline_title")}</div>
+      <p class="muted small">${t("mental_baseline_invite")}</p>
+      <button class="btn primary block" data-action="start-cribado" data-mode="full">${t("crib_start")}</button>
+    </section>`;
+    }
+    const base = hist[0];
+    const last = hist[hist.length - 1];
+    const evo = hist.length > 1 ? `<p class="muted small">${t("mental_evo_base")}: ${esc(base.date)} · ${t("mental_evo_last")}: ${esc(last.date)} · ${hist.length} ${t("mental_evo_checks")}</p>` : `<p class="muted small">${t("mental_baseline_done")}: ${esc(base.date)}</p>`;
+    return `<section class="card">
+      <div class="section-label" style="margin:0 0 6px">\uD83E\uDDED ${t("mental_baseline_title")}</div>
+      ${evo}
+      <button class="btn ghost block" data-action="nav" data-view="cribado-informe">${t("crib_download")}</button>
+      <button class="btn ghost block" data-action="start-cribado" data-mode="full">${t("mental_repeat")}</button>
+    </section>`;
+  }
   function renderMentalGuide(state2) {
     const g = MENTAL_GUIDE;
     const rec = recommendedMentalPiece(state2);
@@ -6422,11 +6468,11 @@ Gràcies.`,
     return `
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t("back")}</button>
     <div class="section-label">${esc(tr(g.intro, "title"))}</div>
+    ${renderMentalBaseline(state2)}
     ${renderMentalToday(state2, rec)}
     ${renderRecribadoCard(state2)}
     ${renderMentalPractice()}
     <button class="btn block" data-action="nav" data-view="pausa">\uD83D\uDD4A️ ${t("mental_pause")}</button>
-    <button class="btn ghost block" data-action="start-cribado">\uD83D\uDCDD ${t("crib_start")}</button>
     <section class="card fasting-body">${tr(g.intro, "body")}</section>
     ${renderMentalPieces(state2, rec)}
     ${blocks}
@@ -6521,22 +6567,26 @@ Gràcies.`,
     const code = state2.cribado && state2.cribado.code || "PREHAB-0000";
     if (!r)
       return `<button class="btn ghost back-btn" data-action="nav" data-view="bienestar-guide">${t("back")}</button><section class="card"><p>${t("crib_none")}</p></section>`;
-    const lvl = { verde: "VERDE", ambar: "ÁMBAR", rojo: "ROJO", crisis: "CRISIS" }[r.level] || r.level;
+    const lvlName = (lv) => ({ verde: "VERDE", ambar: "ÁMBAR", rojo: "ROJO", crisis: "CRISIS" })[lv] || lv || "—";
+    const hist = state2.mental && state2.mental.history || [];
+    const base = hist.length > 1 ? hist[0] : null;
+    const cell = (v, max) => v != null ? v + " / " + max : "—";
+    const row = (label, cur, bas, max) => base ? `<tr><td>${label}</td><td>${cell(bas, max)}</td><td>${cell(cur, max)}</td></tr>` : `<tr><td>${label}</td><td>${cell(cur, max)}</td></tr>`;
     const rows = [
-      `<tr><td>${t("crib_r_distress")}</td><td>${r.dt != null ? r.dt + " / 10" : "—"}</td></tr>`,
-      `<tr><td>PHQ-9</td><td>${r.phq9 != null ? r.phq9 + " / 27" : "—"}</td></tr>`,
-      `<tr><td>GAD-7</td><td>${r.gad7 != null ? r.gad7 + " / 21" : "—"}</td></tr>`,
-      `<tr><td>APAIS · ${t("crib_r_anx")}</td><td>${r.apaisAnx != null ? r.apaisAnx + " / 20" : "—"}</td></tr>`,
-      `<tr><td>APAIS · ${t("crib_r_info")}</td><td>${r.apaisInfo != null ? r.apaisInfo + " / 10" : "—"}</td></tr>`,
-      `<tr><td>${t("crib_r_level")}</td><td><strong>${lvl}</strong></td></tr>`
+      row(t("crib_r_distress"), r.dt, base && base.dt, 10),
+      row("PHQ-9", r.phq9, base && base.phq9, 27),
+      row("GAD-7", r.gad7, base && base.gad7, 21),
+      row("APAIS · " + t("crib_r_anx"), r.apaisAnx, base && base.apaisAnx, 20),
+      base ? `<tr><td>${t("crib_r_level")}</td><td><strong>${lvlName(base.level)}</strong></td><td><strong>${lvlName(r.level)}</strong></td></tr>` : `<tr><td>${t("crib_r_level")}</td><td><strong>${lvlName(r.level)}</strong></td></tr>`
     ].join("");
+    const thead = base ? `<thead><tr><th></th><th>${t("crib_r_baseline")} · ${esc(base.date)}</th><th>${t("crib_r_current")} · ${esc(r.date || "")}</th></tr></thead>` : "";
     return `
     <button class="btn ghost back-btn" data-action="nav" data-view="cribado">${t("back")}</button>
     <div class="section-label">\uD83D\uDCC4 ${t("crib_report_title")}</div>
     <section class="card">
       <p class="muted small">${t("crib_report_anon")}</p>
       <p><strong>${t("crib_r_code")}:</strong> ${esc(code)} · <strong>${t("crib_r_date")}:</strong> ${esc(r.date || "")}</p>
-      <table class="med-table"><tbody>${rows}</tbody></table>
+      <table class="med-table">${thead}<tbody>${rows}</tbody></table>
     </section>
     <button class="btn primary block" data-action="share-cribado">${t("crib_share")}</button>
     <button class="btn ghost block" data-action="print-doc">${t("crib_print")}</button>
@@ -8637,6 +8687,9 @@ Gràcies.`,
     if (!state2.mental)
       state2.mental = {};
     state2.mental.lastCheckDate = todayKey();
+    if (!state2.mental.history)
+      state2.mental.history = [];
+    state2.mental.history.push({ date: todayKey(), mode: state2.cribado.mode || "full", level: triage.level, dt: a.dt != null ? a.dt : null, phq9: phq9Total, gad7: gad7Total, apaisAnx });
     if (state2.cribado.reckey) {
       if (!state2.mental.done)
         state2.mental.done = {};
