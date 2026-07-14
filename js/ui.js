@@ -6,6 +6,7 @@ import {
   DISCLAIMER, DISCLAIMER_EN, DISCLAIMER_CA, ERAS_NOTE, ERAS_NOTE_EN, ERAS_NOTE_CA,
   ALARM_SIGNS, ALARM_SIGNS_EN, ALARM_SIGNS_CA, CAREGIVER_TIPS, FRAIL_QUESTIONS, frailResult, getPhase,
   EDMONTON_QUESTIONS, edmontonResult, PRIVACY_POINTS, FASTING_GUIDE, EXERCISE_GUIDE, RESPIRATORY_GUIDE,
+  MENTAL_GUIDE, MENTAL_PAUSE,
 } from './content.js';
 import { todayKey, daysBetween, listProfiles, getActiveProfileId, assessmentHistory } from './state.js';
 import { GAD7, PHQ9, DASI, MUST, FREQ_OPTIONS, MUST_WEIGHTLOSS, SCALE_LIST, scaleMeta, resultForScale } from './scales.js';
@@ -472,6 +473,36 @@ export function renderRespiratoryGuide(state) {
     <section class="card fasting-body">${tr(g.intro, 'body')}</section>
     ${blocks}
     <p class="muted small fasting-disclaimer">${t('exercise_disclaimer')}</p>`;
+}
+
+/* ---------- Vista: BIENESTAR MENTAL (recurso interno) ---------- */
+
+export function renderMentalGuide(state) {
+  const g = MENTAL_GUIDE;
+  const blocks = g.blocks.map((b) => {
+    const open = !!b.open;
+    return `<details class="fasting-block"${open ? ' open' : ''}>
+      <summary>${esc(tr(b, 'title'))}</summary>
+      <div class="fasting-body">${tr(b, 'body')}</div>
+    </details>`;
+  }).join('');
+  return `
+    <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t('back')}</button>
+    <div class="section-label">${esc(tr(g.intro, 'title'))}</div>
+    <button class="btn block" data-action="nav" data-view="pausa">🕊️ ${t('mental_pause')}</button>
+    <section class="card fasting-body">${tr(g.intro, 'body')}</section>
+    ${blocks}
+    <p class="muted small fasting-disclaimer">${t('mental_disclaimer')}</p>`;
+}
+
+/* ---------- Vista: NECESITO UNA PAUSA (salida segura) ---------- */
+
+export function renderPausa(state) {
+  const p = MENTAL_PAUSE;
+  return `
+    <button class="btn ghost back-btn" data-action="nav" data-view="bienestar-guide">${t('back')}</button>
+    <div class="section-label">🕊️ ${esc(tr(p, 'title'))}</div>
+    <section class="card fasting-body">${tr(p, 'body')}</section>`;
 }
 
 /* ---------- Vista: APRENDE ---------- */

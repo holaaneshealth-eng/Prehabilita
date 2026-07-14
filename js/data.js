@@ -9,6 +9,7 @@ import {
   DEFAULT_POSTS,
   DEFAULT_RESOURCES,
   RESOURCES_VERSION,
+  DEPRECATED_RESOURCE_IDS,
 } from './content.js';
 
 /** Genera un identificador único legible. */
@@ -44,8 +45,16 @@ export function syncDefaultResources(state) {
   for (const r of DEFAULT_RESOURCES) {
     if (!have.has(r.id)) { lib.resources.push({ ...r }); added++; }
   }
+  // Retirar recursos por defecto deprecados (p. ej. sustituidos por otros).
+  let removed = 0;
+  const deprecated = DEPRECATED_RESOURCE_IDS || [];
+  if (deprecated.length) {
+    const before = lib.resources.length;
+    lib.resources = lib.resources.filter((r) => !deprecated.includes(r.id));
+    removed = before - lib.resources.length;
+  }
   lib.resourcesVersion = RESOURCES_VERSION;
-  return added > 0;
+  return added > 0 || removed > 0;
 }
 
 /* ---------- Pilares ---------- */

@@ -387,3 +387,61 @@ Profundización ACT SP1–SP3; reedición del guion original del equipo clínico
 para guionización final, producción audiovisual con IA generativa y desarrollo del
 módulo. **Requiere validación clínica y verificación de referencias antes de uso con
 pacientes.**
+
+
+---
+
+# 10. Decisiones de implementación (v1) y plan por fases
+
+Decisiones acordadas con el equipo para la construcción:
+
+- **Construcción por fases** (no de una pieza).
+- **Reemplaza** el recurso placeholder "Meditaciones guiadas" (`res-mindfulness`,
+  retirado vía `DEPRECATED_RESOURCE_IDS`) por el módulo `res-bienestar`
+  (guideId `bienestar`, pilar `mental`).
+- **Fuera de gamificación:** sin XP, medallas ni rachas. Como mucho, indicadores
+  neutros de progreso.
+- **Sin integración HIS (Vithas):** la derivación se limita a **informe descargable
+  + recomendación de contactar** (sin notificación automática al circuito).
+- **Datos solo en el dispositivo:** se avisa explícitamente. (No hay consentimiento
+  formal por ahora; a revisar.)
+- **Escalas v1:** se **elimina STAI-6**. Núcleo = **APAIS + GAD-7**, más **PHQ**
+  según algoritmo y **Termómetro del distrés**. Cortes: **APAIS ≥ 11** (itinerario
+  reforzado / ÁMBAR si no hay otros criterios); **Termómetro ≥ 4** (puerta de
+  entrada sensible) y **≥ 6** (carga alta / alerta reforzada). Traducidas a ES/EN/CA.
+- **Seguridad clínica:** **sin** detección de riesgo en texto libre; la crisis se
+  basa en el **ítem 9 del PHQ-9**. Botones de llamada **024** y **112**; y, en caso
+  de **cáncer**, contacto de la **AECC** (900 100 036, atención psicológica
+  gratuita).
+- **Regulatorio:** se procede con activación real (sin flag de borrador); revisión
+  posterior cuando la app esté montada. Falta tiempo hasta el primer paciente.
+- **Audiovisual:** estructura completa con placeholders "(Próximamente)"; se
+  insertan IDs a medida que se aporten contenidos validados. Formato: **V1–V12 y
+  SP1–SP3 → Vimeo**; **P1–P5 → mp3 + `<audio>`** (Vimeo como transitorio si conviene).
+- **Idiomas:** despliegue pleno **ES/EN/CA** desde el inicio.
+- **Recordatorios:** solo **in-app al abrir** (PWA sin backend; no se promete
+  seguimiento activo fuera de la app).
+- **Temporización:** "un vídeo al día" es **recomendación de presentación**, no
+  bloqueo rígido. Lógica de **repesca**: al abrir, se calcula desde la fecha de
+  cirugía, se desbloquea lo pendiente y se **prioriza visualmente la pieza del día**,
+  sin penalizar.
+- **Informe PDF (para fase de cribado):** **sin nombre, DNI ni identificativos
+  directos**; usar **código anónimo** (p. ej. `ID de Paciente: PREHAB-8392`) o solo
+  resultados clínicos. El paciente se identifica en el cuerpo del correo si quiere.
+  Compartir mediante **ShareSheet nativo del SO** (no abrir cliente de correo con
+  enlace plano) para que el usuario elija conscientemente cómo/con quién comparte.
+
+## Plan por fases
+
+- **Fase 1 · MVP de contenido (bajo riesgo) — IMPLEMENTADA:** módulo que reemplaza
+  el placeholder; intro sobria + aviso de datos + "no vigila"; estructura V1–V12 /
+  P1–P5 / SP1–SP3 con placeholders; botón permanente "Necesito una pausa" (§8.4) con
+  respiración/grounding/teléfonos 024·112·AECC; fuera de gamificación; ES/EN/CA. Sin
+  cribado ni calendario.
+- **Fase 2 · Cribado + triaje + derivación:** batería (Termómetro, PHQ-4→PHQ-9/
+  GAD-7, APAIS) con cortes acordados; triaje VERDE/ÁMBAR/ROJO/CRISIS; pantallas
+  §8.1–8.3; salvaguarda ítem 9 PHQ-9; informe PDF anónimo (PREHAB-XXXX) + ShareSheet;
+  recribados.
+- **Fase 3 · Orquestación:** itinerario por días a cirugía con repesca, priorización
+  de la pieza del día, práctica diaria, biblioteca, piezas por calendario (V11/V12),
+  reevaluaciones temporizadas, Sesión ACT tras V9 (solo VERDE/ÁMBAR).

@@ -721,17 +721,20 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
 // Versión del catálogo de recursos por defecto. Al incrementarla, la migración
 // (syncDefaultResources en data.js) añade a las bibliotecas ya existentes los
 // recursos por defecto que falten por id, una sola vez.
-export const RESOURCES_VERSION = 2;
+export const RESOURCES_VERSION = 3;
+
+// IDs de recursos por defecto retirados: syncDefaultResources los elimina de las
+// bibliotecas ya sembradas al subir RESOURCES_VERSION.
+export const DEPRECATED_RESOURCE_IDS = ['res-mindfulness'];
 
 export const DEFAULT_RESOURCES = [
-  { id: 'res-mindfulness', pillar: 'mental', type: 'link',
-    url: 'https://www.youtube.com/results?search_query=meditaci%C3%B3n+guiada+mindfulness+10+minutos',
-    title: 'Meditaciones guiadas de mindfulness',
-    title_en: 'Guided mindfulness meditations',
-    title_ca: 'Meditacions guiades de mindfulness',
-    desc: 'Ejemplos de meditación guiada (10 min). Reemplázalo por tu vídeo favorito.',
-    desc_en: 'Examples of guided meditation (10 min). Replace it with your favorite video.',
-    desc_ca: 'Exemples de meditació guiada (10 min). Substitueix-lo pel teu vídeo preferit.' },
+  { id: 'res-bienestar', pillar: 'mental', type: 'guide', guideId: 'bienestar',
+    title: 'Bienestar mental: entrena tu mente para la cirugía',
+    title_en: 'Mental wellbeing: train your mind for surgery',
+    title_ca: 'Benestar mental: entrena la teva ment per a la cirurgia',
+    desc: 'Vídeos breves y prácticas de calma para llegar más preparado, con salida segura y ayuda a un toque.',
+    desc_en: 'Short videos and calm practices to arrive better prepared, with a safe exit and help one tap away.',
+    desc_ca: 'Vídeos breus i pràctiques de calma per arribar més preparat, amb sortida segura i ajuda a un toc.' },
   { id: 'res-nutricion', pillar: 'nutricion', type: 'link',
     url: 'https://www.youtube.com/results?search_query=alimentaci%C3%B3n+rica+en+prote%C3%ADnas+recuperaci%C3%B3n',
     title: 'Alimentación rica en proteínas',
@@ -1948,6 +1951,327 @@ export const RESPIRATORY_GUIDE = {
 <p><strong>Seguretat:</strong> evita practicar just després de menjar i <strong>atura't si apareix mareig, falta d'aire desproporcionada o dolor rellevant</strong>. Davant de qualsevol dubte, consulta amb el teu equip.</p>`,
     },
   ],
+};
+
+// ---------------------------------------------------------------------------
+// MENTAL_GUIDE: módulo interno de Bienestar mental (Fase 1 / MVP).
+// Contenido autoadministrado de bajo riesgo. Sin cribado ni calendario todavía
+// (Fases 2 y 3). Diseño en .kiro/steering/bienestar-mental.md.
+// Los vídeos (V*) y audios (P*) van con placeholder "(Próximamente)" hasta que
+// se aporten los IDs de Vimeo / archivos validados.
+// ---------------------------------------------------------------------------
+export const MENTAL_GUIDE = {
+  intro: {
+    title: 'Bienestar mental: entrena tu mente para la cirugía',
+    title_en: 'Mental wellbeing: train your mind for surgery',
+    title_ca: 'Benestar mental: entrena la teva ment per a la cirurgia',
+    body: `<p>Así como entrenas el cuerpo antes de una operación, también puedes <strong>entrenar la mente</strong>. Aquí encontrarás vídeos breves y prácticas de calma que, con constancia, ayudan a llegar mejor preparado. No buscamos eliminar los nervios —son normales—, sino que te acompañen sin mandar.</p>
+<p><strong>A tu ritmo.</strong> Puedes ver una pieza al día o ir más despacio. Puedes saltarte lo que quieras: no hay deberes ni penalizaciones.</p>
+<p><strong>Esta sección no te vigila.</strong> No hacemos seguimiento en tiempo real de cómo estás. Si algún cuestionario sugiere que te vendría bien más apoyo, te lo diremos con claridad y te daremos un resumen para llevar a tu equipo.</p>
+<p class="muted small">🔒 Lo que respondas aquí se guarda <strong>solo en este dispositivo</strong>. Si usas un móvil o tablet compartido, tenlo en cuenta.</p>
+<p class="muted small">En cualquier momento puedes tocar <strong>«Necesito una pausa»</strong>: paramos todo y te ofrecemos calma y teléfonos de ayuda.</p>`,
+    body_en: `<p>Just as you train your body before an operation, you can also <strong>train your mind</strong>. Here you'll find short videos and calm practices that, with consistency, help you arrive better prepared. We're not trying to remove the nerves —they're normal—, but to keep them from taking over.</p>
+<p><strong>At your own pace.</strong> Watch one piece a day or go slower. You can skip anything: no homework, no penalties.</p>
+<p><strong>This section does not monitor you.</strong> We don't track how you're doing in real time. If a questionnaire suggests you'd benefit from more support, we'll tell you clearly and give you a summary to take to your team.</p>
+<p class="muted small">🔒 Anything you answer here is stored <strong>only on this device</strong>. Keep that in mind on a shared phone or tablet.</p>
+<p class="muted small">Anytime, tap <strong>"I need a pause"</strong>: we stop everything and offer calm and helplines.</p>`,
+    body_ca: `<p>Així com entrenes el cos abans d'una operació, també pots <strong>entrenar la ment</strong>. Aquí trobaràs vídeos breus i pràctiques de calma que, amb constància, ajuden a arribar més preparat. No busquem eliminar els nervis —són normals—, sinó que t'acompanyin sense manar.</p>
+<p><strong>Al teu ritme.</strong> Pots veure una peça al dia o anar més a poc a poc. Pots saltar-te el que vulguis: no hi ha deures ni penalitzacions.</p>
+<p><strong>Aquesta secció no et vigila.</strong> No fem seguiment en temps real de com estàs. Si algun qüestionari suggereix que et vindria bé més suport, t'ho direm amb claredat i et donarem un resum per portar al teu equip.</p>
+<p class="muted small">🔒 El que responguis aquí es desa <strong>només en aquest dispositiu</strong>. Si fas servir un mòbil o tauleta compartits, tingues-ho en compte.</p>
+<p class="muted small">En qualsevol moment pots tocar <strong>«Necessito una pausa»</strong>: aturem tot i t'oferim calma i telèfons d'ajuda.</p>`,
+  },
+  blocks: [
+    {
+      id: 'programa', open: true,
+      title: '🎬 Los vídeos del programa',
+      title_en: '🎬 The programme videos',
+      title_ca: '🎬 Els vídeos del programa',
+      body: `<p>Piezas breves, en orden. Cada una termina bajando la activación. Ve a tu ritmo.</p>
+<p><strong>Entender lo que va a pasar</strong></p>
+<h4>V1. Bienvenida: entrena tu mente para tu cirugía</h4>
+<p>Presenta el programa, normaliza dudas y nervios, e introduce el botón de pausa.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>V2. Tu cirugía, paso a paso</h4>
+<p>El recorrido perioperatorio en orden, de la preparación al alta, para reducir la incertidumbre.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>V3. Qué notarás: la anestesia, explicada con calma</h4>
+<p>Sensaciones esperables, el papel del anestesista y respuestas a miedos frecuentes.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<p><strong>Herramientas de calma</strong></p>
+<h4>V4. Entrena tu calma: la respiración que se lleva al quirófano</h4>
+<p>Respiración lenta diafragmática como herramienta principal de autorregulación.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>V4-B. Entrenar la atención: el músculo que vuelve</h4>
+<p>Mindfulness breve y guiado: volver con amabilidad al presente cuando la mente se va al futuro.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<p><strong>Prepararte por dentro</strong></p>
+<h4>V5. Lo que esperas importa</h4>
+<p>Expectativas realistas y concretas sobre la recuperación; objetivos personales alcanzables.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>V6. El dolor, bien explicado (I): tu sistema de alarma</h4>
+<p>El dolor como sistema de protección modulable, no como medida exacta de daño.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>V7. El dolor, bien explicado (II): lo que tú puedes hacer</h4>
+<p>Estrategias prácticas ante el dolor agudo: respirar, avisar pronto, moverte pautadamente.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>V8. La mente que avisa demasiado</h4>
+<p>Reconocer los pensamientos anticipatorios como avisos mentales, no como hechos.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>V9. Lo que importa: tu para qué</h4>
+<p>Conecta la preparación con tus valores y tradúcelos en pasos pequeños.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<p><strong>Dormir y el día D</strong></p>
+<h4>V10. Dormir mejor antes de operarte</h4>
+<p>Medidas básicas de higiene del sueño; enlaza con el audio nocturno.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>V11. Modo Día D: tu guía para hoy</h4>
+<p>Para las 24–48 h antes: instrucciones prácticas y herramientas de regulación.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>V12. Los primeros días: volver poco a poco</h4>
+<p>Tras la cirugía: ajusta expectativas, recuerda herramientas y repasa señales de alarma.</p>
+<p class="muted small">(Vídeo próximamente.)</p>`,
+      body_en: `<p>Short pieces, in order. Each one ends by lowering activation. Go at your own pace.</p>
+<p><strong>Understanding what will happen</strong></p>
+<h4>V1. Welcome: train your mind for your surgery</h4>
+<p>Introduces the programme, normalises doubts and nerves, and introduces the pause button.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>V2. Your surgery, step by step</h4>
+<p>The perioperative journey in order, from preparation to discharge, to reduce uncertainty.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>V3. What you'll notice: anaesthesia, explained calmly</h4>
+<p>Expected sensations, the anaesthetist's role and answers to common fears.</p>
+<p class="muted small">(Video coming soon.)</p>
+<p><strong>Calm tools</strong></p>
+<h4>V4. Train your calm: the breathing you take to theatre</h4>
+<p>Slow diaphragmatic breathing as the main self-regulation tool.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>V4-B. Training attention: the muscle that comes back</h4>
+<p>Brief, guided mindfulness: gently returning to the present when the mind drifts to the future.</p>
+<p class="muted small">(Video coming soon.)</p>
+<p><strong>Preparing on the inside</strong></p>
+<h4>V5. What you expect matters</h4>
+<p>Realistic, concrete recovery expectations; achievable personal goals.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>V6. Pain, well explained (I): your alarm system</h4>
+<p>Pain as a modulable protection system, not an exact measure of damage.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>V7. Pain, well explained (II): what you can do</h4>
+<p>Practical strategies for acute pain: breathe, speak up early, move as advised.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>V8. The mind that warns too much</h4>
+<p>Recognising anticipatory thoughts as mental alerts, not facts.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>V9. What matters: your why</h4>
+<p>Connect your preparation with your values and turn them into small steps.</p>
+<p class="muted small">(Video coming soon.)</p>
+<p><strong>Sleep and D-day</strong></p>
+<h4>V10. Sleeping better before your operation</h4>
+<p>Basic sleep hygiene; links to the night-time audio.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>V11. D-day mode: your guide for today</h4>
+<p>For the 24–48 h before: practical instructions and regulation tools.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>V12. The first days: coming back gradually</h4>
+<p>After surgery: adjust expectations, recall tools and review warning signs.</p>
+<p class="muted small">(Video coming soon.)</p>`,
+      body_ca: `<p>Peces breus, en ordre. Cadascuna acaba baixant l'activació. Ves al teu ritme.</p>
+<p><strong>Entendre què passarà</strong></p>
+<h4>V1. Benvinguda: entrena la teva ment per a la cirurgia</h4>
+<p>Presenta el programa, normalitza dubtes i nervis, i introdueix el botó de pausa.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>V2. La teva cirurgia, pas a pas</h4>
+<p>El recorregut perioperatori en ordre, de la preparació a l'alta, per reduir la incertesa.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>V3. Què notaràs: l'anestèsia, explicada amb calma</h4>
+<p>Sensacions esperables, el paper de l'anestesista i respostes a pors freqüents.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<p><strong>Eines de calma</strong></p>
+<h4>V4. Entrena la teva calma: la respiració que et portes al quiròfan</h4>
+<p>Respiració lenta diafragmàtica com a eina principal d'autoregulació.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>V4-B. Entrenar l'atenció: el múscul que torna</h4>
+<p>Mindfulness breu i guiat: tornar amb amabilitat al present quan la ment se'n va al futur.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<p><strong>Preparar-te per dins</strong></p>
+<h4>V5. El que esperes importa</h4>
+<p>Expectatives realistes i concretes sobre la recuperació; objectius personals assolibles.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>V6. El dolor, ben explicat (I): el teu sistema d'alarma</h4>
+<p>El dolor com a sistema de protecció modulable, no com a mesura exacta de dany.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>V7. El dolor, ben explicat (II): el que tu pots fer</h4>
+<p>Estratègies pràctiques davant el dolor agut: respirar, avisar aviat, moure't pautadament.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>V8. La ment que avisa massa</h4>
+<p>Reconèixer els pensaments anticipatoris com a avisos mentals, no com a fets.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>V9. El que importa: el teu per a què</h4>
+<p>Connecta la preparació amb els teus valors i tradueix-los en passos petits.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<p><strong>Dormir i el dia D</strong></p>
+<h4>V10. Dormir millor abans d'operar-te</h4>
+<p>Mesures bàsiques d'higiene del son; enllaça amb l'àudio nocturn.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>V11. Mode Dia D: la teva guia per avui</h4>
+<p>Per a les 24–48 h abans: instruccions pràctiques i eines de regulació.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>V12. Els primers dies: tornar a poc a poc</h4>
+<p>Després de la cirurgia: ajusta expectatives, recorda eines i repassa senyals d'alarma.</p>
+<p class="muted small">(Vídeo pròximament.)</p>`,
+    },
+    {
+      id: 'practica', open: false,
+      title: '🎧 Práctica diaria (audios)',
+      title_en: '🎧 Daily practice (audio)',
+      title_ca: '🎧 Pràctica diària (àudios)',
+      body: `<p>Herramientas para usar tantas veces como quieras. La respiración es la base: "cada práctica es un entrenamiento que te llevas al quirófano".</p>
+<h4>P1. Respiración guiada diaria</h4>
+<p>Práctica breve de respiración lenta diafragmática, con versión corta para momentos de pausa.</p>
+<p class="muted small">(Audio próximamente.)</p>
+<h4>P2. Volver al presente (grounding 5-4-3-2-1)</h4>
+<p>Estabilización para momentos de agobio, orientando los sentidos al presente.</p>
+<p class="muted small">(Audio próximamente.)</p>
+<h4>P4. Atención abierta</h4>
+<p>Práctica con ojos abiertos centrada en sonidos y respiración; para salas de espera y trayectos.</p>
+<p class="muted small">(Audio próximamente.)</p>
+<h4>P5. Paseo consciente</h4>
+<p>Para acompañar tus caminatas de preparación, uniendo cuerpo y atención.</p>
+<p class="muted small">(Audio próximamente.)</p>
+<h4>P3. Audio nocturno</h4>
+<p>Para conciliar el sueño: respiración, relajación del cuerpo e imaginería serena.</p>
+<p class="muted small">(Audio próximamente.)</p>`,
+      body_en: `<p>Tools to use as often as you like. Breathing is the foundation: "every practice is training you take to theatre".</p>
+<h4>P1. Daily guided breathing</h4>
+<p>Short slow diaphragmatic breathing practice, with a short version for pause moments.</p>
+<p class="muted small">(Audio coming soon.)</p>
+<h4>P2. Back to the present (5-4-3-2-1 grounding)</h4>
+<p>Stabilisation for overwhelming moments, orienting the senses to the present.</p>
+<p class="muted small">(Audio coming soon.)</p>
+<h4>P4. Open attention</h4>
+<p>Eyes-open practice focused on sounds and breath; for waiting rooms and journeys.</p>
+<p class="muted small">(Audio coming soon.)</p>
+<h4>P5. Mindful walk</h4>
+<p>To go with your preparation walks, joining body and attention.</p>
+<p class="muted small">(Audio coming soon.)</p>
+<h4>P3. Night-time audio</h4>
+<p>To help you fall asleep: breathing, body relaxation and calm imagery.</p>
+<p class="muted small">(Audio coming soon.)</p>`,
+      body_ca: `<p>Eines per fer servir tantes vegades com vulguis. La respiració és la base: "cada pràctica és un entrenament que et portes al quiròfan".</p>
+<h4>P1. Respiració guiada diària</h4>
+<p>Pràctica breu de respiració lenta diafragmàtica, amb versió curta per a moments de pausa.</p>
+<p class="muted small">(Àudio pròximament.)</p>
+<h4>P2. Tornar al present (grounding 5-4-3-2-1)</h4>
+<p>Estabilització per a moments d'angoixa, orientant els sentits al present.</p>
+<p class="muted small">(Àudio pròximament.)</p>
+<h4>P4. Atenció oberta</h4>
+<p>Pràctica amb ulls oberts centrada en sons i respiració; per a sales d'espera i trajectes.</p>
+<p class="muted small">(Àudio pròximament.)</p>
+<h4>P5. Passeig conscient</h4>
+<p>Per acompanyar les teves caminades de preparació, unint cos i atenció.</p>
+<p class="muted small">(Àudio pròximament.)</p>
+<h4>P3. Àudio nocturn</h4>
+<p>Per conciliar el son: respiració, relaxació del cos i imatgeria serena.</p>
+<p class="muted small">(Àudio pròximament.)</p>`,
+    },
+    {
+      id: 'profundizacion', open: false,
+      title: '🧭 Profundización (opcional)',
+      title_en: '🧭 Going deeper (optional)',
+      title_ca: '🧭 Aprofundiment (opcional)',
+      body: `<p>Tres sesiones más largas para quien quiera ir un paso más allá, tras el vídeo V9.</p>
+<h4>SP1. Mirar de frente</h4>
+<p>Identificar tu principal preocupación sobre la cirugía y revisar cómo intentas manejarla.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>SP2. Soltar la cuerda</h4>
+<p>Observar pensamientos y sensaciones sin fusionarte con ellos ni luchar contra ellos.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<h4>SP3. Qué tipo de paciente quieres ser</h4>
+<p>Traducir lo que te importa en una acción concreta ligada a tu operación y recuperación.</p>
+<p class="muted small">(Vídeo próximamente.)</p>
+<p class="muted small">Estas sesiones son opcionales. En una próxima versión se ofrecerán según tu situación.</p>`,
+      body_en: `<p>Three longer sessions for those who want to go a step further, after video V9.</p>
+<h4>SP1. Facing it</h4>
+<p>Identify your main concern about surgery and review how you try to manage it.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>SP2. Dropping the rope</h4>
+<p>Observe thoughts and sensations without fusing with them or fighting them.</p>
+<p class="muted small">(Video coming soon.)</p>
+<h4>SP3. What kind of patient you want to be</h4>
+<p>Turn what matters to you into a concrete action tied to your operation and recovery.</p>
+<p class="muted small">(Video coming soon.)</p>
+<p class="muted small">These sessions are optional. A future version will offer them according to your situation.</p>`,
+      body_ca: `<p>Tres sessions més llargues per a qui vulgui anar un pas més enllà, després del vídeo V9.</p>
+<h4>SP1. Mirar de cara</h4>
+<p>Identificar la teva principal preocupació sobre la cirurgia i revisar com intentes gestionar-la.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>SP2. Deixar anar la corda</h4>
+<p>Observar pensaments i sensacions sense fusionar-t'hi ni lluitar-hi.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<h4>SP3. Quin tipus de pacient vols ser</h4>
+<p>Traduir el que t'importa en una acció concreta lligada a la teva operació i recuperació.</p>
+<p class="muted small">(Vídeo pròximament.)</p>
+<p class="muted small">Aquestes sessions són opcionals. Una versió futura les oferirà segons la teva situació.</p>`,
+    },
+    {
+      id: 'ayuda', open: false,
+      title: '🆘 Si lo necesitas: ayuda',
+      title_en: '🆘 If you need it: help',
+      title_ca: '🆘 Si ho necessites: ajuda',
+      body: `<p>Esta app es de apoyo, no sustituye la atención de un profesional. Si lo estás pasando mal, pedir ayuda es un acto de valentía y funciona.</p>
+<ul><li><strong>024</strong> — Línea de atención a la conducta suicida (gratuita, 24 h, confidencial). <a href="tel:024">Llamar</a></li>
+<li><strong>112</strong> — Emergencias. <a href="tel:112">Llamar</a></li>
+<li>Si tu proceso está relacionado con un <strong>cáncer</strong>, la <strong>AECC</strong> ofrece atención psicológica gratuita para pacientes y familiares: <strong>900 100 036</strong>. <a href="tel:900100036">Llamar</a></li></ul>
+<p>También puedes acudir a tu centro de salud o a urgencias, o contárselo a alguien de confianza que esté cerca.</p>`,
+      body_en: `<p>This app is supportive; it does not replace professional care. If you're struggling, asking for help is an act of courage and it works.</p>
+<ul><li><strong>024</strong> — Suicidal behaviour helpline (free, 24 h, confidential). <a href="tel:024">Call</a></li>
+<li><strong>112</strong> — Emergencies. <a href="tel:112">Call</a></li>
+<li>If your process is related to <strong>cancer</strong>, the <strong>AECC</strong> offers free psychological support for patients and families: <strong>900 100 036</strong>. <a href="tel:900100036">Call</a></li></ul>
+<p>You can also go to your health centre or A&E, or tell someone you trust who is nearby.</p>`,
+      body_ca: `<p>Aquesta app és de suport; no substitueix l'atenció d'un professional. Si ho estàs passant malament, demanar ajuda és un acte de valentia i funciona.</p>
+<ul><li><strong>024</strong> — Línia d'atenció a la conducta suïcida (gratuïta, 24 h, confidencial). <a href="tel:024">Trucar</a></li>
+<li><strong>112</strong> — Emergències. <a href="tel:112">Trucar</a></li>
+<li>Si el teu procés està relacionat amb un <strong>càncer</strong>, l'<strong>AECC</strong> ofereix atenció psicològica gratuïta per a pacients i familiars: <strong>900 100 036</strong>. <a href="tel:900100036">Trucar</a></li></ul>
+<p>També pots anar al teu centre de salut o a urgències, o explicar-ho a algú de confiança que tinguis a prop.</p>`,
+    },
+  ],
+};
+
+// Pantalla "Necesito una pausa" (§8.4 del diseño). Salida segura siempre accesible.
+export const MENTAL_PAUSE = {
+  title: 'Necesito una pausa',
+  title_en: 'I need a pause',
+  title_ca: 'Necessito una pausa',
+  body: `<p>Estoy contigo. Paramos todo. Elige lo que te venga bien ahora; no hay prisa, y también puedes solo descansar.</p>
+<h4>Respirar 2 minutos</h4>
+<p>Siéntate cómodo. Inspira por la nariz contando hasta 4 y nota cómo sube tu abdomen. Espira despacio por la boca contando hasta 6. Repite a tu ritmo, sin forzar.</p>
+<h4>Volver al presente (3 minutos)</h4>
+<p>Sin prisa, nombra: 5 cosas que ves, 4 que puedes tocar, 3 que oyes, 2 que hueles y 1 que puedes saborear. Estás aquí, ahora.</p>
+<h4>Hablar con alguien que pueda ayudarte</h4>
+<ul><li><strong>024</strong> — Conducta suicida (gratuita, 24 h, confidencial). <a href="tel:024">Llamar</a></li>
+<li><strong>112</strong> — Emergencias. <a href="tel:112">Llamar</a></li>
+<li>Si hay un <strong>cáncer</strong> de por medio, la <strong>AECC</strong> ofrece apoyo psicológico gratuito: <strong>900 100 036</strong>. <a href="tel:900100036">Llamar</a></li></ul>
+<p>Cuando quieras, retomamos donde lo dejaste. Parar y volver también es entrenar.</p>`,
+  body_en: `<p>I'm with you. We stop everything. Choose what feels right now; there's no rush, and you can just rest too.</p>
+<h4>Breathe for 2 minutes</h4>
+<p>Sit comfortably. Breathe in through your nose counting to 4 and feel your abdomen rise. Breathe out slowly through your mouth counting to 6. Repeat at your own pace, without forcing.</p>
+<h4>Back to the present (3 minutes)</h4>
+<p>Slowly, name: 5 things you see, 4 you can touch, 3 you hear, 2 you smell and 1 you can taste. You are here, now.</p>
+<h4>Talk to someone who can help</h4>
+<ul><li><strong>024</strong> — Suicidal behaviour (free, 24 h, confidential). <a href="tel:024">Call</a></li>
+<li><strong>112</strong> — Emergencies. <a href="tel:112">Call</a></li>
+<li>If <strong>cancer</strong> is involved, the <strong>AECC</strong> offers free psychological support: <strong>900 100 036</strong>. <a href="tel:900100036">Call</a></li></ul>
+<p>Whenever you like, we'll pick up where you left off. Stopping and coming back is also training.</p>`,
+  body_ca: `<p>Estic amb tu. Aturem tot. Tria el que et vagi bé ara; no hi ha pressa, i també pots només descansar.</p>
+<h4>Respirar 2 minuts</h4>
+<p>Seu còmode. Inspira pel nas comptant fins a 4 i nota com puja el teu abdomen. Espira a poc a poc per la boca comptant fins a 6. Repeteix al teu ritme, sense forçar.</p>
+<h4>Tornar al present (3 minuts)</h4>
+<p>Sense pressa, anomena: 5 coses que veus, 4 que pots tocar, 3 que sents, 2 que olores i 1 que pots assaborir. Ets aquí, ara.</p>
+<h4>Parlar amb algú que pugui ajudar-te</h4>
+<ul><li><strong>024</strong> — Conducta suïcida (gratuïta, 24 h, confidencial). <a href="tel:024">Trucar</a></li>
+<li><strong>112</strong> — Emergències. <a href="tel:112">Trucar</a></li>
+<li>Si hi ha un <strong>càncer</strong> pel mig, l'<strong>AECC</strong> ofereix suport psicològic gratuït: <strong>900 100 036</strong>. <a href="tel:900100036">Trucar</a></li></ul>
+<p>Quan vulguis, reprenem on ho vam deixar. Aturar-se i tornar també és entrenar.</p>`,
 };
 
 export const ALARM_SIGNS = [
