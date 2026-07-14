@@ -154,6 +154,99 @@ export function mustResult(s) {
   return { color: '#ef4444', label: 'Riesgo alto', label_en: 'High risk', label_ca: 'Risc alt', message: 'Riesgo nutricional alto. Es importante que lo comentes pronto con tu equipo médico o nutricionista.', message_en: 'High nutritional risk. It is important to discuss this soon with your medical team or dietitian.', message_ca: 'Risc nutricional alt. És important que ho comentis aviat amb el teu equip mèdic o nutricionista.' };
 }
 
+/* ---------- Cribado de bienestar mental (Fase 2): DT + APAIS + triaje ---------- */
+// Escalas del módulo de bienestar mental. Se guardan por separado (no en
+// SCALE_LIST) para no alterar el hub de evaluaciones ni el informe de progreso.
+// Detección de crisis: SOLO por el ítem 9 del PHQ-9 (no hay análisis de texto libre).
+
+// Termómetro del malestar (ítem único 0–10). Puerta de entrada sensible (≥4) y
+// marcador de carga alta (≥6). Nunca decide el triaje en solitario.
+export const DISTRESS = {
+  id: 'distress', max: 10,
+  title: 'Termómetro del malestar', title_en: 'Distress thermometer', title_ca: 'Termòmetre del malestar',
+  stem: 'En una escala de 0 a 10, ¿cuánto malestar o angustia has sentido en la última semana? (0 = ninguno, 10 = el máximo)',
+  stem_en: 'On a scale of 0 to 10, how much distress have you felt in the past week? (0 = none, 10 = the most)',
+  stem_ca: 'En una escala de 0 a 10, quant malestar o angoixa has sentit en l’última setmana? (0 = gens, 10 = el màxim)',
+  note: 'Termómetro del distrés (adaptado de NCCN). Cribado orientativo, no diagnóstico.',
+  note_en: 'Distress thermometer (adapted from NCCN). Guidance screening, not diagnostic.',
+  note_ca: 'Termòmetre del distrés (adaptat de NCCN). Cribratge orientatiu, no diagnòstic.',
+};
+
+// APAIS: ansiedad y necesidad de información preoperatoria. 6 ítems, Likert 1–5.
+// Ansiedad = ítems 0,1,3,4 (rango 4–20); Información = ítems 2,5 (rango 2–10).
+// EN original (Moerman 1996) + ES validado (Vergara-Romero et al., 2017).
+// CA: traducción funcional supervisada (NO validada metodológicamente).
+export const APAIS_OPTIONS = [
+  { v: 1, label: 'En absoluto', label_en: 'Not at all', label_ca: 'Gens' },
+  { v: 2, label: 'Un poco', label_en: 'A little', label_ca: 'Una mica' },
+  { v: 3, label: 'Moderadamente', label_en: 'Moderately', label_ca: 'Moderadament' },
+  { v: 4, label: 'Bastante', label_en: 'Quite a lot', label_ca: 'Bastant' },
+  { v: 5, label: 'Muchísimo', label_en: 'Extremely', label_ca: 'Moltíssim' },
+];
+export const APAIS = {
+  id: 'apais', max: 30, anxietyIndexes: [0, 1, 3, 4], infoIndexes: [2, 5],
+  title: 'Ansiedad e información antes de la cirugía (APAIS)', title_en: 'Preoperative anxiety and information (APAIS)', title_ca: 'Ansietat i informació abans de la cirurgia (APAIS)',
+  intro: 'Indica en qué medida estás de acuerdo con cada frase, pensando en tu próxima cirugía.',
+  intro_en: 'Indicate how much you agree with each statement, thinking about your upcoming surgery.',
+  intro_ca: 'Indica en quina mesura estàs d’acord amb cada frase, pensant en la teva propera cirurgia.',
+  note: 'APAIS (Moerman 1996; validación española de Vergara-Romero et al., 2017). Versión catalana: traducción funcional, no validada. Cribado orientativo, no diagnóstico.',
+  note_en: 'APAIS (Moerman 1996; Spanish validation by Vergara-Romero et al., 2017). Catalan version: functional translation, not validated. Guidance screening, not diagnostic.',
+  note_ca: 'APAIS (Moerman 1996; validació espanyola de Vergara-Romero et al., 2017). Versió catalana: traducció funcional, no validada. Cribratge orientatiu, no diagnòstic.',
+  items: [
+    { q: 'Estoy preocupado/a por la anestesia.', q_en: 'I am worried about the anaesthetic.', q_ca: 'Estic preocupat/da per l’anestèsia.' },
+    { q: 'Pienso continuamente en la anestesia.', q_en: 'The anaesthetic is on my mind continually.', q_ca: 'Penso contínuament en l’anestèsia.' },
+    { q: 'Me gustaría saber lo máximo posible sobre la anestesia.', q_en: 'I would like to know as much as possible about the anaesthetic.', q_ca: 'M’agradaria saber tant com sigui possible sobre l’anestèsia.' },
+    { q: 'Estoy preocupado/a por la intervención.', q_en: 'I am worried about the procedure.', q_ca: 'Estic preocupat/da per la intervenció.' },
+    { q: 'Pienso continuamente en la intervención.', q_en: 'The procedure is on my mind continually.', q_ca: 'Penso contínuament en la intervenció.' },
+    { q: 'Me gustaría saber lo máximo posible sobre la intervención.', q_en: 'I would like to know as much as possible about the procedure.', q_ca: 'M’agradaria saber tant com sigui possible sobre la intervenció.' },
+  ],
+};
+
+export function distressResult(s) {
+  if (s >= 6) return { color: '#ef4444', level: 'high', label: 'Malestar alto', label_en: 'High distress', label_ca: 'Malestar alt', message: 'Estás cargando bastante. Cuidarte hoy y apoyarte en tu equipo puede ayudarte a llegar mejor.', message_en: 'You are carrying quite a lot. Taking care of yourself today and leaning on your team can help you arrive better.', message_ca: 'Estàs carregant força. Cuidar-te avui i recolzar-te en el teu equip et pot ajudar a arribar millor.' };
+  if (s >= 4) return { color: '#f59e0b', level: 'moderate', label: 'Malestar moderado', label_en: 'Moderate distress', label_ca: 'Malestar moderat', message: 'Notas cierto malestar. Las prácticas de calma pueden venirte bien estos días.', message_en: 'You feel some distress. The calm practices may help you these days.', message_ca: 'Notes cert malestar. Les pràctiques de calma et poden anar bé aquests dies.' };
+  return { color: '#22c55e', level: 'low', label: 'Malestar bajo', label_en: 'Low distress', label_ca: 'Malestar baix', message: 'Tu malestar es bajo. Mantén tus rutinas de calma y sueño.', message_en: 'Your distress is low. Keep up your calm and sleep routines.', message_ca: 'El teu malestar és baix. Mantén les teves rutines de calma i son.' };
+}
+
+/** Suma de la subescala de ansiedad del APAIS (ítems 0,1,3,4). */
+export function apaisAnxietyScore(answers) {
+  return APAIS.anxietyIndexes.reduce((acc, i) => acc + (Number(answers[i]) || 0), 0);
+}
+/** Suma de la subescala de información del APAIS (ítems 2,5). */
+export function apaisInfoScore(answers) {
+  return APAIS.infoIndexes.reduce((acc, i) => acc + (Number(answers[i]) || 0), 0);
+}
+export function apaisResult(anx) {
+  if (anx >= 11) return { color: '#f59e0b', label: 'Ansiedad quirúrgica elevada', label_en: 'High surgical anxiety', label_ca: 'Ansietat quirúrgica elevada', message: 'Tu ansiedad ante la cirugía es alta. Reforzaremos la información y las herramientas de calma; coméntalo también en tu consulta de preanestesia.', message_en: 'Your anxiety about surgery is high. We will reinforce information and calm tools; also mention it at your pre-anaesthesia appointment.', message_ca: 'La teva ansietat davant la cirurgia és alta. Reforçarem la informació i les eines de calma; comenta-ho també a la consulta de preanestèsia.' };
+  return { color: '#22c55e', label: 'Ansiedad quirúrgica baja', label_en: 'Low surgical anxiety', label_ca: 'Ansietat quirúrgica baixa', message: 'Tu ansiedad ante la cirugía es baja. Las herramientas del programa te ayudarán a mantenerte así.', message_en: 'Your anxiety about surgery is low. The programme tools will help you stay this way.', message_ca: 'La teva ansietat davant la cirurgia és baixa. Les eines del programa t’ajudaran a mantenir-te així.' };
+}
+
+/**
+ * Motor de triaje del bienestar mental (reglas transparentes, sin ML).
+ * Prioridad: CRISIS > ROJO > ÁMBAR > VERDE. El termómetro no decide en solitario;
+ * highBurden (DT≥6) es un marcador informativo que acompaña al nivel.
+ * @returns { level, reasons, highBurden }
+ */
+export function computeMentalTriage({ distress = null, phq9 = null, gad7 = null, apaisAnx = null, phq9Item9 = null } = {}) {
+  const highBurden = distress != null && distress >= 6;
+  if (phq9Item9 != null && phq9Item9 >= 1) {
+    return { level: 'crisis', reasons: ['phq9_item9'], highBurden };
+  }
+  const reasons = [];
+  if ((phq9 != null && phq9 >= 15) || (gad7 != null && gad7 >= 15)) {
+    if (phq9 != null && phq9 >= 15) reasons.push('phq9>=15');
+    if (gad7 != null && gad7 >= 15) reasons.push('gad7>=15');
+    return { level: 'rojo', reasons, highBurden };
+  }
+  if ((apaisAnx != null && apaisAnx >= 11) || (phq9 != null && phq9 >= 10) || (gad7 != null && gad7 >= 10)) {
+    if (apaisAnx != null && apaisAnx >= 11) reasons.push('apais>=11');
+    if (phq9 != null && phq9 >= 10) reasons.push('phq9_10_14');
+    if (gad7 != null && gad7 >= 10) reasons.push('gad7_10_14');
+    return { level: 'ambar', reasons, highBurden };
+  }
+  return { level: 'verde', reasons: highBurden ? ['distress_high'] : [], highBurden };
+}
+
 /* ---------- Registro de todas las escalas (para el hub y la comparación) ---------- */
 export const SCALE_LIST = [
   { id: 'dasi', icon: '🏃', route: 'dasi', name: 'Capacidad funcional (DASI)', name_en: 'Functional capacity (DASI)', name_ca: 'Capacitat funcional (DASI)', higherBetter: true },
