@@ -4952,6 +4952,11 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       mental_practice_msg: "Dedica unos minutos a la respiración (abajo, en Práctica diaria). Cada práctica es un entrenamiento que te llevas al quirófano.",
       mental_sp_locked: "Estas sesiones se desbloquean tras hacer el cuestionario de bienestar.",
       mental_sp_postponed: "De momento posponemos estas sesiones más exigentes. Ahora es mejor cuidarte con las prácticas de calma y, si lo necesitas, apoyarte en tu equipo.",
+      recrib_title: "Repaso",
+      recrib_do: "Hacer un repaso breve",
+      recrib_weekly: "Ha pasado una semana desde tu último repaso: unas pocas preguntas para ver cómo vas.",
+      recrib_preop: "Tu cirugía es muy pronto: un repaso breve sobre cómo llegas.",
+      recrib_postop: "Tras la cirugía: un repaso breve de cómo te encuentras estos días.",
       report_fasting: "Ayuno: situación indicada",
       fasting_flag_diabetes: "Diabetes",
       fasting_flag_glp1: "Medicación GLP‑1",
@@ -5293,6 +5298,11 @@ Gracias.`,
       mental_practice_msg: "Spend a few minutes on breathing (below, in Daily practice). Every practice is training you take to theatre.",
       mental_sp_locked: "These sessions unlock after you complete the wellbeing questionnaire.",
       mental_sp_postponed: "For now we are postponing these more demanding sessions. Right now it is better to look after yourself with the calm practices and, if you need it, lean on your team.",
+      recrib_title: "Check-in",
+      recrib_do: "Do a quick check-in",
+      recrib_weekly: "A week has passed since your last check-in: a few questions to see how you are doing.",
+      recrib_preop: "Your surgery is very soon: a quick check-in on how you are arriving.",
+      recrib_postop: "After surgery: a quick check-in on how you are feeling these days.",
       report_fasting: "Fasting: reported situation",
       fasting_flag_diabetes: "Diabetes",
       fasting_flag_glp1: "GLP‑1 medication",
@@ -5634,6 +5644,11 @@ Thank you.`,
       mental_practice_msg: "Dedica uns minuts a la respiració (a sota, a Pràctica diària). Cada pràctica és un entrenament que et portes al quiròfan.",
       mental_sp_locked: "Aquestes sessions es desbloquegen després de fer el qüestionari de benestar.",
       mental_sp_postponed: "De moment posposem aquestes sessions més exigents. Ara és millor cuidar-te amb les pràctiques de calma i, si ho necessites, recolzar-te en el teu equip.",
+      recrib_title: "Repàs",
+      recrib_do: "Fer un repàs breu",
+      recrib_weekly: "Ha passat una setmana des del teu últim repàs: unes poques preguntes per veure com vas.",
+      recrib_preop: "La teva cirurgia és molt aviat: un repàs breu sobre com hi arribes.",
+      recrib_postop: "Després de la cirurgia: un repàs breu de com et trobes aquests dies.",
       report_fasting: "Dejuni: situació indicada",
       fasting_flag_diabetes: "Diabetis",
       fasting_flag_glp1: "Medicació GLP‑1",
@@ -6368,6 +6383,30 @@ Gràcies.`,
       ${cta}
     </section>`;
   }
+  function dueRecribado(state2) {
+    const dts = daysToSurgery(state2);
+    const m = state2.mental || {};
+    const done = m.done || {};
+    if (dts != null && (dts === 2 || dts === 3) && !done.preop)
+      return { mode: "preop", key: "preop" };
+    if (dts != null && dts <= -6 && dts >= -9 && !done.post7)
+      return { mode: "postop", key: "post7" };
+    if (dts != null && dts <= -28 && dts >= -34 && !done.post30)
+      return { mode: "postop", key: "post30" };
+    if (m.lastCheckDate && daysBetween(todayKey(), m.lastCheckDate) >= 7)
+      return { mode: "weekly", key: "weekly" };
+    return null;
+  }
+  function renderRecribadoCard(state2) {
+    const due = dueRecribado(state2);
+    if (!due)
+      return "";
+    return `<section class="card" style="border-left:4px solid var(--gold)">
+      <div class="section-label" style="margin:0 0 6px">\uD83D\uDD01 ${t("recrib_title")}</div>
+      <p class="muted small">${t("recrib_" + due.mode)}</p>
+      <button class="btn block" data-action="start-cribado" data-mode="${due.mode}" data-reckey="${due.key}">${t("recrib_do")}</button>
+    </section>`;
+  }
   function renderMentalGuide(state2) {
     const g = MENTAL_GUIDE;
     const rec = recommendedMentalPiece(state2);
@@ -6384,6 +6423,7 @@ Gràcies.`,
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t("back")}</button>
     <div class="section-label">${esc(tr(g.intro, "title"))}</div>
     ${renderMentalToday(state2, rec)}
+    ${renderRecribadoCard(state2)}
     ${renderMentalPractice()}
     <button class="btn block" data-action="nav" data-view="pausa">\uD83D\uDD4A️ ${t("mental_pause")}</button>
     <button class="btn ghost block" data-action="start-cribado">\uD83D\uDCDD ${t("crib_start")}</button>
@@ -7615,7 +7655,7 @@ Gràcies.`,
         navigate(el.dataset.view, el.dataset.tab);
         break;
       case "start-cribado":
-        startCribado();
+        startCribado(el.dataset.mode || "full", el.dataset.reckey || null);
         break;
       case "cribado-consent": {
         if (!state2.cribado) {
@@ -8478,10 +8518,11 @@ Gràcies.`,
     window.scrollTo(0, 0);
     toast(L2("✔ Guardado.", "✔ Saved."));
   }
-  function startCribado() {
+  function startCribado(mode = "full", reckey = null) {
     const state2 = getState();
     const code = state2.cribado && state2.cribado.code || "PREHAB-" + Math.floor(1000 + Math.random() * 9000);
-    state2.cribado = { step: "consent", a: {}, result: null, code };
+    const firstStep = mode === "full" ? "consent" : mode === "preop" ? "apais" : mode === "weekly" ? "phq4" : "dt";
+    state2.cribado = { mode, reckey, step: firstStep, a: {}, result: null, code };
     saveState();
     navigate("cribado");
   }
@@ -8491,6 +8532,7 @@ Gràcies.`,
       state2.cribado = { step: "dt", a: {}, result: null, code: "PREHAB-" + Math.floor(1000 + Math.random() * 9000) };
     const c = state2.cribado;
     const a = c.a;
+    const mode = c.mode || "full";
     const step = form.dataset.step;
     const fd = new FormData(form);
     const num = (name) => {
@@ -8498,19 +8540,21 @@ Gràcies.`,
       return v == null ? null : Number(v);
     };
     const warn = () => toast(L2("Responde a todas las preguntas, por favor.", "Please answer all the questions."));
+    const afterBranch = mode === "full" ? "apais" : "result";
+    let next = null;
     if (step === "dt") {
       const v = num("dt");
       if (v == null)
         return warn();
       a.dt = v;
-      c.step = "phq4";
+      next = "phq4";
     } else if (step === "phq4") {
       const g0 = num("ga0"), g1 = num("ga1"), d0 = num("de0"), d1 = num("de1");
       if ([g0, g1, d0, d1].some((x) => x == null))
         return warn();
       a.gad2 = g0 + g1;
       a.phq2 = d0 + d1;
-      c.step = a.phq2 >= 3 ? "phq9" : a.gad2 >= 3 ? "gad7" : "apais";
+      next = a.phq2 >= 3 ? "phq9" : a.gad2 >= 3 ? "gad7" : afterBranch;
     } else if (step === "phq9") {
       const arr = [];
       for (let i = 0;i < PHQ9.items.length; i++) {
@@ -8524,7 +8568,7 @@ Gràcies.`,
         finishCribado(state2);
         return;
       }
-      c.step = a.gad2 >= 3 ? "gad7" : "apais";
+      next = a.gad2 >= 3 ? "gad7" : afterBranch;
     } else if (step === "gad7") {
       const arr = [];
       for (let i = 0;i < GAD7.items.length; i++) {
@@ -8534,7 +8578,7 @@ Gràcies.`,
         arr.push(v);
       }
       a.gad7 = arr;
-      c.step = "apais";
+      next = afterBranch;
     } else if (step === "apais") {
       const arr = [];
       for (let i = 0;i < APAIS.items.length; i++) {
@@ -8544,9 +8588,13 @@ Gràcies.`,
         arr.push(v);
       }
       a.apais = arr;
+      next = "result";
+    }
+    if (next === "result") {
       finishCribado(state2);
       return;
     }
+    c.step = next;
     saveState();
     render();
     window.scrollTo(0, 0);
@@ -8586,6 +8634,14 @@ Gràcies.`,
     state2.cribado.step = "result";
     if (!state2.cribado.code)
       state2.cribado.code = "PREHAB-" + Math.floor(1000 + Math.random() * 9000);
+    if (!state2.mental)
+      state2.mental = {};
+    state2.mental.lastCheckDate = todayKey();
+    if (state2.cribado.reckey) {
+      if (!state2.mental.done)
+        state2.mental.done = {};
+      state2.mental.done[state2.cribado.reckey] = true;
+    }
     saveState();
     render();
     window.scrollTo(0, 0);

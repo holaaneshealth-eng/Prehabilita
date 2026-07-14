@@ -157,7 +157,7 @@ function onClick(e) {
     case 'nav':
       navigate(el.dataset.view, el.dataset.tab);
       break;
-    case 'start-cribado': startCribado(); break;
+    case 'start-cribado': startCribado(el.dataset.mode || 'full', el.dataset.reckey || null); break;
     case 'cribado-consent': {
       if (!state.cribado) { startCribado(); break; }
       state.cribado.step = 'dt'; saveState(); render(); window.scrollTo(0, 0); break;
@@ -948,10 +948,11 @@ function submitMust(form) {
 
 /* ---------- Cribado de bienestar mental (Fase 2) ---------- */
 
-function startCribado() {
+function startCribado(mode = 'full', reckey = null) {
   const state = getState();
   const code = (state.cribado && state.cribado.code) || ('PREHAB-' + Math.floor(1000 + Math.random() * 9000));
-  state.cribado = { step: 'consent', a: {}, result: null, code };
+  const firstStep = mode === 'full' ? 'consent' : (mode === 'preop' ? 'apais' : (mode === 'weekly' ? 'phq4' : 'dt'));
+  state.cribado = { mode, reckey, step: firstStep, a: {}, result: null, code };
   saveState();
   navigate('cribado');
 }
@@ -959,32 +960,36 @@ function startCribado() {
 function submitCribado(form) {
   const state = getState();
   if (!state.cribado) state.cribado = { step: 'dt', a: {}, result: null, code: 'PREHAB-' + Math.floor(1000 + Math.random() * 9000) };
-  const c = state.cribado; const a = c.a;
+  const c = state.cribado; const a = c.a; const mode = c.mode || 'full';
   const step = form.dataset.step;
   const fd = new FormData(form);
   const num = (name) => { const v = fd.get(name); return v == null ? null : Number(v); };
   const warn = () => toast(L('Responde a todas las preguntas, por favor.', 'Please answer all the questions.'));
+  // Tras la rama ansiedad/depresión: en modo completo sigue APAIS; en el resto, resultado.
+  const afterBranch = mode === 'full' ? 'apais' : 'result';
+  let next = null;
   if (step === 'dt') {
     const v = num('dt'); if (v == null) return warn();
-    a.dt = v; c.step = 'phq4';
+    a.dt = v; next = 'phq4';
   } else if (step === 'phq4') {
     const g0 = num('ga0'), g1 = num('ga1'), d0 = num('de0'), d1 = num('de1');
     if ([g0, g1, d0, d1].some((x) => x == null)) return warn();
     a.gad2 = g0 + g1; a.phq2 = d0 + d1;
-    c.step = a.phq2 >= 3 ? 'phq9' : (a.gad2 >= 3 ? 'gad7' : 'apais');
+    next = a.phq2 >= 3 ? 'phq9' : (a.gad2 >= 3 ? 'gad7' : afterBranch);
   } else if (step === 'phq9') {
     const arr = []; for (let i = 0; i < PHQ9.items.length; i++) { const v = num('q' + i); if (v == null) return warn(); arr.push(v); }
     a.phq9 = arr;
     if (arr[PHQ9.selfHarmIndex] >= 1) { finishCribado(state); return; }
-    c.step = a.gad2 >= 3 ? 'gad7' : 'apais';
+    next = a.gad2 >= 3 ? 'gad7' : afterBranch;
   } else if (step === 'gad7') {
     const arr = []; for (let i = 0; i < GAD7.items.length; i++) { const v = num('q' + i); if (v == null) return warn(); arr.push(v); }
-    a.gad7 = arr; c.step = 'apais';
+    a.gad7 = arr; next = afterBranch;
   } else if (step === 'apais') {
     const arr = []; for (let i = 0; i < APAIS.items.length; i++) { const v = num('q' + i); if (v == null) return warn(); arr.push(v); }
-    a.apais = arr; finishCribado(state); return;
+    a.apais = arr; next = 'result';
   }
-  saveState(); render(); window.scrollTo(0, 0);
+  if (next === 'result') { finishCribado(state); return; }
+  c.step = next; saveState(); render(); window.scrollTo(0, 0);
 }
 
 function finishCribado(state) {
@@ -1007,6 +1012,13 @@ function finishCribado(state) {
   };
   state.cribado.step = 'result';
   if (!state.cribado.code) state.cribado.code = 'PREHAB-' + Math.floor(1000 + Math.random() * 9000);
+  // Registro de recribados (para recordatorios in-app; nunca seguimiento externo).
+  if (!state.mental) state.mental = {};
+  state.mental.lastCheckDate = todayKey();
+  if (state.cribado.reckey) {
+    if (!state.mental.done) state.mental.done = {};
+    state.mental.done[state.cribado.reckey] = true;
+  }
   saveState(); render(); window.scrollTo(0, 0);
 }
 

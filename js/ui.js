@@ -564,6 +564,27 @@ function renderMentalDeepening(state, block) {
     </section>`;
 }
 
+/** Recribado temporizado (in-app): preop 48–72 h, postop 7/30 d, semanal. */
+function dueRecribado(state) {
+  const dts = daysToSurgery(state);
+  const m = state.mental || {};
+  const done = m.done || {};
+  if (dts != null && (dts === 2 || dts === 3) && !done.preop) return { mode: 'preop', key: 'preop' };
+  if (dts != null && dts <= -6 && dts >= -9 && !done.post7) return { mode: 'postop', key: 'post7' };
+  if (dts != null && dts <= -28 && dts >= -34 && !done.post30) return { mode: 'postop', key: 'post30' };
+  if (m.lastCheckDate && daysBetween(todayKey(), m.lastCheckDate) >= 7) return { mode: 'weekly', key: 'weekly' };
+  return null;
+}
+function renderRecribadoCard(state) {
+  const due = dueRecribado(state);
+  if (!due) return '';
+  return `<section class="card" style="border-left:4px solid var(--gold)">
+      <div class="section-label" style="margin:0 0 6px">🔁 ${t('recrib_title')}</div>
+      <p class="muted small">${t('recrib_' + due.mode)}</p>
+      <button class="btn block" data-action="start-cribado" data-mode="${due.mode}" data-reckey="${due.key}">${t('recrib_do')}</button>
+    </section>`;
+}
+
 export function renderMentalGuide(state) {
   const g = MENTAL_GUIDE;
   const rec = recommendedMentalPiece(state);
@@ -580,6 +601,7 @@ export function renderMentalGuide(state) {
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t('back')}</button>
     <div class="section-label">${esc(tr(g.intro, 'title'))}</div>
     ${renderMentalToday(state, rec)}
+    ${renderRecribadoCard(state)}
     ${renderMentalPractice()}
     <button class="btn block" data-action="nav" data-view="pausa">🕊️ ${t('mental_pause')}</button>
     <button class="btn ghost block" data-action="start-cribado">📝 ${t('crib_start')}</button>
