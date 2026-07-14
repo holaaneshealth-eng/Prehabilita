@@ -8,7 +8,7 @@ import {
   recordAssessment,
 } from './state.js';
 import { BADGES, DISCLAIMER, DISCLAIMER_EN, DISCLAIMER_CA, FRAIL_QUESTIONS, EDMONTON_QUESTIONS, MEMORY_EMOJIS } from './content.js';
-import { GAD7, PHQ9, DASI, bmiScore } from './scales.js';
+import { GAD7, PHQ9, DASI, APAIS, bmiScore, apaisAnxietyScore, apaisInfoScore, computeMentalTriage } from './scales.js';
 import {
   seedLibrary, syncDefaultResources, getTasks, getTaskById, getAllTasksForEditor, getPillarById,
   getResources, getPosts, getDailyGoal, uid,
@@ -90,6 +90,8 @@ function render() {
     case 'respiratorio-guide': body = ui.renderRespiratoryGuide(state); break;
     case 'bienestar-guide': body = ui.renderMentalGuide(state); break;
     case 'pausa': body = ui.renderPausa(state); break;
+    case 'cribado': body = ui.renderCribado(state); break;
+    case 'cribado-informe': body = ui.renderCribadoInforme(state); break;
     case 'progreso': body = ui.renderProgress(state, charts); break;
     case 'aprende': body = ui.renderLearn(state); break;
     case 'post': body = ui.renderPost(state, currentPostId); break;
@@ -155,6 +157,8 @@ function onClick(e) {
     case 'nav':
       navigate(el.dataset.view, el.dataset.tab);
       break;
+    case 'start-cribado': startCribado(); break;
+    case 'share-cribado': shareCribado(); break;
 
     case 'toggle-task': {
       const id = el.dataset.task;
@@ -312,6 +316,7 @@ function onSubmit(e) {
   if (form.id === 'form-resource') return submitResource(form);
   if (form.id === 'form-post') return submitPost(form);
   if (form.id === 'form-frail') return submitFrail(form);
+  if (form.id === 'form-cribado') return submitCribado(form);
   if (form.id === 'form-edmonton') return submitEdmonton(form);
   if (form.id === 'form-gad7') return submitFreqScale(form, 'gad7');
   if (form.id === 'form-phq9') return submitFreqScale(form, 'phq9');
@@ -927,6 +932,93 @@ function submitMust(form) {
   render();
   window.scrollTo(0, 0);
   toast(L('✔ Guardado.', '✔ Saved.'));
+}
+
+/* ---------- Cribado de bienestar mental (Fase 2) ---------- */
+
+function startCribado() {
+  const state = getState();
+  const code = (state.cribado && state.cribado.code) || ('PREHAB-' + Math.floor(1000 + Math.random() * 9000));
+  state.cribado = { step: 'dt', a: {}, result: null, code };
+  saveState();
+  navigate('cribado');
+}
+
+function submitCribado(form) {
+  const state = getState();
+  if (!state.cribado) state.cribado = { step: 'dt', a: {}, result: null, code: 'PREHAB-' + Math.floor(1000 + Math.random() * 9000) };
+  const c = state.cribado; const a = c.a;
+  const step = form.dataset.step;
+  const fd = new FormData(form);
+  const num = (name) => { const v = fd.get(name); return v == null ? null : Number(v); };
+  const warn = () => toast(L('Responde a todas las preguntas, por favor.', 'Please answer all the questions.'));
+  if (step === 'dt') {
+    const v = num('dt'); if (v == null) return warn();
+    a.dt = v; c.step = 'phq4';
+  } else if (step === 'phq4') {
+    const g0 = num('ga0'), g1 = num('ga1'), d0 = num('de0'), d1 = num('de1');
+    if ([g0, g1, d0, d1].some((x) => x == null)) return warn();
+    a.gad2 = g0 + g1; a.phq2 = d0 + d1;
+    c.step = a.phq2 >= 3 ? 'phq9' : (a.gad2 >= 3 ? 'gad7' : 'apais');
+  } else if (step === 'phq9') {
+    const arr = []; for (let i = 0; i < PHQ9.items.length; i++) { const v = num('q' + i); if (v == null) return warn(); arr.push(v); }
+    a.phq9 = arr;
+    if (arr[PHQ9.selfHarmIndex] >= 1) { finishCribado(state); return; }
+    c.step = a.gad2 >= 3 ? 'gad7' : 'apais';
+  } else if (step === 'gad7') {
+    const arr = []; for (let i = 0; i < GAD7.items.length; i++) { const v = num('q' + i); if (v == null) return warn(); arr.push(v); }
+    a.gad7 = arr; c.step = 'apais';
+  } else if (step === 'apais') {
+    const arr = []; for (let i = 0; i < APAIS.items.length; i++) { const v = num('q' + i); if (v == null) return warn(); arr.push(v); }
+    a.apais = arr; finishCribado(state); return;
+  }
+  saveState(); render(); window.scrollTo(0, 0);
+}
+
+function finishCribado(state) {
+  const a = state.cribado.a;
+  const sum = (arr) => arr.reduce((x, y) => x + y, 0);
+  const phq9Total = a.phq9 ? sum(a.phq9) : null;
+  const gad7Total = a.gad7 ? sum(a.gad7) : null;
+  const apaisAnx = a.apais ? apaisAnxietyScore(a.apais) : null;
+  const apaisInfo = a.apais ? apaisInfoScore(a.apais) : null;
+  const item9 = a.phq9 ? a.phq9[PHQ9.selfHarmIndex] : null;
+  const triage = computeMentalTriage({ distress: a.dt, phq9: phq9Total, gad7: gad7Total, apaisAnx, phq9Item9: item9 });
+  const toObj = (arr) => arr.reduce((o, v, i) => { o[i] = v; return o; }, {});
+  if (a.dt != null) recordAssessment('distress', a.dt, { 0: a.dt });
+  if (a.phq9) recordAssessment('phq9', phq9Total, toObj(a.phq9));
+  if (a.gad7) recordAssessment('gad7', gad7Total, toObj(a.gad7));
+  if (a.apais) recordAssessment('apais', apaisAnx, toObj(a.apais));
+  state.cribado.result = {
+    level: triage.level, reasons: triage.reasons, highBurden: triage.highBurden,
+    dt: a.dt != null ? a.dt : null, phq9: phq9Total, gad7: gad7Total, apaisAnx, apaisInfo, date: todayKey(),
+  };
+  state.cribado.step = 'result';
+  if (!state.cribado.code) state.cribado.code = 'PREHAB-' + Math.floor(1000 + Math.random() * 9000);
+  saveState(); render(); window.scrollTo(0, 0);
+}
+
+function shareCribado() {
+  const state = getState();
+  const r = state.cribado && state.cribado.result; if (!r) return;
+  const code = state.cribado.code || 'PREHAB';
+  const lvl = { verde: 'VERDE', ambar: 'AMBAR', rojo: 'ROJO', crisis: 'CRISIS' }[r.level] || r.level;
+  const text = [
+    L('Resumen de bienestar (PreHabilítame)', 'Wellbeing summary (PreHabilítame)'),
+    code + ' · ' + (r.date || ''),
+    L('Nivel', 'Level') + ': ' + lvl,
+    r.dt != null ? (L('Malestar', 'Distress') + ': ' + r.dt + '/10') : null,
+    r.phq9 != null ? ('PHQ-9: ' + r.phq9 + '/27') : null,
+    r.gad7 != null ? ('GAD-7: ' + r.gad7 + '/21') : null,
+    r.apaisAnx != null ? ('APAIS ' + L('ansiedad', 'anxiety') + ': ' + r.apaisAnx + '/20') : null,
+  ].filter(Boolean).join('\n');
+  if (navigator.share) {
+    navigator.share({ title: 'PreHabilítame', text }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => toast(L('Resumen copiado.', 'Summary copied.')), () => {});
+  } else {
+    toast(L('Comparte este resumen con tu equipo.', 'Share this summary with your team.'));
+  }
 }
 
 /* ---------- Medicación y alergias ---------- */

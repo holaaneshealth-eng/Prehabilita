@@ -2274,6 +2274,44 @@ export const MENTAL_PAUSE = {
 <p>Quan vulguis, reprenem on ho vam deixar. Aturar-se i tornar també és entrenar.</p>`,
 };
 
+// Pantallas de resultado del cribado (triaje). Textos ES exactos del diseño §8;
+// EN/CA traducción funcional. Los botones se renderizan según el nivel.
+export const TRIAGE_SCREENS = {
+  verde: {
+    label: 'Sin señales de alerta hoy', label_en: 'No warning signs today', label_ca: 'Sense senyals d’alerta avui',
+    body: `<p>Gracias por responder con sinceridad. Ahora mismo tus respuestas no muestran señales de alerta. Sigue cuidándote con las prácticas de calma y el resto del programa. Puedes repetir este cuestionario cuando quieras.</p>`,
+    body_en: `<p>Thank you for answering honestly. Right now your answers show no warning signs. Keep looking after yourself with the calm practices and the rest of the programme. You can repeat this questionnaire whenever you like.</p>`,
+    body_ca: `<p>Gràcies per respondre amb sinceritat. Ara mateix les teves respostes no mostren senyals d’alerta. Continua cuidant-te amb les pràctiques de calma i la resta del programa. Pots repetir aquest qüestionari quan vulguis.</p>`,
+  },
+  ambar: {
+    label: 'Conviene compartirlo', label_en: 'Worth sharing it', label_ca: 'Convé compartir-ho',
+    body: `<p>Gracias por responder con sinceridad. Tus respuestas de hoy muestran que estás pasando unos días exigentes, y queremos que no los pases en soledad. Te recomendamos comentarlo en tu próxima consulta —puedes descargar aquí un resumen de tus respuestas para llevarlo— o pedir cita con tu médico o médica de familia. Mientras tanto, todo el programa sigue contigo, y quizá te venga bien empezar hoy por la práctica de calma.</p>`,
+    body_en: `<p>Thank you for answering honestly. Your answers today show you're going through some demanding days, and we don't want you to face them alone. We recommend mentioning it at your next appointment —you can download a summary of your answers here to take with you— or booking with your family doctor. Meanwhile, the whole programme stays with you, and it may help to start today with the calm practice.</p>`,
+    body_ca: `<p>Gràcies per respondre amb sinceritat. Les teves respostes d’avui mostren que estàs passant uns dies exigents, i no volem que els passis en soledat. Et recomanem comentar-ho a la teva propera consulta —pots descarregar aquí un resum de les teves respostes per portar-lo— o demanar cita amb el teu metge o metgessa de família. Mentrestant, tot el programa segueix amb tu, i potser et va bé començar avui per la pràctica de calma.</p>`,
+  },
+  rojo: {
+    label: 'Te vendría bien más apoyo', label_en: 'You would benefit from more support', label_ca: 'Et vindria bé més suport',
+    body: `<p>Queremos ser honestos contigo: por tus respuestas, creemos que en este momento te merecerías más apoyo del que una aplicación puede darte. Esto no significa que algo vaya mal contigo: significa que estás cargando mucho, y que hay profesionales que pueden ayudarte de verdad. Te pedimos que esta semana contactes con tu centro de salud o con el equipo que lleva tu operación, y les enseñes este resumen que hemos preparado. La app seguirá aquí, con las prácticas de calma siempre disponibles. Dar este paso también es prepararse bien.</p>`,
+    body_en: `<p>We want to be honest with you: from your answers, we think that right now you'd deserve more support than an app can give. This doesn't mean something is wrong with you: it means you're carrying a lot, and there are professionals who can truly help. We ask you to contact your health centre or your surgical team this week, and show them this summary we've prepared. The app will stay here, with the calm practices always available. Taking this step is also preparing well.</p>`,
+    body_ca: `<p>Volem ser honestos amb tu: per les teves respostes, creiem que en aquest moment et mereixeries més suport del que una aplicació et pot donar. Això no vol dir que alguna cosa vagi malament amb tu: vol dir que estàs carregant molt, i que hi ha professionals que et poden ajudar de veritat. Et demanem que aquesta setmana contactis amb el teu centre de salut o amb l’equip que porta la teva operació, i els ensenyis aquest resum que hem preparat. L’app seguirà aquí, amb les pràctiques de calma sempre disponibles. Fer aquest pas també és preparar-se bé.</p>`,
+  },
+  crisis: {
+    label: 'Habla con alguien ahora', label_en: 'Talk to someone now', label_ca: 'Parla amb algú ara',
+    body: `<p>Gracias por tu sinceridad. Lo que has contado es importante y no queremos que lo lleves en soledad ni un día más. Si estás pensando en hacerte daño, por favor, habla ahora con alguien que pueda ayudarte:</p>
+<ul><li><strong>024</strong> — Línea de atención a la conducta suicida (gratuita, 24 horas, confidencial). <a href="tel:024">Llamar</a></li>
+<li><strong>112</strong> — Emergencias. <a href="tel:112">Llamar</a></li></ul>
+<p>También puedes acudir a tu centro de salud o a urgencias, o contárselo a alguien de confianza que esté cerca. Esta aplicación no puede darte la ayuda que mereces en este momento, y por eso te lo decimos con claridad. Pedir ayuda es un acto de valentía, y funciona.</p>`,
+    body_en: `<p>Thank you for your honesty. What you've shared matters and we don't want you to carry it alone one more day. If you are thinking of harming yourself, please talk now to someone who can help:</p>
+<ul><li><strong>024</strong> — Suicidal behaviour helpline (free, 24 h, confidential). <a href="tel:024">Call</a></li>
+<li><strong>112</strong> — Emergencies. <a href="tel:112">Call</a></li></ul>
+<p>You can also go to your health centre or A&E, or tell someone you trust who is nearby. This app cannot give you the help you deserve right now, and that's why we're telling you clearly. Asking for help is an act of courage, and it works.</p>`,
+    body_ca: `<p>Gràcies per la teva sinceritat. El que has explicat és important i no volem que ho portis en soledat ni un dia més. Si estàs pensant a fer-te mal, si us plau, parla ara amb algú que pugui ajudar-te:</p>
+<ul><li><strong>024</strong> — Línia d’atenció a la conducta suïcida (gratuïta, 24 h, confidencial). <a href="tel:024">Trucar</a></li>
+<li><strong>112</strong> — Emergències. <a href="tel:112">Trucar</a></li></ul>
+<p>També pots anar al teu centre de salut o a urgències, o explicar-ho a algú de confiança que tinguis a prop. Aquesta aplicació no et pot donar l’ajuda que mereixes en aquest moment, i per això t’ho diem amb claredat. Demanar ajuda és un acte de valentia, i funciona.</p>`,
+  },
+};
+
 export const ALARM_SIGNS = [
   'Dolor en el pecho, palpitaciones o falta de aire en reposo.',
   'Fiebre alta o escalofríos.',

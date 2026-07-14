@@ -6,10 +6,10 @@ import {
   DISCLAIMER, DISCLAIMER_EN, DISCLAIMER_CA, ERAS_NOTE, ERAS_NOTE_EN, ERAS_NOTE_CA,
   ALARM_SIGNS, ALARM_SIGNS_EN, ALARM_SIGNS_CA, CAREGIVER_TIPS, FRAIL_QUESTIONS, frailResult, getPhase,
   EDMONTON_QUESTIONS, edmontonResult, PRIVACY_POINTS, FASTING_GUIDE, EXERCISE_GUIDE, RESPIRATORY_GUIDE,
-  MENTAL_GUIDE, MENTAL_PAUSE,
+  MENTAL_GUIDE, MENTAL_PAUSE, TRIAGE_SCREENS,
 } from './content.js';
 import { todayKey, daysBetween, listProfiles, getActiveProfileId, assessmentHistory } from './state.js';
-import { GAD7, PHQ9, DASI, MUST, FREQ_OPTIONS, MUST_WEIGHTLOSS, SCALE_LIST, scaleMeta, resultForScale } from './scales.js';
+import { GAD7, PHQ9, DASI, MUST, FREQ_OPTIONS, MUST_WEIGHTLOSS, SCALE_LIST, scaleMeta, resultForScale, DISTRESS, APAIS, APAIS_OPTIONS } from './scales.js';
 import {
   levelInfo, dayXp, isDayComplete, tasksDoneCount, taskIsDone, getWeeklyChallenge,
 } from './gamification.js';
@@ -490,6 +490,7 @@ export function renderMentalGuide(state) {
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t('back')}</button>
     <div class="section-label">${esc(tr(g.intro, 'title'))}</div>
     <button class="btn block" data-action="nav" data-view="pausa">🕊️ ${t('mental_pause')}</button>
+    <button class="btn ghost block" data-action="start-cribado">📝 ${t('crib_start')}</button>
     <section class="card fasting-body">${tr(g.intro, 'body')}</section>
     ${blocks}
     <p class="muted small fasting-disclaimer">${t('mental_disclaimer')}</p>`;
@@ -503,6 +504,105 @@ export function renderPausa(state) {
     <button class="btn ghost back-btn" data-action="nav" data-view="bienestar-guide">${t('back')}</button>
     <div class="section-label">🕊️ ${esc(tr(p, 'title'))}</div>
     <section class="card fasting-body">${tr(p, 'body')}</section>`;
+}
+
+/* ---------- Vista: CRIBADO DE BIENESTAR (Fase 2) ---------- */
+
+function cribFreqRow(name, q) {
+  const radios = FREQ_OPTIONS.map((o) => `<label class="fopt efs-opt"><input type="radio" name="${name}" value="${o.v}"/> <span>${esc(tr(o, 'label'))}</span></label>`).join('');
+  return `<div class="frail-q efs-q"><p>${esc(q)}</p><div class="efs-opts">${radios}</div></div>`;
+}
+function cribApaisRow(name, q) {
+  const radios = APAIS_OPTIONS.map((o) => `<label class="fopt efs-opt"><input type="radio" name="${name}" value="${o.v}"/> <span>${esc(tr(o, 'label'))}</span></label>`).join('');
+  return `<div class="frail-q efs-q"><p>${esc(q)}</p><div class="efs-opts">${radios}</div></div>`;
+}
+
+export function renderCribado(state) {
+  const c = state.cribado || { step: 'dt', a: {} };
+  const step = c.step || 'dt';
+  if (step === 'result') return renderCribadoResult(state);
+  const back = `<button class="btn ghost back-btn" data-action="nav" data-view="bienestar-guide">${t('back')}</button>`;
+  const pause = `<button class="btn block" data-action="nav" data-view="pausa">🕊️ ${t('mental_pause')}</button>`;
+  let title = ''; let inner = '';
+  if (step === 'dt') {
+    title = tr(DISTRESS, 'title');
+    let radios = '';
+    for (let n = 0; n <= 10; n++) radios += `<label class="fopt efs-opt"><input type="radio" name="dt" value="${n}"/> <span>${n}</span></label>`;
+    inner = `<p class="small"><em>${esc(tr(DISTRESS, 'stem'))}</em></p><div class="efs-opts">${radios}</div>`;
+  } else if (step === 'phq4') {
+    title = 'PHQ-4';
+    inner = `<p class="small"><em>${esc(tr(GAD7, 'stem'))}</em></p>`
+      + cribFreqRow('ga0', tr(GAD7.items[0], 'q')) + cribFreqRow('ga1', tr(GAD7.items[1], 'q'))
+      + cribFreqRow('de0', tr(PHQ9.items[0], 'q')) + cribFreqRow('de1', tr(PHQ9.items[1], 'q'));
+  } else if (step === 'phq9') {
+    title = tr(PHQ9, 'title');
+    inner = `<p class="small"><em>${esc(tr(PHQ9, 'stem'))}</em></p>` + PHQ9.items.map((it, i) => cribFreqRow('q' + i, tr(it, 'q'))).join('');
+  } else if (step === 'gad7') {
+    title = tr(GAD7, 'title');
+    inner = `<p class="small"><em>${esc(tr(GAD7, 'stem'))}</em></p>` + GAD7.items.map((it, i) => cribFreqRow('q' + i, tr(it, 'q'))).join('');
+  } else if (step === 'apais') {
+    title = tr(APAIS, 'title');
+    inner = `<p class="muted small">${esc(tr(APAIS, 'intro'))}</p>` + APAIS.items.map((it, i) => cribApaisRow('q' + i, tr(it, 'q'))).join('');
+  }
+  return `${back}
+    <div class="section-label">🧭 ${esc(title)}</div>
+    ${pause}
+    <form id="form-cribado" class="card" data-step="${step}">${inner}
+      <button type="submit" class="btn primary block">${t('crib_next')}</button></form>
+    <p class="muted small fasting-disclaimer">${t('mental_disclaimer')}</p>`;
+}
+
+function renderCribadoResult(state) {
+  const r = (state.cribado && state.cribado.result) || { level: 'verde' };
+  const scr = TRIAGE_SCREENS[r.level] || TRIAGE_SCREENS.verde;
+  const back = `<button class="btn ghost back-btn" data-action="nav" data-view="bienestar-guide">${t('back')}</button>`;
+  let btns = '';
+  if (r.level === 'crisis') {
+    btns = `<a class="btn primary block" href="tel:024">024 · ${t('crib_call')}</a>
+      <a class="btn block" href="tel:112">112 · ${t('crib_call')}</a>
+      <button class="btn ghost block" data-action="nav" data-view="pausa">${t('crib_calm')}</button>`;
+  } else if (r.level === 'rojo') {
+    btns = `<button class="btn primary block" data-action="nav" data-view="cribado-informe">${t('crib_download')}</button>
+      <button class="btn block" data-action="nav" data-view="pausa">${t('crib_phones')}</button>
+      <button class="btn ghost block" data-action="nav" data-view="bienestar-guide">${t('crib_calm')}</button>`;
+  } else if (r.level === 'ambar') {
+    btns = `<button class="btn primary block" data-action="nav" data-view="cribado-informe">${t('crib_download')}</button>
+      <button class="btn block" data-action="nav" data-view="pausa">${t('crib_phones')}</button>
+      <button class="btn ghost block" data-action="nav" data-view="bienestar-guide">${t('crib_continue')}</button>`;
+  } else {
+    btns = `<button class="btn primary block" data-action="nav" data-view="bienestar-guide">${t('crib_continue')}</button>`;
+  }
+  return `${back}
+    <div class="section-label">🧭 ${esc(tr(scr, 'label'))}</div>
+    <section class="card fasting-body">${tr(scr, 'body')}</section>
+    ${btns}
+    <p class="muted small fasting-disclaimer">${t('mental_disclaimer')}</p>`;
+}
+
+export function renderCribadoInforme(state) {
+  const r = (state.cribado && state.cribado.result);
+  const code = (state.cribado && state.cribado.code) || 'PREHAB-0000';
+  if (!r) return `<button class="btn ghost back-btn" data-action="nav" data-view="bienestar-guide">${t('back')}</button><section class="card"><p>${t('crib_none')}</p></section>`;
+  const lvl = { verde: 'VERDE', ambar: 'ÁMBAR', rojo: 'ROJO', crisis: 'CRISIS' }[r.level] || r.level;
+  const rows = [
+    `<tr><td>${t('crib_r_distress')}</td><td>${r.dt != null ? r.dt + ' / 10' : '—'}</td></tr>`,
+    `<tr><td>PHQ-9</td><td>${r.phq9 != null ? r.phq9 + ' / 27' : '—'}</td></tr>`,
+    `<tr><td>GAD-7</td><td>${r.gad7 != null ? r.gad7 + ' / 21' : '—'}</td></tr>`,
+    `<tr><td>APAIS · ${t('crib_r_anx')}</td><td>${r.apaisAnx != null ? r.apaisAnx + ' / 20' : '—'}</td></tr>`,
+    `<tr><td>APAIS · ${t('crib_r_info')}</td><td>${r.apaisInfo != null ? r.apaisInfo + ' / 10' : '—'}</td></tr>`,
+    `<tr><td>${t('crib_r_level')}</td><td><strong>${lvl}</strong></td></tr>`,
+  ].join('');
+  return `
+    <button class="btn ghost back-btn" data-action="nav" data-view="cribado">${t('back')}</button>
+    <div class="section-label">📄 ${t('crib_report_title')}</div>
+    <section class="card">
+      <p class="muted small">${t('crib_report_anon')}</p>
+      <p><strong>${t('crib_r_code')}:</strong> ${esc(code)} · <strong>${t('crib_r_date')}:</strong> ${esc(r.date || '')}</p>
+      <table class="med-table"><tbody>${rows}</tbody></table>
+    </section>
+    <button class="btn primary block" data-action="share-cribado">${t('crib_share')}</button>
+    <button class="btn ghost block" data-action="print-doc">${t('crib_print')}</button>
+    <p class="muted small fasting-disclaimer">${t('mental_disclaimer')}</p>`;
 }
 
 /* ---------- Vista: APRENDE ---------- */
