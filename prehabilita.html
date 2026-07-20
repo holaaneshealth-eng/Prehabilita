@@ -7,7 +7,7 @@
   <meta name="description" content="PreHabilítame: programa domiciliario y autogestionado de prehabilitación anestésica antes de una cirugía de alta complejidad, con incentivos de gamificación." />
   <title>PreHabilítame · Prehabilitación anestésica</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%AB%81%3C/text%3E%3C/svg%3E" />
-  <style>
+<style>
 @import url('https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800&family=Roboto:wght@400;500&display=swap');
 
 /* styles.css — PreHabilítame
@@ -285,6 +285,12 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
 .resource-title { font-weight: 700; margin-bottom: 6px; }
 .video { position: relative; width: 100%; padding-top: 56.25%; border-radius: 12px; overflow: hidden; background: #000; margin-top: 10px; }
 .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-facade { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(160deg, #1a2733, #0b0f14); color: #fff; padding: 12px; }
+.video-facade .vf-play { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.14); border: 2px solid rgba(255,255,255,.9); display: flex; align-items: center; justify-content: center; font-size: 22px; padding-left: 4px; transition: background .15s ease, transform .15s ease; }
+.video-facade .vf-text { font-size: 13px; font-weight: 600; text-align: center; line-height: 1.3; max-width: 90%; }
+.video-facade .vf-hint { font-size: 11px; opacity: .8; }
+.video-facade:hover .vf-play, .video-facade:focus-visible .vf-play { background: rgba(255,255,255,.3); transform: scale(1.06); }
+.video-facade:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 .empty-state { text-align: center; }
 .empty-emoji { font-size: 3rem; }
 .empty-state .btn { margin-top: 12px; }
@@ -556,17 +562,23 @@ body.high-contrast .cmp-down { color: #b91c1c; }
 .task-more::after { content: ' ⌄'; }
 .task-more[aria-expanded="true"]::after { content: ' ⌃'; }
 
-  </style>
+</style>
 </head>
 <body>
+  <!-- Splash / carga -->
   <div id="app">
     <noscript>
       <div class="noscript">Esta aplicación necesita JavaScript activado para funcionar.</div>
     </noscript>
   </div>
+
+  <!-- Contenedor de notificaciones (toasts) -->
   <div id="toast-layer" class="toast-layer" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- Contenedor de modales -->
   <div id="modal-root"></div>
-  <script>
+
+<script>
 (() => {
   var __defProp = Object.defineProperty;
   var __export = (target, all) => {
@@ -625,6 +637,7 @@ body.high-contrast .cmp-down { color: #b91c1c; }
       badges: [],
       challengeAwards: {},
       visited: {},
+      report: { lastShared: null },
       medList: { meds: [], allergies: "", notes: "" },
       frail: { score: null, date: null, answers: {} },
       edmonton: { score: null, date: null, answers: {} },
@@ -5251,6 +5264,14 @@ Gracias.`,
       report_xp: "XP total",
       report_streak: "Mejor racha",
       report_daysc: "Días completados",
+      report_meds: "Medicación y alergias",
+      report_mental: "Bienestar mental (evolución)",
+      report_mental_note: "Evolución de los cuestionarios a lo largo del programa. La primera fila corresponde a la medida basal.",
+      video_play: "Toca para reproducir",
+      weekly_report_title: "\uD83D\uDCC4 Tu informe semanal",
+      weekly_report_body: "Ha pasado una semana: comparte con tu equipo un resumen de tu medicación, progreso, adherencia y bienestar.",
+      weekly_report_cta: "Ver y compartir mi informe",
+      weekly_report_snooze: "Ahora no · recordar en 7 días",
       phase_label: "Fase actual de tu preparación",
       profiles_title: "\uD83D\uDC65 Perfiles de paciente",
       profiles_intro: "Gestiona varios pacientes en este dispositivo. Cada perfil guarda su propio progreso de forma independiente.",
@@ -5615,6 +5636,14 @@ Thank you.`,
       report_xp: "Total XP",
       report_streak: "Best streak",
       report_daysc: "Days completed",
+      report_meds: "Medication and allergies",
+      report_mental: "Mental wellbeing (trend)",
+      report_mental_note: "Questionnaire trend across the programme. The first row is the baseline measure.",
+      video_play: "Tap to play",
+      weekly_report_title: "\uD83D\uDCC4 Your weekly report",
+      weekly_report_body: "A week has passed: share a summary of your medication, progress, adherence and wellbeing with your team.",
+      weekly_report_cta: "View and share my report",
+      weekly_report_snooze: "Not now · remind me in 7 days",
       phase_label: "Current phase of your preparation",
       profiles_title: "\uD83D\uDC65 Patient profiles",
       profiles_intro: "Manage several patients on this device. Each profile stores its own progress independently.",
@@ -5979,6 +6008,14 @@ Gràcies.`,
       report_xp: "XP total",
       report_streak: "Millor ratxa",
       report_daysc: "Dies completats",
+      report_meds: "Medicació i al·lèrgies",
+      report_mental: "Benestar mental (evolució)",
+      report_mental_note: "Evolució dels qüestionaris al llarg del programa. La primera fila correspon a la mesura basal.",
+      video_play: "Toca per reproduir",
+      weekly_report_title: "\uD83D\uDCC4 El teu informe setmanal",
+      weekly_report_body: "Ha passat una setmana: comparteix amb el teu equip un resum de la teva medicació, progrés, adherència i benestar.",
+      weekly_report_cta: "Veure i compartir el meu informe",
+      weekly_report_snooze: "Ara no · recorda-m'ho en 7 dies",
       phase_label: "Fase actual de la teva preparació",
       profiles_title: "\uD83D\uDC65 Perfils de pacient",
       profiles_intro: "Gestiona diversos pacients en aquest dispositiu. Cada perfil desa el seu propi progrés de forma independent.",
@@ -6043,6 +6080,21 @@ Gràcies.`,
   }
   function formatBody(body) {
     return esc(body).replace(/\n/g, "<br>");
+  }
+  function facadeVideos(html) {
+    if (!html || html.indexOf("<iframe") === -1)
+      return html;
+    return html.replace(/<iframe\b([^>]*)>\s*<\/iframe>/gi, (m, attrs) => {
+      const srcM = attrs.match(/\ssrc="([^"]*)"/i);
+      if (!srcM)
+        return m;
+      const src = srcM[1];
+      const titleM = attrs.match(/\stitle="([^"]*)"/i);
+      const title = titleM ? titleM[1] : "";
+      const hint = esc(t("video_play"));
+      const label = title ? `${hint}: ${title}` : hint;
+      return `<button type="button" class="video-facade" data-action="load-video" data-src="${src}" aria-label="${label}">` + `<span class="vf-play" aria-hidden="true">▶</span>` + (title ? `<span class="vf-text">${title}</span>` : "") + `<span class="vf-hint">${hint}</span>` + `</button>`;
+    });
   }
   function disc() {
     return pickArr([DISCLAIMER], [DISCLAIMER_EN], [DISCLAIMER_CA])[0];
@@ -6134,6 +6186,22 @@ Gràcies.`,
       <p class="muted small">${t("preop_note")}</p>
     </section>`;
   }
+  function weeklyReportBanner(state2) {
+    const start = state2.profile && state2.profile.startDate;
+    if (!start)
+      return "";
+    if (daysBetween(todayKey(), start) < 7)
+      return "";
+    const last = state2.report && state2.report.lastShared;
+    if (last && daysBetween(todayKey(), last) < 7)
+      return "";
+    return `<section class="card" style="border-left:4px solid var(--accent)">
+      <h3>${t("weekly_report_title")}</h3>
+      <p class="muted small">${t("weekly_report_body")}</p>
+      <button class="btn primary block" data-action="nav" data-view="report">${t("weekly_report_cta")}</button>
+      <button class="btn ghost block" data-action="dismiss-report-reminder">${t("weekly_report_snooze")}</button>
+    </section>`;
+  }
   function renderToday(state2) {
     const tasks = getTasks(state2);
     const goal = getDailyGoal(state2);
@@ -6185,6 +6253,7 @@ Gràcies.`,
     ${phaseBanner(state2)}
     ${reevalBanner(state2)}
     ${preopBanner(state2)}
+    ${weeklyReportBanner(state2)}
     ${dailyCard}
     ${challengeCard}
     <div class="section-label">${t("tasks_today")}</div>
@@ -7061,6 +7130,13 @@ Gràcies.`,
     if (ff.gastricSurgery)
       fastingFlags.push(t("fasting_flag_gastric"));
     const fastingHtml = fastingFlags.length ? `<h3>${t("report_fasting")}</h3><p>${fastingFlags.map(esc).join(" · ")}</p>` : "";
+    const m = state2.medList || { meds: [], allergies: "", notes: "" };
+    const medDocRows = m.meds.length ? m.meds.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.dose || "")}</td><td>${esc(x.freq || "")}</td></tr>`).join("") : `<tr><td colspan="3">${t("meds_doc_none")}</td></tr>`;
+    const medsHtml = `<h3>${t("report_meds")}</h3>` + `<table class="med-table"><thead><tr><th>${t("meds_name")}</th><th>${t("meds_dose")}</th><th>${t("meds_freq")}</th></tr></thead><tbody>${medDocRows}</tbody></table>` + `<p><strong>${t("meds_doc_allergies")}:</strong> ${esc(m.allergies || "—")}</p>`;
+    const lvlName = (lv) => ({ verde: "VERDE", ambar: "ÁMBAR", rojo: "ROJO", crisis: "CRISIS" })[lv] || lv || "—";
+    const mh = state2.mental && state2.mental.history || [];
+    const cell = (v, max) => v != null ? v + "/" + max : "—";
+    const mentalHtml = mh.length ? `<h3>${t("report_mental")}</h3>` + `<table class="med-table"><thead><tr><th>${t("crib_r_date")}</th><th>${t("crib_r_level")}</th><th>${t("crib_r_dt")}</th><th>PHQ-9</th><th>GAD-7</th><th>APAIS</th></tr></thead><tbody>` + mh.map((h) => `<tr><td>${esc(h.date || "")}</td><td><strong>${lvlName(h.level)}</strong></td><td>${cell(h.dt, 10)}</td><td>${cell(h.phq9, 27)}</td><td>${cell(h.gad7, 21)}</td><td>${cell(h.apaisAnx, 20)}</td></tr>`).join("") + `</tbody></table><p class="muted small">${t("report_mental_note")}</p>` : "";
     return `
     <div class="section-label">${t("report_title")}</div>
     <div class="no-print">
@@ -7095,7 +7171,9 @@ Gràcies.`,
       </tbody></table>
       <h3>${t("report_adherence")}</h3>
       <table class="med-table"><tbody>${adhRows}</tbody></table>
+      ${medsHtml}
       ${assessTable}
+      ${mentalHtml}
       ${fastingHtml}
       <h3>${t("report_badges")} (${earned.length})</h3><p class="rep-badges">${badgeList}</p>
       <p class="doc-foot">${t("report_foot")}</p>
@@ -7825,7 +7903,7 @@ Gràcies.`,
     }
     app.innerHTML = `
     ${renderHeader(state2)}
-    <main class="content" id="view">${body}</main>
+    <main class="content" id="view">${facadeVideos(body)}</main>
     ${renderNav(route)}
   `;
   }
@@ -7843,6 +7921,12 @@ Gràcies.`,
       st.visited = {};
     if (view && !st.visited[view]) {
       st.visited[view] = true;
+      saveState();
+    }
+    if (view === "report") {
+      if (!st.report)
+        st.report = {};
+      st.report.lastShared = todayKey();
       saveState();
     }
     route = view;
@@ -7872,6 +7956,27 @@ Gràcies.`,
       case "nav":
         navigate(el.dataset.view, el.dataset.tab);
         break;
+      case "load-video": {
+        const box = el.closest(".video");
+        if (!box)
+          break;
+        const src = el.dataset.src || "";
+        if (!src)
+          break;
+        const sep = src.indexOf("?") === -1 ? "?" : "&";
+        const title = (el.getAttribute("aria-label") || "").replace(/"/g, "&quot;");
+        box.innerHTML = `<iframe src="${src}${sep}autoplay=1" title="${title}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+        break;
+      }
+      case "dismiss-report-reminder": {
+        if (!state2.report)
+          state2.report = {};
+        state2.report.lastShared = todayKey();
+        saveState();
+        render();
+        window.scrollTo(0, 0);
+        break;
+      }
       case "start-cribado":
         startCribado(el.dataset.mode || "full", el.dataset.reckey || null);
         break;
@@ -8996,6 +9101,6 @@ Gràcies.`,
   }
 })();
 
-  </script>
+</script>
 </body>
 </html>

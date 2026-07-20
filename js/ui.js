@@ -29,6 +29,31 @@ export function formatBody(body) {
   return esc(body).replace(/\n/g, '<br>');
 }
 
+/**
+ * Convierte los <iframe> de vídeo (Vimeo/YouTube) en una "fachada" ligera:
+ * un botón con icono de reproducir que sólo carga el iframe real al tocarlo.
+ * Evita que decenas de reproductores se carguen a la vez (causa de caídas por
+ * memoria en móviles, sobre todo en la guía de ejercicio con muchos vídeos).
+ * El iframe real se inyecta en el click handler (data-action="load-video").
+ */
+export function facadeVideos(html) {
+  if (!html || html.indexOf('<iframe') === -1) return html;
+  return html.replace(/<iframe\b([^>]*)>\s*<\/iframe>/gi, (m, attrs) => {
+    const srcM = attrs.match(/\ssrc="([^"]*)"/i);
+    if (!srcM) return m;
+    const src = srcM[1];
+    const titleM = attrs.match(/\stitle="([^"]*)"/i);
+    const title = titleM ? titleM[1] : '';
+    const hint = esc(t('video_play'));
+    const label = title ? `${hint}: ${title}` : hint;
+    return `<button type="button" class="video-facade" data-action="load-video" data-src="${src}" aria-label="${label}">`
+      + `<span class="vf-play" aria-hidden="true">▶</span>`
+      + (title ? `<span class="vf-text">${title}</span>` : '')
+      + `<span class="vf-hint">${hint}</span>`
+      + `</button>`;
+  });
+}
+
 function disc() { return pickArr([DISCLAIMER], [DISCLAIMER_EN], [DISCLAIMER_CA])[0]; }
 function erasNote() { return pickArr([ERAS_NOTE], [ERAS_NOTE_EN], [ERAS_NOTE_CA])[0]; }
 
@@ -128,6 +153,24 @@ function preopBanner(state) {
     </section>`;
 }
 
+/** Recordatorio semanal para generar y compartir el informe con el equipo médico.
+ * Aparece cuando han pasado ≥7 días desde el inicio del programa y ≥7 días desde
+ * la última vez que se abrió/compartió el informe. Sin backend: la entrega la hace
+ * el paciente desde el propio informe (imprimir/compartir). */
+function weeklyReportBanner(state) {
+  const start = state.profile && state.profile.startDate;
+  if (!start) return '';
+  if (daysBetween(todayKey(), start) < 7) return '';
+  const last = state.report && state.report.lastShared;
+  if (last && daysBetween(todayKey(), last) < 7) return '';
+  return `<section class="card" style="border-left:4px solid var(--accent)">
+      <h3>${t('weekly_report_title')}</h3>
+      <p class="muted small">${t('weekly_report_body')}</p>
+      <button class="btn primary block" data-action="nav" data-view="report">${t('weekly_report_cta')}</button>
+      <button class="btn ghost block" data-action="dismiss-report-reminder">${t('weekly_report_snooze')}</button>
+    </section>`;
+}
+
 /* ---------- Vista: HOY ---------- */
 
 export function renderToday(state) {
@@ -184,6 +227,7 @@ export function renderToday(state) {
     ${phaseBanner(state)}
     ${reevalBanner(state)}
     ${preopBanner(state)}
+    ${weeklyReportBanner(state)}
     ${dailyCard}
     ${challengeCard}
     <div class="section-label">${t('tasks_today')}</div>
@@ -1128,6 +1172,26 @@ export function renderReport(state) {
     ? `<h3>${t('report_fasting')}</h3><p>${fastingFlags.map(esc).join(' · ')}</p>`
     : '';
 
+  // Medicación y alergias (unificado en el informe semanal).
+  const m = state.medList || { meds: [], allergies: '', notes: '' };
+  const medDocRows = m.meds.length
+    ? m.meds.map((x) => `<tr><td>${esc(x.name)}</td><td>${esc(x.dose || '')}</td><td>${esc(x.freq || '')}</td></tr>`).join('')
+    : `<tr><td colspan="3">${t('meds_doc_none')}</td></tr>`;
+  const medsHtml = `<h3>${t('report_meds')}</h3>`
+    + `<table class="med-table"><thead><tr><th>${t('meds_name')}</th><th>${t('meds_dose')}</th><th>${t('meds_freq')}</th></tr></thead><tbody>${medDocRows}</tbody></table>`
+    + `<p><strong>${t('meds_doc_allergies')}:</strong> ${esc(m.allergies || '—')}</p>`;
+
+  // Evolución longitudinal de los cuestionarios de bienestar mental.
+  const lvlName = (lv) => ({ verde: 'VERDE', ambar: 'ÁMBAR', rojo: 'ROJO', crisis: 'CRISIS' }[lv] || lv || '—');
+  const mh = (state.mental && state.mental.history) || [];
+  const cell = (v, max) => (v != null ? v + '/' + max : '—');
+  const mentalHtml = mh.length
+    ? `<h3>${t('report_mental')}</h3>`
+      + `<table class="med-table"><thead><tr><th>${t('crib_r_date')}</th><th>${t('crib_r_level')}</th><th>${t('crib_r_dt')}</th><th>PHQ-9</th><th>GAD-7</th><th>APAIS</th></tr></thead><tbody>`
+      + mh.map((h) => `<tr><td>${esc(h.date || '')}</td><td><strong>${lvlName(h.level)}</strong></td><td>${cell(h.dt, 10)}</td><td>${cell(h.phq9, 27)}</td><td>${cell(h.gad7, 21)}</td><td>${cell(h.apaisAnx, 20)}</td></tr>`).join('')
+      + `</tbody></table><p class="muted small">${t('report_mental_note')}</p>`
+    : '';
+
   return `
     <div class="section-label">${t('report_title')}</div>
     <div class="no-print">
@@ -1162,7 +1226,9 @@ export function renderReport(state) {
       </tbody></table>
       <h3>${t('report_adherence')}</h3>
       <table class="med-table"><tbody>${adhRows}</tbody></table>
+      ${medsHtml}
       ${assessTable}
+      ${mentalHtml}
       ${fastingHtml}
       <h3>${t('report_badges')} (${earned.length})</h3><p class="rep-badges">${badgeList}</p>
       <p class="doc-foot">${t('report_foot')}</p>

@@ -275,6 +275,12 @@ body.reduce-motion * { animation: none !important; transition: none !important; 
 .resource-title { font-weight: 700; margin-bottom: 6px; }
 .video { position: relative; width: 100%; padding-top: 56.25%; border-radius: 12px; overflow: hidden; background: #000; margin-top: 10px; }
 .video iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+.video-facade { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; background: linear-gradient(160deg, #1a2733, #0b0f14); color: #fff; padding: 12px; }
+.video-facade .vf-play { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,255,255,.14); border: 2px solid rgba(255,255,255,.9); display: flex; align-items: center; justify-content: center; font-size: 22px; padding-left: 4px; transition: background .15s ease, transform .15s ease; }
+.video-facade .vf-text { font-size: 13px; font-weight: 600; text-align: center; line-height: 1.3; max-width: 90%; }
+.video-facade .vf-hint { font-size: 11px; opacity: .8; }
+.video-facade:hover .vf-play, .video-facade:focus-visible .vf-play { background: rgba(255,255,255,.3); transform: scale(1.06); }
+.video-facade:focus-visible { outline: 3px solid var(--accent); outline-offset: -3px; }
 .empty-state { text-align: center; }
 .empty-emoji { font-size: 3rem; }
 .empty-state .btn { margin-top: 12px; }

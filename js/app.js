@@ -122,7 +122,7 @@ function render() {
 
   app.innerHTML = `
     ${ui.renderHeader(state)}
-    <main class="content" id="view">${body}</main>
+    <main class="content" id="view">${ui.facadeVideos(body)}</main>
     ${ui.renderNav(route)}
   `;
 }
@@ -138,6 +138,8 @@ function navigate(view, tab) {
   const st = getState();
   if (!st.visited) st.visited = {};
   if (view && !st.visited[view]) { st.visited[view] = true; saveState(); }
+  // Abrir el informe cuenta como "visto esta semana": pospone el recordatorio 7 días.
+  if (view === 'report') { if (!st.report) st.report = {}; st.report.lastShared = todayKey(); saveState(); }
   route = view;
   render();
   window.scrollTo(0, 0);
@@ -164,6 +166,23 @@ function onClick(e) {
     case 'nav':
       navigate(el.dataset.view, el.dataset.tab);
       break;
+    case 'load-video': {
+      // Carga bajo demanda: inyecta el iframe real sólo al tocar la fachada.
+      const box = el.closest('.video');
+      if (!box) break;
+      const src = el.dataset.src || '';
+      if (!src) break;
+      const sep = src.indexOf('?') === -1 ? '?' : '&';
+      const title = (el.getAttribute('aria-label') || '').replace(/"/g, '&quot;');
+      box.innerHTML = `<iframe src="${src}${sep}autoplay=1" title="${title}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>`;
+      break;
+    }
+    case 'dismiss-report-reminder': {
+      if (!state.report) state.report = {};
+      state.report.lastShared = todayKey();
+      saveState(); render(); window.scrollTo(0, 0);
+      break;
+    }
     case 'start-cribado': startCribado(el.dataset.mode || 'full', el.dataset.reckey || null); break;
     case 'cribado-consent': {
       if (!state.cribado) { startCribado(); break; }
