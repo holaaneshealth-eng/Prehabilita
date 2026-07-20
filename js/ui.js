@@ -6,7 +6,7 @@ import {
   DISCLAIMER, DISCLAIMER_EN, DISCLAIMER_CA, ERAS_NOTE, ERAS_NOTE_EN, ERAS_NOTE_CA,
   ALARM_SIGNS, ALARM_SIGNS_EN, ALARM_SIGNS_CA, CAREGIVER_TIPS, FRAIL_QUESTIONS, frailResult, getPhase,
   EDMONTON_QUESTIONS, edmontonResult, PRIVACY_POINTS, FASTING_GUIDE, EXERCISE_GUIDE, RESPIRATORY_GUIDE,
-  MENTAL_GUIDE, MENTAL_PAUSE, TRIAGE_SCREENS, MENTAL_CONSENT, MENTAL_PIECES,
+  MENTAL_GUIDE, MENTAL_PAUSE, TRIAGE_SCREENS, MENTAL_CONSENT, MENTAL_PIECES, NUTRITION_GUIDE,
 } from './content.js';
 import { todayKey, daysBetween, listProfiles, getActiveProfileId, assessmentHistory } from './state.js';
 import { GAD7, PHQ9, DASI, MUST, FREQ_OPTIONS, MUST_WEIGHTLOSS, SCALE_LIST, scaleMeta, resultForScale, DISTRESS, APAIS, APAIS_OPTIONS } from './scales.js';
@@ -452,7 +452,26 @@ export function renderExerciseGuide(state) {
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t('back')}</button>
     <div class="section-label">${esc(tr(g.intro, 'title'))}</div>
     <section class="card fasting-body">${tr(g.intro, 'body')}</section>
+    <section class="card">
+      <button class="btn block" data-action="nav" data-view="dasi">📊 ${t('dasi_cta')}</button>
+      <p class="muted small">${t('eval_init_final')}</p>
+    </section>
     ${blocks}
+    <p class="muted small fasting-disclaimer">${t('exercise_disclaimer')}</p>`;
+}
+
+/* ---------- Vista: GUÍA DE NUTRICIÓN (recurso interno) ---------- */
+
+export function renderNutritionGuide(state) {
+  const g = NUTRITION_GUIDE;
+  return `
+    <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t('back')}</button>
+    <div class="section-label">${esc(tr(g.intro, 'title'))}</div>
+    <section class="card fasting-body">${tr(g.intro, 'body')}</section>
+    <section class="card">
+      <button class="btn block" data-action="nav" data-view="must">🥗 ${t('must_cta')}</button>
+      <p class="muted small">${t('eval_init_final')}</p>
+    </section>
     <p class="muted small fasting-disclaimer">${t('exercise_disclaimer')}</p>`;
 }
 
@@ -987,6 +1006,10 @@ export function renderMeds(state) {
     <div class="section-label">${t('meds_title')}</div>
     <div class="no-print">
       <section class="card"><p class="muted small">${t('meds_intro')}</p></section>
+      <section class="card" style="border-left:4px solid var(--danger)">
+        <h3>⚠️ ${t('meds_anticoag_title')}</h3>
+        ${t('meds_anticoag_body')}
+      </section>
       <section class="card">
         <h3>${t('meds_add')}</h3>
         <form id="form-med" class="stack-form">
@@ -1280,11 +1303,12 @@ function comparisonNote(id) {
 
 export function renderAssessments(state) {
   const dts = daysToSurgery(state);
-  const hasBaseline = SCALE_LIST.some((sc) => assessmentHistory(sc.id).length > 0);
+  const hubScales = SCALE_LIST.filter((sc) => sc.hub !== false);
+  const hasBaseline = hubScales.some((sc) => assessmentHistory(sc.id).length > 0);
   const reeval = (dts != null && dts >= 0 && dts <= 3 && hasBaseline)
     ? `<section class="card reeval-card">${t('assess_reeval_soon')}</section>` : '';
 
-  const rows = SCALE_LIST.map((sc) => {
+  const rows = hubScales.map((sc) => {
     const hist = assessmentHistory(sc.id);
     const last = hist.length ? hist[hist.length - 1] : null;
     let body;
@@ -1371,7 +1395,7 @@ export function renderDasi(state) {
       </div></div>`;
   }).join('');
   return `
-    <button class="btn ghost back-btn" data-action="nav" data-view="evaluaciones">${t('back')}</button>
+    <button class="btn ghost back-btn" data-action="nav" data-view="ejercicio-guide">${t('back')}</button>
     <div class="section-label">🩺 ${esc(tr(DASI, 'title'))}</div>
     ${resultCard}
     <section class="card"><p class="muted small">${esc(tr(DASI, 'intro'))}</p><p class="small"><em>${esc(tr(DASI, 'stem'))}</em></p></section>
@@ -1399,7 +1423,7 @@ export function renderMust(state) {
   }
   const wl = MUST_WEIGHTLOSS.map((o) => `<option value="${o.v}" ${prev.wl === o.v ? 'selected' : ''}>${esc(tr(o, 'label'))}</option>`).join('');
   return `
-    <button class="btn ghost back-btn" data-action="nav" data-view="evaluaciones">${t('back')}</button>
+    <button class="btn ghost back-btn" data-action="nav" data-view="nutricion-guide">${t('back')}</button>
     <div class="section-label">🩺 ${esc(tr(MUST, 'title'))}</div>
     ${resultCard}
     <section class="card"><p class="muted small">${esc(tr(MUST, 'intro'))}</p></section>

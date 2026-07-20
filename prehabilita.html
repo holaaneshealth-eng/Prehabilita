@@ -624,6 +624,7 @@ body.high-contrast .cmp-down { color: #b91c1c; }
       readPosts: [],
       badges: [],
       challengeAwards: {},
+      visited: {},
       medList: { meds: [], allergies: "", notes: "" },
       frail: { score: null, date: null, answers: {} },
       edmonton: { score: null, date: null, answers: {} },
@@ -1538,6 +1539,62 @@ Senyals per parar i consultar: dolor al pit, mareig, falta d’aire desproporcio
   ];
   var BADGES = [
     {
+      id: "explora",
+      emoji: "\uD83E\uDDED",
+      name: "A bordo",
+      name_en: "On board",
+      name_ca: "A bord",
+      desc: "Explora Hoy, Prepárate, Progreso y Aprende.",
+      desc_en: "Explore Today, Get ready, Progress and Learn.",
+      desc_ca: "Explora Avui, Prepara’t, Progrés i Aprèn.",
+      check: (s) => {
+        const v = s.visited || {};
+        return !!(v.hoy && v.recursos && v.progreso && v.aprende);
+      }
+    },
+    {
+      id: "mi-ficha",
+      emoji: "\uD83D\uDC8A",
+      name: "Mi ficha lista",
+      name_en: "My details ready",
+      name_ca: "La meva fitxa llesta",
+      desc: "Rellena tu medicación y alergias.",
+      desc_en: "Fill in your medication and allergies.",
+      desc_ca: "Omple la teva medicació i al·lèrgies.",
+      check: (s) => {
+        const m = s.medList || {};
+        return !!(m.meds && m.meds.length > 0 || m.allergies && String(m.allergies).trim().length > 0);
+      }
+    },
+    {
+      id: "conoce-plan",
+      emoji: "\uD83D\uDCCB",
+      name: "Conoce tu plan",
+      name_en: "Know your plan",
+      name_ca: "Coneix el teu pla",
+      desc: "Abre una guía de Prepárate.",
+      desc_en: "Open a Get-ready guide.",
+      desc_ca: "Obre una guia de Prepara’t.",
+      check: (s) => {
+        const v = s.visited || {};
+        return ["ayuno-guide", "ejercicio-guide", "respiratorio-guide", "bienestar-guide", "nutricion-guide"].some((k) => v[k]);
+      }
+    },
+    {
+      id: "punto-partida",
+      emoji: "\uD83E\uDE7A",
+      name: "Punto de partida",
+      name_en: "Starting point",
+      name_ca: "Punt de partida",
+      desc: "Haz un test inicial (física, nutrición o fragilidad).",
+      desc_en: "Do an initial test (fitness, nutrition or frailty).",
+      desc_ca: "Fes un test inicial (física, nutrició o fragilitat).",
+      check: (s) => {
+        const a = s.assessments || {};
+        return ["dasi", "must", "frail", "edmonton"].some((k) => a[k] && a[k].length > 0);
+      }
+    },
+    {
       id: "primer-paso",
       emoji: "\uD83D\uDC5F",
       name: "Primer paso",
@@ -2077,9 +2134,9 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       pillar: "mental",
       type: "guide",
       guideId: "bienestar",
-      title: "Bienestar mental: entrena tu mente para la cirugía",
-      title_en: "Mental wellbeing: train your mind for surgery",
-      title_ca: "Benestar mental: entrena la teva ment per a la cirurgia",
+      title: "Bienestar mental: infórmate, empodérate y entrena tu mente",
+      title_en: "Mental wellbeing: learn, empower yourself and train your mind",
+      title_ca: "Benestar mental: informa’t, empodera’t i entrena la teva ment",
       desc: "Vídeos breves y prácticas de calma para llegar más preparado, con salida segura y ayuda a un toque.",
       desc_en: "Short videos and calm practices to arrive better prepared, with a safe exit and help one tap away.",
       desc_ca: "Vídeos breus i pràctiques de calma per arribar més preparat, amb sortida segura i ajuda a un toc."
@@ -2087,14 +2144,14 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
     {
       id: "res-nutricion",
       pillar: "nutricion",
-      type: "link",
-      url: "https://www.youtube.com/results?search_query=alimentaci%C3%B3n+rica+en+prote%C3%ADnas+recuperaci%C3%B3n",
-      title: "Alimentación rica en proteínas",
-      title_en: "Protein-rich eating",
-      title_ca: "Alimentació rica en proteïnes",
-      desc: "Ideas de comidas ricas en proteína para tu prehabilitación.",
-      desc_en: "Meal ideas rich in protein for your prehabilitation.",
-      desc_ca: "Idees d’àpats rics en proteïna per a la teva prehabilitació."
+      type: "guide",
+      guideId: "nutricion",
+      title: "Nutrición antes de la cirugía",
+      title_en: "Nutrition before surgery",
+      title_ca: "Nutrició abans de la cirurgia",
+      desc: "Cómo llegar bien nutrido: proteína, hidratación y tu test de riesgo nutricional (MUST).",
+      desc_en: "Arriving well nourished: protein, hydration and your nutrition-risk test (MUST).",
+      desc_ca: "Arribar ben nodrit: proteïna, hidratació i el teu test de risc nutricional (MUST)."
     },
     {
       id: "res-ejercicio",
@@ -3323,9 +3380,9 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
   };
   var MENTAL_GUIDE = {
     intro: {
-      title: "Bienestar mental: entrena tu mente para la cirugía",
-      title_en: "Mental wellbeing: train your mind for surgery",
-      title_ca: "Benestar mental: entrena la teva ment per a la cirurgia",
+      title: "Bienestar mental: infórmate, empodérate y entrena tu mente",
+      title_en: "Mental wellbeing: learn, empower yourself and train your mind",
+      title_ca: "Benestar mental: informa’t, empodera’t i entrena la teva ment",
       body: `<p>Así como entrenas el cuerpo antes de una operación, también puedes <strong>entrenar la mente</strong>. Aquí encontrarás vídeos breves y prácticas de calma que, con constancia, ayudan a llegar mejor preparado. No buscamos eliminar los nervios —son normales—, sino que te acompañen sin mandar.</p>
 <p><strong>A tu ritmo.</strong> Puedes ver una pieza al día o ir más despacio. Puedes saltarte lo que quieras: no hay deberes ni penalizaciones.</p>
 <p><strong>Esta sección no te vigila.</strong> No hacemos seguimiento en tiempo real de cómo estás. Si algún cuestionario sugiere que te vendría bien más apoyo, te lo diremos con claridad y te daremos un resumen para llevar a tu equipo.</p>
@@ -3606,7 +3663,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       id: "v1",
       day: 0,
       priority: true,
-      vimeo: "",
+      vimeo: "1210571832",
       title: "V1. Bienvenida",
       title_en: "V1. Welcome",
       title_ca: "V1. Benvinguda",
@@ -3618,7 +3675,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       id: "v2",
       day: 1,
       priority: true,
-      vimeo: "",
+      vimeo: "1211511202",
       title: "V2. Tu cirugía, paso a paso",
       title_en: "V2. Your surgery, step by step",
       title_ca: "V2. La teva cirurgia, pas a pas",
@@ -3847,6 +3904,34 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
 <ul><li><strong>024</strong> — Línia d’atenció a la conducta suïcida (gratuïta, 24 h, confidencial). <a href="tel:024">Trucar</a></li>
 <li><strong>112</strong> — Emergències. <a href="tel:112">Trucar</a></li></ul>
 <p>També pots anar al teu centre de salut o a urgències, o explicar-ho a algú de confiança que tinguis a prop. Aquesta aplicació no et pot donar l’ajuda que mereixes en aquest moment, i per això t’ho diem amb claredat. Demanar ajuda és un acte de valentia, i funciona.</p>`
+    }
+  };
+  var NUTRITION_GUIDE = {
+    intro: {
+      title: "Nutrición antes de la cirugía",
+      title_en: "Nutrition before surgery",
+      title_ca: "Nutrició abans de la cirurgia",
+      body: `<p>Llegar bien nutrido ayuda a cicatrizar y a recuperarte mejor. Dos ideas clave: <strong>suficiente proteína</strong> cada día y buena <strong>hidratación</strong>.</p>
+<h4>Proteína</h4>
+<p>Reparte la proteína en todas las comidas (huevos, lácteos, legumbres, pescado, carne, tofu). Si comes poco, prioriza primero la proteína del plato.</p>
+<h4>Hidratación</h4>
+<p>Bebe agua a lo largo del día, salvo que tu equipo te indique otra cosa.</p>
+<h4>Evalúa tu riesgo nutricional</h4>
+<p>El test <strong>MUST</strong> estima tu riesgo nutricional en 1 minuto. Te recomendamos hacerlo <strong>al empezar</strong> y <strong>al final del programa</strong> para ver tu evolución, y compartirlo con tu equipo.</p>`,
+      body_en: `<p>Arriving well nourished helps you heal and recover better. Two key ideas: <strong>enough protein</strong> every day and good <strong>hydration</strong>.</p>
+<h4>Protein</h4>
+<p>Spread protein across all meals (eggs, dairy, legumes, fish, meat, tofu). If you eat little, prioritise the protein on your plate first.</p>
+<h4>Hydration</h4>
+<p>Drink water throughout the day, unless your team advises otherwise.</p>
+<h4>Assess your nutritional risk</h4>
+<p>The <strong>MUST</strong> test estimates your nutritional risk in 1 minute. We recommend doing it <strong>at the start</strong> and <strong>at the end of the programme</strong> to track your progress, and sharing it with your team.</p>`,
+      body_ca: `<p>Arribar ben nodrit ajuda a cicatritzar i a recuperar-te millor. Dues idees clau: <strong>prou proteïna</strong> cada dia i bona <strong>hidratació</strong>.</p>
+<h4>Proteïna</h4>
+<p>Reparteix la proteïna en tots els àpats (ous, lactis, llegums, peix, carn, tofu). Si menges poc, prioritza primer la proteïna del plat.</p>
+<h4>Hidratació</h4>
+<p>Beu aigua al llarg del dia, tret que el teu equip t’indiqui una altra cosa.</p>
+<h4>Avalua el teu risc nutricional</h4>
+<p>El test <strong>MUST</strong> estima el teu risc nutricional en 1 minut. Et recomanem fer-lo <strong>en començar</strong> i <strong>al final del programa</strong> per veure la teva evolució, i compartir-lo amb el teu equip.</p>`
     }
   };
   var ALARM_SIGNS = [
@@ -4461,8 +4546,8 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
     return { level: "verde", reasons: highBurden ? ["distress_high"] : [], highBurden };
   }
   var SCALE_LIST = [
-    { id: "dasi", icon: "\uD83C\uDFC3", route: "dasi", name: "Capacidad funcional (DASI)", name_en: "Functional capacity (DASI)", name_ca: "Capacitat funcional (DASI)", higherBetter: true },
-    { id: "must", icon: "\uD83E\uDD57", route: "must", name: "Riesgo nutricional (MUST)", name_en: "Nutrition risk (MUST)", name_ca: "Risc nutricional (MUST)", higherBetter: false },
+    { id: "dasi", icon: "\uD83C\uDFC3", route: "dasi", name: "Capacidad funcional (DASI)", name_en: "Functional capacity (DASI)", name_ca: "Capacitat funcional (DASI)", higherBetter: true, hub: false },
+    { id: "must", icon: "\uD83E\uDD57", route: "must", name: "Riesgo nutricional (MUST)", name_en: "Nutrition risk (MUST)", name_ca: "Risc nutricional (MUST)", higherBetter: false, hub: false },
     { id: "frail", icon: "\uD83E\uDDED", route: "fragilidad", name: "Fragilidad rápida (FRAIL)", name_en: "Quick frailty (FRAIL)", name_ca: "Fragilitat ràpida (FRAIL)", higherBetter: false },
     { id: "edmonton", icon: "\uD83D\uDCCB", route: "edmonton", name: "Fragilidad (Edmonton)", name_en: "Frailty (Edmonton)", name_ca: "Fragilitat (Edmonton)", higherBetter: false }
   ];
@@ -4894,7 +4979,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       res_empty_2: "Entra en <strong>Más → Modo médico → Recursos</strong> para añadir vídeos de YouTube (mindfulness, nutrición, ejercicio…) o cualquier enlace.",
       res_add: "➕ Añadir recursos",
       res_other: "Otros",
-      res_open: "Abrir recurso ↗",
+      res_open: "Abrir tu plan ↗",
       learn_posts: "\uD83D\uDCF0 Publicaciones",
       learn_pills: "\uD83D\uDCA1 Píldoras rápidas",
       learn_no_posts: "Aún no hay publicaciones. Créalas desde el Modo médico.",
@@ -5050,13 +5135,16 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       efs_of17: "/ 17",
       efs_result_note: "Resultado del {date} · {score}/17 puntos. Cribado orientativo autoinformado; compártelo con tu equipo médico.",
       efs_saved: "✔ Test de Edmonton guardado. Compártelo con tu equipo médico.",
-      m_assess: "Mis evaluaciones de salud",
-      m_assess_sub: "Test de forma física, ánimo, nutrición y fragilidad",
-      assess_title: "\uD83E\uDE7A Mis evaluaciones de salud",
-      assess_intro: "Cuestionarios breves y orientativos. Hazlos al empezar (medida basal) y repítelos antes de la cirugía para ver tu mejora. Comparte los resultados con tu equipo médico.",
+      m_assess: "Evaluación de fragilidad",
+      m_assess_sub: "Test de fragilidad (FRAIL y Edmonton)",
+      assess_title: "\uD83E\uDDED Evaluación de fragilidad",
+      assess_intro: "Cuestionarios breves y orientativos de fragilidad. Hazlos al empezar (medida basal) y repítelos antes de la cirugía para ver tu evolución. Comparte los resultados con tu equipo médico. (La capacidad física está en Ejercicio, la nutrición en Nutrición y el ánimo/ansiedad en Bienestar mental.)",
       assess_baseline: "Basal",
       assess_latest: "Actual",
       assess_none: "Sin realizar",
+      dasi_cta: "Evalúa tu capacidad física (DASI)",
+      must_cta: "Evalúa tu riesgo nutricional (MUST)",
+      eval_init_final: "Recomendado al inicio y al final del programa.",
       assess_do: "Hacer test",
       assess_redo: "Repetir",
       assess_improved: "↑ mejora",
@@ -5081,6 +5169,8 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       phq9_safety: "Has indicado pensamientos de hacerte daño. Por favor, cuéntaselo a tu equipo médico o a alguien de confianza. Si necesitas ayuda urgente, en España puedes llamar al 024 (atención a la conducta suicida) o al 112 (emergencias).",
       meds_title: "\uD83D\uDC8A Mi medicación y alergias",
       meds_intro: "Prepara tu lista para la consulta de preanestesia. Incluye TODO: recetados, sin receta y productos de herbolario. Al terminar podrás guardarla en PDF.",
+      meds_anticoag_title: "Anticoagulantes y antiagregantes",
+      meds_anticoag_body: '<p>Si tomas <strong>anticoagulantes</strong> o <strong>antiagregantes</strong>, <strong>no los suspendas ni los mantengas por tu cuenta</strong>: requieren la <strong>indicación expresa de tu anestesista</strong>. Comunícalo <strong>al menos 10 días antes</strong> de la intervención.</p><p class="small"><strong>Antiagregantes:</strong> ácido acetilsalicílico/AAS (Adiro®, Aspirina®), clopidogrel (Plavix®, Iscover®), prasugrel (Efient®), ticagrelor (Brilique®), triflusal (Disgren®).</p><p class="small"><strong>Anticoagulantes:</strong> acenocumarol (Sintrom®), warfarina (Aldocumar®), dabigatrán (Pradaxa®), rivaroxabán (Xarelto®), apixabán (Eliquis®), edoxabán (Lixiana®), heparinas de bajo peso molecular (enoxaparina/Clexane®, bemiparina/Hibor®, dalteparina/Fragmin®).</p><p class="small muted">Si alguno de estos figura en tu medicación, avísalo cuanto antes a tu equipo.</p>',
       meds_add: "Añadir medicamento",
       meds_name: "Nombre",
       meds_dose: "Dosis",
@@ -5252,7 +5342,7 @@ Gracias.`,
       res_empty_2: "Go to <strong>More → Clinician mode → Resources</strong> to add YouTube videos (mindfulness, nutrition, exercise…) or any link.",
       res_add: "➕ Add resources",
       res_other: "Other",
-      res_open: "Open resource ↗",
+      res_open: "Open your plan ↗",
       learn_posts: "\uD83D\uDCF0 Articles",
       learn_pills: "\uD83D\uDCA1 Quick tips",
       learn_no_posts: "No articles yet. Create them in Clinician mode.",
@@ -5408,13 +5498,16 @@ Gracias.`,
       efs_of17: "/ 17",
       efs_result_note: "Result from {date} · {score}/17 points. Self-reported guidance screening; share it with your medical team.",
       efs_saved: "✔ Edmonton test saved. Share it with your medical team.",
-      m_assess: "My health assessments",
-      m_assess_sub: "Fitness, mood, nutrition and frailty tests",
-      assess_title: "\uD83E\uDE7A My health assessments",
-      assess_intro: "Short, guidance questionnaires. Do them at the start (baseline) and repeat them before surgery to see your improvement. Share the results with your medical team.",
+      m_assess: "Frailty assessment",
+      m_assess_sub: "Frailty tests (FRAIL and Edmonton)",
+      assess_title: "\uD83E\uDDED Frailty assessment",
+      assess_intro: "Short, guidance frailty questionnaires. Do them at the start (baseline) and repeat them before surgery to see your progress. Share the results with your medical team. (Physical capacity is in Exercise, nutrition in Nutrition, and mood/anxiety in Mental wellbeing.)",
       assess_baseline: "Baseline",
       assess_latest: "Current",
       assess_none: "Not done",
+      dasi_cta: "Assess your physical capacity (DASI)",
+      must_cta: "Assess your nutritional risk (MUST)",
+      eval_init_final: "Recommended at the start and end of the programme.",
       assess_do: "Take test",
       assess_redo: "Repeat",
       assess_improved: "↑ improved",
@@ -5439,6 +5532,8 @@ Gracias.`,
       phq9_safety: "You indicated thoughts of hurting yourself. Please tell your medical team or someone you trust. If you need urgent help, call your local emergency number (112 in Europe, 911 in the US) or a suicide prevention line (988 in the US).",
       meds_title: "\uD83D\uDC8A My medication & allergies",
       meds_intro: "Prepare your list for the pre-anesthesia consultation. Include EVERYTHING: prescription, over-the-counter and herbal products. When done you can save it as PDF.",
+      meds_anticoag_title: "Anticoagulants and antiplatelets",
+      meds_anticoag_body: `<p>If you take <strong>anticoagulants</strong> or <strong>antiplatelets</strong>, <strong>do not stop or continue them on your own</strong>: they require your <strong>anaesthetist's explicit instruction</strong>. Tell them <strong>at least 10 days before</strong> surgery.</p><p class="small"><strong>Antiplatelets:</strong> acetylsalicylic acid/ASA (Adiro®, Aspirina®), clopidogrel (Plavix®, Iscover®), prasugrel (Efient®), ticagrelor (Brilique®), triflusal (Disgren®).</p><p class="small"><strong>Anticoagulants:</strong> acenocoumarol (Sintrom®), warfarin (Aldocumar®), dabigatran (Pradaxa®), rivaroxaban (Xarelto®), apixaban (Eliquis®), edoxaban (Lixiana®), low-molecular-weight heparins (enoxaparin/Clexane®, bemiparin/Hibor®, dalteparin/Fragmin®).</p><p class="small muted">If any of these is in your medication, tell your team as soon as possible.</p>`,
       meds_add: "Add medication",
       meds_name: "Name",
       meds_dose: "Dose",
@@ -5610,7 +5705,7 @@ Thank you.`,
       res_empty_2: "Ves a <strong>Més → Mode mèdic → Recursos</strong> per afegir vídeos de YouTube (mindfulness, nutrició, exercici…) o qualsevol enllaç.",
       res_add: "➕ Afegir recursos",
       res_other: "Altres",
-      res_open: "Obrir recurs ↗",
+      res_open: "Obrir el teu pla ↗",
       learn_posts: "\uD83D\uDCF0 Publicacions",
       learn_pills: "\uD83D\uDCA1 Píndoles ràpides",
       learn_no_posts: "Encara no hi ha publicacions. Crea-les des del Mode mèdic.",
@@ -5766,13 +5861,16 @@ Thank you.`,
       efs_of17: "/ 17",
       efs_result_note: "Resultat del {date} · {score}/17 punts. Cribratge orientatiu autoinformat; comparteix-lo amb el teu equip mèdic.",
       efs_saved: "✔ Test d’Edmonton desat. Comparteix-lo amb el teu equip mèdic.",
-      m_assess: "Les meves avaluacions de salut",
-      m_assess_sub: "Test de forma física, ànim, nutrició i fragilitat",
-      assess_title: "\uD83E\uDE7A Les meves avaluacions de salut",
-      assess_intro: "Qüestionaris breus i orientatius. Fes-los en començar (mesura basal) i repeteix-los abans de la cirurgia per veure la teva millora. Comparteix els resultats amb el teu equip mèdic.",
+      m_assess: "Avaluació de fragilitat",
+      m_assess_sub: "Test de fragilitat (FRAIL i Edmonton)",
+      assess_title: "\uD83E\uDDED Avaluació de fragilitat",
+      assess_intro: "Qüestionaris breus i orientatius de fragilitat. Fes-los en començar (mesura basal) i repeteix-los abans de la cirurgia per veure la teva evolució. Comparteix els resultats amb el teu equip mèdic. (La capacitat física és a Exercici, la nutrició a Nutrició i l’ànim/ansietat a Benestar mental.)",
       assess_baseline: "Basal",
       assess_latest: "Actual",
       assess_none: "Sense fer",
+      dasi_cta: "Avalua la teva capacitat física (DASI)",
+      must_cta: "Avalua el teu risc nutricional (MUST)",
+      eval_init_final: "Recomanat a l’inici i al final del programa.",
       assess_do: "Fer test",
       assess_redo: "Repetir",
       assess_improved: "↑ millora",
@@ -5797,6 +5895,8 @@ Thank you.`,
       phq9_safety: "Has indicat pensaments de fer-te mal. Si us plau, explica-ho al teu equip mèdic o a algú de confiança. Si necessites ajuda urgent, a Espanya pots trucar al 024 (atenció a la conducta suïcida) o al 112 (emergències).",
       meds_title: "\uD83D\uDC8A La meva medicació i al·lèrgies",
       meds_intro: "Prepara la teva llista per a la consulta de preanestèsia. Inclou-ho TOT: amb recepta, sense recepta i productes d’herbolari. En acabar podràs desar-la en PDF.",
+      meds_anticoag_title: "Anticoagulants i antiagregants",
+      meds_anticoag_body: '<p>Si prens <strong>anticoagulants</strong> o <strong>antiagregants</strong>, <strong>no els suspenguis ni els mantinguis pel teu compte</strong>: requereixen la <strong>indicació expressa del teu anestesista</strong>. Comunica-ho <strong>almenys 10 dies abans</strong> de la intervenció.</p><p class="small"><strong>Antiagregants:</strong> àcid acetilsalicílic/AAS (Adiro®, Aspirina®), clopidogrel (Plavix®, Iscover®), prasugrel (Efient®), ticagrelor (Brilique®), triflusal (Disgren®).</p><p class="small"><strong>Anticoagulants:</strong> acenocumarol (Sintrom®), warfarina (Aldocumar®), dabigatran (Pradaxa®), rivaroxaban (Xarelto®), apixaban (Eliquis®), edoxaban (Lixiana®), heparines de baix pes molecular (enoxaparina/Clexane®, bemiparina/Hibor®, dalteparina/Fragmin®).</p><p class="small muted">Si algun d’aquests figura a la teva medicació, avisa el teu equip com més aviat millor.</p>',
       meds_add: "Afegir medicament",
       meds_name: "Nom",
       meds_dose: "Dosi",
@@ -6315,7 +6415,23 @@ Gràcies.`,
     <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t("back")}</button>
     <div class="section-label">${esc(tr(g.intro, "title"))}</div>
     <section class="card fasting-body">${tr(g.intro, "body")}</section>
+    <section class="card">
+      <button class="btn block" data-action="nav" data-view="dasi">\uD83D\uDCCA ${t("dasi_cta")}</button>
+      <p class="muted small">${t("eval_init_final")}</p>
+    </section>
     ${blocks}
+    <p class="muted small fasting-disclaimer">${t("exercise_disclaimer")}</p>`;
+  }
+  function renderNutritionGuide(state2) {
+    const g = NUTRITION_GUIDE;
+    return `
+    <button class="btn ghost back-btn" data-action="nav" data-view="recursos">${t("back")}</button>
+    <div class="section-label">${esc(tr(g.intro, "title"))}</div>
+    <section class="card fasting-body">${tr(g.intro, "body")}</section>
+    <section class="card">
+      <button class="btn block" data-action="nav" data-view="must">\uD83E\uDD57 ${t("must_cta")}</button>
+      <p class="muted small">${t("eval_init_final")}</p>
+    </section>
     <p class="muted small fasting-disclaimer">${t("exercise_disclaimer")}</p>`;
   }
   function renderRespiratoryGuide(state2) {
@@ -6821,6 +6937,10 @@ Gràcies.`,
     <div class="section-label">${t("meds_title")}</div>
     <div class="no-print">
       <section class="card"><p class="muted small">${t("meds_intro")}</p></section>
+      <section class="card" style="border-left:4px solid var(--danger)">
+        <h3>⚠️ ${t("meds_anticoag_title")}</h3>
+        ${t("meds_anticoag_body")}
+      </section>
       <section class="card">
         <h3>${t("meds_add")}</h3>
         <form id="form-med" class="stack-form">
@@ -7082,9 +7202,10 @@ Gràcies.`,
   }
   function renderAssessments(state2) {
     const dts = daysToSurgery(state2);
-    const hasBaseline = SCALE_LIST.some((sc) => assessmentHistory(sc.id).length > 0);
+    const hubScales = SCALE_LIST.filter((sc) => sc.hub !== false);
+    const hasBaseline = hubScales.some((sc) => assessmentHistory(sc.id).length > 0);
     const reeval = dts != null && dts >= 0 && dts <= 3 && hasBaseline ? `<section class="card reeval-card">${t("assess_reeval_soon")}</section>` : "";
-    const rows = SCALE_LIST.map((sc) => {
+    const rows = hubScales.map((sc) => {
       const hist = assessmentHistory(sc.id);
       const last = hist.length ? hist[hist.length - 1] : null;
       let body;
@@ -7164,7 +7285,7 @@ Gràcies.`,
       </div></div>`;
     }).join("");
     return `
-    <button class="btn ghost back-btn" data-action="nav" data-view="evaluaciones">${t("back")}</button>
+    <button class="btn ghost back-btn" data-action="nav" data-view="ejercicio-guide">${t("back")}</button>
     <div class="section-label">\uD83E\uDE7A ${esc(tr(DASI, "title"))}</div>
     ${resultCard}
     <section class="card"><p class="muted small">${esc(tr(DASI, "intro"))}</p><p class="small"><em>${esc(tr(DASI, "stem"))}</em></p></section>
@@ -7189,7 +7310,7 @@ Gràcies.`,
     }
     const wl = MUST_WEIGHTLOSS.map((o) => `<option value="${o.v}" ${prev.wl === o.v ? "selected" : ""}>${esc(tr(o, "label"))}</option>`).join("");
     return `
-    <button class="btn ghost back-btn" data-action="nav" data-view="evaluaciones">${t("back")}</button>
+    <button class="btn ghost back-btn" data-action="nav" data-view="nutricion-guide">${t("back")}</button>
     <div class="section-label">\uD83E\uDE7A ${esc(tr(MUST, "title"))}</div>
     ${resultCard}
     <section class="card"><p class="muted small">${esc(tr(MUST, "intro"))}</p></section>
@@ -7573,6 +7694,11 @@ Gràcies.`,
       return;
     }
     app.className = "";
+    const freshBadges = evaluateBadges(state2);
+    if (freshBadges.length) {
+      saveState();
+      freshBadges.forEach((b) => setTimeout(() => celebrateBadge(b), 600));
+    }
     let body = "";
     switch (route) {
       case "recursos":
@@ -7586,6 +7712,9 @@ Gràcies.`,
         break;
       case "respiratorio-guide":
         body = renderRespiratoryGuide(state2);
+        break;
+      case "nutricion-guide":
+        body = renderNutritionGuide(state2);
         break;
       case "bienestar-guide":
         body = renderMentalGuide(state2);
@@ -7679,6 +7808,13 @@ Gràcies.`,
         editorTab = tab;
       if (!enterEditorGuard())
         return;
+    }
+    const st = getState();
+    if (!st.visited)
+      st.visited = {};
+    if (view && !st.visited[view]) {
+      st.visited[view] = true;
+      saveState();
     }
     route = view;
     render();

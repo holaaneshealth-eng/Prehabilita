@@ -13,7 +13,7 @@ import {
   seedLibrary, syncDefaultResources, getTasks, getTaskById, getAllTasksForEditor, getPillarById,
   getResources, getPosts, getDailyGoal, uid,
 } from './data.js';
-import { applyEngine, recompute, dayXp, tasksDoneCount } from './gamification.js';
+import { applyEngine, recompute, dayXp, tasksDoneCount, evaluateBadges } from './gamification.js';
 import { setLang, getLang, tr, t } from './i18n.js';
 import * as ui from './ui.js';
 import * as editor from './editor.js';
@@ -82,12 +82,16 @@ function render() {
   }
 
   app.className = '';
+  // Medallas basadas en navegación/acciones (ficha, tests, guías abiertas).
+  const freshBadges = evaluateBadges(state);
+  if (freshBadges.length) { saveState(); freshBadges.forEach((b) => setTimeout(() => celebrateBadge(b), 600)); }
   let body = '';
   switch (route) {
     case 'recursos': body = ui.renderResources(state); break;
     case 'ayuno-guide': body = ui.renderFastingGuide(state); break;
     case 'ejercicio-guide': body = ui.renderExerciseGuide(state); break;
     case 'respiratorio-guide': body = ui.renderRespiratoryGuide(state); break;
+    case 'nutricion-guide': body = ui.renderNutritionGuide(state); break;
     case 'bienestar-guide': body = ui.renderMentalGuide(state); break;
     case 'pausa': body = ui.renderPausa(state); break;
     case 'cribado': body = ui.renderCribado(state); break;
@@ -131,6 +135,9 @@ function navigate(view, tab) {
     if (tab) editorTab = tab;
     if (!enterEditorGuard()) return;
   }
+  const st = getState();
+  if (!st.visited) st.visited = {};
+  if (view && !st.visited[view]) { st.visited[view] = true; saveState(); }
   route = view;
   render();
   window.scrollTo(0, 0);
