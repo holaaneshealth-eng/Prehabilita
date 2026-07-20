@@ -4996,6 +4996,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       learn_no_posts: "Aún no hay publicaciones. Créalas desde el Modo médico.",
       preop_title: "✅ Preparativos preoperatorios",
       preop_note: "Sigue siempre las instrucciones concretas de tu centro; esta lista es orientativa.",
+      preop_soon: "Tu cirugía se acerca: repasa tus preparativos.",
       med_notice: "ⓘ Aviso médico",
       listen: "\uD83D\uDD0A Escuchar",
       back: "← Volver",
@@ -5149,7 +5150,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       m_assess: "Evaluación de fragilidad",
       m_assess_sub: "Test de fragilidad (FRAIL y Edmonton)",
       assess_title: "\uD83E\uDDED Evaluación de fragilidad",
-      assess_intro: "Cuestionarios breves y orientativos de fragilidad. Hazlos al empezar (medida basal) y repítelos antes de la cirugía para ver tu evolución. Comparte los resultados con tu equipo médico. (La capacidad física está en Ejercicio, la nutrición en Nutrición y el ánimo/ansiedad en Bienestar mental.)",
+      assess_intro: "Cuestionarios breves y orientativos de fragilidad. Hazlos al empezar (medida basal) y repítelos antes de la cirugía para ver tu evolución. Comparte los resultados con tu equipo médico.",
       assess_baseline: "Basal",
       assess_latest: "Actual",
       assess_none: "Sin realizar",
@@ -5359,6 +5360,7 @@ Gracias.`,
       learn_no_posts: "No articles yet. Create them in Clinician mode.",
       preop_title: "✅ Pre-op checklist",
       preop_note: "Always follow the specific instructions from your hospital; this list is a guide.",
+      preop_soon: "Your surgery is approaching: review your preparations.",
       med_notice: "ⓘ Medical notice",
       listen: "\uD83D\uDD0A Listen",
       back: "← Back",
@@ -5512,7 +5514,7 @@ Gracias.`,
       m_assess: "Frailty assessment",
       m_assess_sub: "Frailty tests (FRAIL and Edmonton)",
       assess_title: "\uD83E\uDDED Frailty assessment",
-      assess_intro: "Short, guidance frailty questionnaires. Do them at the start (baseline) and repeat them before surgery to see your progress. Share the results with your medical team. (Physical capacity is in Exercise, nutrition in Nutrition, and mood/anxiety in Mental wellbeing.)",
+      assess_intro: "Short, guidance frailty questionnaires. Do them at the start (baseline) and repeat them before surgery to see your progress. Share the results with your medical team.",
       assess_baseline: "Baseline",
       assess_latest: "Current",
       assess_none: "Not done",
@@ -5722,6 +5724,7 @@ Thank you.`,
       learn_no_posts: "Encara no hi ha publicacions. Crea-les des del Mode mèdic.",
       preop_title: "✅ Preparatius preoperatoris",
       preop_note: "Segueix sempre les instruccions concretes del teu centre; aquesta llista és orientativa.",
+      preop_soon: "La teva cirurgia s’acosta: repassa els teus preparatius.",
       med_notice: "ⓘ Avís mèdic",
       listen: "\uD83D\uDD0A Escoltar",
       back: "← Tornar",
@@ -5875,7 +5878,7 @@ Thank you.`,
       m_assess: "Avaluació de fragilitat",
       m_assess_sub: "Test de fragilitat (FRAIL i Edmonton)",
       assess_title: "\uD83E\uDDED Avaluació de fragilitat",
-      assess_intro: "Qüestionaris breus i orientatius de fragilitat. Fes-los en començar (mesura basal) i repeteix-los abans de la cirurgia per veure la teva evolució. Comparteix els resultats amb el teu equip mèdic. (La capacitat física és a Exercici, la nutrició a Nutrició i l’ànim/ansietat a Benestar mental.)",
+      assess_intro: "Qüestionaris breus i orientatius de fragilitat. Fes-los en començar (mesura basal) i repeteix-los abans de la cirurgia per veure la teva evolució. Comparteix els resultats amb el teu equip mèdic.",
       assess_baseline: "Basal",
       assess_latest: "Actual",
       assess_none: "Sense fer",
@@ -6118,6 +6121,19 @@ Gràcies.`,
     <button class="btn primary block" data-action="nav" data-view="evaluaciones">${t("m_assess")}</button>
   </section>`;
   }
+  function preopBanner(state2) {
+    const dts = daysToSurgery(state2);
+    if (dts == null || dts < 0 || dts > 7)
+      return "";
+    const preop = pickArr(PREOP_CHECKLIST, PREOP_CHECKLIST_EN, PREOP_CHECKLIST_CA);
+    const checklist = preop.map((c) => `<li>☐ ${esc(c)}</li>`).join("");
+    return `<section class="card" style="border-left:4px solid var(--accent)">
+      <h3>${t("preop_title")}</h3>
+      <p class="muted small">${t("preop_soon")}</p>
+      <ul class="preop">${checklist}</ul>
+      <p class="muted small">${t("preop_note")}</p>
+    </section>`;
+  }
   function renderToday(state2) {
     const tasks = getTasks(state2);
     const goal = getDailyGoal(state2);
@@ -6168,6 +6184,7 @@ Gràcies.`,
     return `
     ${phaseBanner(state2)}
     ${reevalBanner(state2)}
+    ${preopBanner(state2)}
     ${dailyCard}
     ${challengeCard}
     <div class="section-label">${t("tasks_today")}</div>

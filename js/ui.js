@@ -114,6 +114,20 @@ function reevalBanner(state) {
   </section>`;
 }
 
+/** Recordatorio de preparativos preoperatorios en Hoy cuando la cirugía se acerca. */
+function preopBanner(state) {
+  const dts = daysToSurgery(state);
+  if (dts == null || dts < 0 || dts > 7) return '';
+  const preop = pickArr(PREOP_CHECKLIST, PREOP_CHECKLIST_EN, PREOP_CHECKLIST_CA);
+  const checklist = preop.map((c) => `<li>☐ ${esc(c)}</li>`).join('');
+  return `<section class="card" style="border-left:4px solid var(--accent)">
+      <h3>${t('preop_title')}</h3>
+      <p class="muted small">${t('preop_soon')}</p>
+      <ul class="preop">${checklist}</ul>
+      <p class="muted small">${t('preop_note')}</p>
+    </section>`;
+}
+
 /* ---------- Vista: HOY ---------- */
 
 export function renderToday(state) {
@@ -169,6 +183,7 @@ export function renderToday(state) {
   return `
     ${phaseBanner(state)}
     ${reevalBanner(state)}
+    ${preopBanner(state)}
     ${dailyCard}
     ${challengeCard}
     <div class="section-label">${t('tasks_today')}</div>
