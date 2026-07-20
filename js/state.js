@@ -37,6 +37,7 @@ function defaultState() {
     readPosts: [],
     badges: [],
     challengeAwards: {},
+    visited: {},
     medList: { meds: [], allergies: '', notes: '' },
     frail: { score: null, date: null, answers: {} },
     edmonton: { score: null, date: null, answers: {} },

@@ -249,10 +249,11 @@ export function computeMentalTriage({ distress = null, phq9 = null, gad7 = null,
 
 /* ---------- Registro de todas las escalas (para el hub y la comparación) ---------- */
 export const SCALE_LIST = [
-  { id: 'dasi', icon: '🏃', route: 'dasi', name: 'Capacidad funcional (DASI)', name_en: 'Functional capacity (DASI)', name_ca: 'Capacitat funcional (DASI)', higherBetter: true },
-  // GAD-7 y PHQ-9 se administran ahora en el módulo Bienestar mental (cribado basal),
-  // no en el hub de evaluaciones, para no duplicarlas.
-  { id: 'must', icon: '🥗', route: 'must', name: 'Riesgo nutricional (MUST)', name_en: 'Nutrition risk (MUST)', name_ca: 'Risc nutricional (MUST)', higherBetter: false },
+  // hub:false -> no aparece en el hub de evaluaciones (fragilidad), pero mantiene
+  // metadatos para comparación e informe. DASI vive en Ejercicio, MUST en Nutrición.
+  // GAD-7/PHQ-9 se administran en Bienestar mental (no están aquí).
+  { id: 'dasi', icon: '🏃', route: 'dasi', name: 'Capacidad funcional (DASI)', name_en: 'Functional capacity (DASI)', name_ca: 'Capacitat funcional (DASI)', higherBetter: true, hub: false },
+  { id: 'must', icon: '🥗', route: 'must', name: 'Riesgo nutricional (MUST)', name_en: 'Nutrition risk (MUST)', name_ca: 'Risc nutricional (MUST)', higherBetter: false, hub: false },
   { id: 'frail', icon: '🧭', route: 'fragilidad', name: 'Fragilidad rápida (FRAIL)', name_en: 'Quick frailty (FRAIL)', name_ca: 'Fragilitat ràpida (FRAIL)', higherBetter: false },
   { id: 'edmonton', icon: '📋', route: 'edmonton', name: 'Fragilidad (Edmonton)', name_en: 'Frailty (Edmonton)', name_ca: 'Fragilitat (Edmonton)', higherBetter: false },
 ];

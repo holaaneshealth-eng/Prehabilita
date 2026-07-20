@@ -321,6 +321,15 @@ export const PREOP_CHECKLIST_CA = [
 ];
 
 export const BADGES = [
+  // Medallas de arranque: guían el uso inicial del programa (navegar, ficha, plan, tests).
+  { id: 'explora', emoji: '🧭', name: 'A bordo', name_en: 'On board', name_ca: 'A bord', desc: 'Explora Hoy, Prepárate, Progreso y Aprende.', desc_en: 'Explore Today, Get ready, Progress and Learn.', desc_ca: 'Explora Avui, Prepara’t, Progrés i Aprèn.',
+    check: (s) => { const v = s.visited || {}; return !!(v.hoy && v.recursos && v.progreso && v.aprende); } },
+  { id: 'mi-ficha', emoji: '💊', name: 'Mi ficha lista', name_en: 'My details ready', name_ca: 'La meva fitxa llesta', desc: 'Rellena tu medicación y alergias.', desc_en: 'Fill in your medication and allergies.', desc_ca: 'Omple la teva medicació i al·lèrgies.',
+    check: (s) => { const m = s.medList || {}; return !!((m.meds && m.meds.length > 0) || (m.allergies && String(m.allergies).trim().length > 0)); } },
+  { id: 'conoce-plan', emoji: '📋', name: 'Conoce tu plan', name_en: 'Know your plan', name_ca: 'Coneix el teu pla', desc: 'Abre una guía de Prepárate.', desc_en: 'Open a Get-ready guide.', desc_ca: 'Obre una guia de Prepara’t.',
+    check: (s) => { const v = s.visited || {}; return ['ayuno-guide', 'ejercicio-guide', 'respiratorio-guide', 'bienestar-guide', 'nutricion-guide'].some((k) => v[k]); } },
+  { id: 'punto-partida', emoji: '🩺', name: 'Punto de partida', name_en: 'Starting point', name_ca: 'Punt de partida', desc: 'Haz un test inicial (física, nutrición o fragilidad).', desc_en: 'Do an initial test (fitness, nutrition or frailty).', desc_ca: 'Fes un test inicial (física, nutrició o fragilitat).',
+    check: (s) => { const a = s.assessments || {}; return ['dasi', 'must', 'frail', 'edmonton'].some((k) => a[k] && a[k].length > 0); } },
   { id: 'primer-paso', emoji: '👟', name: 'Primer paso', name_en: 'First step', name_ca: 'Primer pas', desc: 'Completa tu primer día de programa.', desc_en: 'Complete your first day of the program.', desc_ca: 'Completa el teu primer dia de programa.',
     check: (s) => s.stats.daysCompleted >= 1 },
   { id: 'racha-3', emoji: '🔥', name: 'En marcha', name_en: 'Getting going', name_ca: 'En marxa', desc: 'Mantén una racha de 3 días.', desc_en: 'Keep a 3-day streak.', desc_ca: 'Mantén una ratxa de 3 dies.',
@@ -729,20 +738,19 @@ export const DEPRECATED_RESOURCE_IDS = ['res-mindfulness'];
 
 export const DEFAULT_RESOURCES = [
   { id: 'res-bienestar', pillar: 'mental', type: 'guide', guideId: 'bienestar',
-    title: 'Bienestar mental: entrena tu mente para la cirugía',
-    title_en: 'Mental wellbeing: train your mind for surgery',
-    title_ca: 'Benestar mental: entrena la teva ment per a la cirurgia',
+    title: 'Bienestar mental: infórmate, empodérate y entrena tu mente',
+    title_en: 'Mental wellbeing: learn, empower yourself and train your mind',
+    title_ca: 'Benestar mental: informa’t, empodera’t i entrena la teva ment',
     desc: 'Vídeos breves y prácticas de calma para llegar más preparado, con salida segura y ayuda a un toque.',
     desc_en: 'Short videos and calm practices to arrive better prepared, with a safe exit and help one tap away.',
     desc_ca: 'Vídeos breus i pràctiques de calma per arribar més preparat, amb sortida segura i ajuda a un toc.' },
-  { id: 'res-nutricion', pillar: 'nutricion', type: 'link',
-    url: 'https://www.youtube.com/results?search_query=alimentaci%C3%B3n+rica+en+prote%C3%ADnas+recuperaci%C3%B3n',
-    title: 'Alimentación rica en proteínas',
-    title_en: 'Protein-rich eating',
-    title_ca: 'Alimentació rica en proteïnes',
-    desc: 'Ideas de comidas ricas en proteína para tu prehabilitación.',
-    desc_en: 'Meal ideas rich in protein for your prehabilitation.',
-    desc_ca: 'Idees d’àpats rics en proteïna per a la teva prehabilitació.' },
+  { id: 'res-nutricion', pillar: 'nutricion', type: 'guide', guideId: 'nutricion',
+    title: 'Nutrición antes de la cirugía',
+    title_en: 'Nutrition before surgery',
+    title_ca: 'Nutrició abans de la cirurgia',
+    desc: 'Cómo llegar bien nutrido: proteína, hidratación y tu test de riesgo nutricional (MUST).',
+    desc_en: 'Arriving well nourished: protein, hydration and your nutrition-risk test (MUST).',
+    desc_ca: 'Arribar ben nodrit: proteïna, hidratació i el teu test de risc nutricional (MUST).' },
   { id: 'res-ejercicio', pillar: 'fisico', type: 'guide', guideId: 'ejercicio',
     title: 'Ejercicio antes de la cirugía: tu plan de prehabilitación física',
     title_en: 'Exercise before surgery: your physical prehabilitation plan',
@@ -1962,9 +1970,9 @@ export const RESPIRATORY_GUIDE = {
 // ---------------------------------------------------------------------------
 export const MENTAL_GUIDE = {
   intro: {
-    title: 'Bienestar mental: entrena tu mente para la cirugía',
-    title_en: 'Mental wellbeing: train your mind for surgery',
-    title_ca: 'Benestar mental: entrena la teva ment per a la cirurgia',
+    title: 'Bienestar mental: infórmate, empodérate y entrena tu mente',
+    title_en: 'Mental wellbeing: learn, empower yourself and train your mind',
+    title_ca: 'Benestar mental: informa’t, empodera’t i entrena la teva ment',
     body: `<p>Así como entrenas el cuerpo antes de una operación, también puedes <strong>entrenar la mente</strong>. Aquí encontrarás vídeos breves y prácticas de calma que, con constancia, ayudan a llegar mejor preparado. No buscamos eliminar los nervios —son normales—, sino que te acompañen sin mandar.</p>
 <p><strong>A tu ritmo.</strong> Puedes ver una pieza al día o ir más despacio. Puedes saltarte lo que quieras: no hay deberes ni penalizaciones.</p>
 <p><strong>Esta sección no te vigila.</strong> No hacemos seguimiento en tiempo real de cómo estás. Si algún cuestionario sugiere que te vendría bien más apoyo, te lo diremos con claridad y te daremos un resumen para llevar a tu equipo.</p>
@@ -2242,9 +2250,9 @@ export const MENTAL_GUIDE = {
 // `priority` = pieza esencial a priorizar si la cirugía está cerca. `vimeo` se
 // rellena con el ID cuando el contenido esté validado.
 export const MENTAL_PIECES = [
-  { id: 'v1', day: 0, priority: true, vimeo: '', title: 'V1. Bienvenida', title_en: 'V1. Welcome', title_ca: 'V1. Benvinguda',
+  { id: 'v1', day: 0, priority: true, vimeo: '1210571832', title: 'V1. Bienvenida', title_en: 'V1. Welcome', title_ca: 'V1. Benvinguda',
     desc: 'Presenta el programa, normaliza dudas y nervios, e introduce el botón de pausa.', desc_en: 'Introduces the programme, normalises doubts and nerves, and introduces the pause button.', desc_ca: 'Presenta el programa, normalitza dubtes i nervis, i introdueix el botó de pausa.' },
-  { id: 'v2', day: 1, priority: true, vimeo: '', title: 'V2. Tu cirugía, paso a paso', title_en: 'V2. Your surgery, step by step', title_ca: 'V2. La teva cirurgia, pas a pas',
+  { id: 'v2', day: 1, priority: true, vimeo: '1211511202', title: 'V2. Tu cirugía, paso a paso', title_en: 'V2. Your surgery, step by step', title_ca: 'V2. La teva cirurgia, pas a pas',
     desc: 'El recorrido perioperatorio en orden, de la preparación al alta, para reducir la incertidumbre.', desc_en: 'The perioperative journey in order, from preparation to discharge, to reduce uncertainty.', desc_ca: 'El recorregut perioperatori en ordre, de la preparació a l’alta, per reduir la incertesa.' },
   { id: 'v3', day: 2, priority: true, vimeo: '', title: 'V3. Qué notarás: la anestesia', title_en: 'V3. What you\'ll notice: anaesthesia', title_ca: 'V3. Què notaràs: l’anestèsia',
     desc: 'Sensaciones esperables, el papel del anestesista y respuestas a miedos frecuentes.', desc_en: 'Expected sensations, the anaesthetist\'s role and answers to common fears.', desc_ca: 'Sensacions esperables, el paper de l’anestesista i respostes a pors freqüents.' },
@@ -2364,6 +2372,36 @@ export const TRIAGE_SCREENS = {
 <ul><li><strong>024</strong> — Línia d’atenció a la conducta suïcida (gratuïta, 24 h, confidencial). <a href="tel:024">Trucar</a></li>
 <li><strong>112</strong> — Emergències. <a href="tel:112">Trucar</a></li></ul>
 <p>També pots anar al teu centre de salut o a urgències, o explicar-ho a algú de confiança que tinguis a prop. Aquesta aplicació no et pot donar l’ajuda que mereixes en aquest moment, i per això t’ho diem amb claredat. Demanar ajuda és un acte de valentia, i funciona.</p>`,
+  },
+};
+
+// Guía de nutrición (aloja el test MUST: inicial y final).
+export const NUTRITION_GUIDE = {
+  intro: {
+    title: 'Nutrición antes de la cirugía',
+    title_en: 'Nutrition before surgery',
+    title_ca: 'Nutrició abans de la cirurgia',
+    body: `<p>Llegar bien nutrido ayuda a cicatrizar y a recuperarte mejor. Dos ideas clave: <strong>suficiente proteína</strong> cada día y buena <strong>hidratación</strong>.</p>
+<h4>Proteína</h4>
+<p>Reparte la proteína en todas las comidas (huevos, lácteos, legumbres, pescado, carne, tofu). Si comes poco, prioriza primero la proteína del plato.</p>
+<h4>Hidratación</h4>
+<p>Bebe agua a lo largo del día, salvo que tu equipo te indique otra cosa.</p>
+<h4>Evalúa tu riesgo nutricional</h4>
+<p>El test <strong>MUST</strong> estima tu riesgo nutricional en 1 minuto. Te recomendamos hacerlo <strong>al empezar</strong> y <strong>al final del programa</strong> para ver tu evolución, y compartirlo con tu equipo.</p>`,
+    body_en: `<p>Arriving well nourished helps you heal and recover better. Two key ideas: <strong>enough protein</strong> every day and good <strong>hydration</strong>.</p>
+<h4>Protein</h4>
+<p>Spread protein across all meals (eggs, dairy, legumes, fish, meat, tofu). If you eat little, prioritise the protein on your plate first.</p>
+<h4>Hydration</h4>
+<p>Drink water throughout the day, unless your team advises otherwise.</p>
+<h4>Assess your nutritional risk</h4>
+<p>The <strong>MUST</strong> test estimates your nutritional risk in 1 minute. We recommend doing it <strong>at the start</strong> and <strong>at the end of the programme</strong> to track your progress, and sharing it with your team.</p>`,
+    body_ca: `<p>Arribar ben nodrit ajuda a cicatritzar i a recuperar-te millor. Dues idees clau: <strong>prou proteïna</strong> cada dia i bona <strong>hidratació</strong>.</p>
+<h4>Proteïna</h4>
+<p>Reparteix la proteïna en tots els àpats (ous, lactis, llegums, peix, carn, tofu). Si menges poc, prioritza primer la proteïna del plat.</p>
+<h4>Hidratació</h4>
+<p>Beu aigua al llarg del dia, tret que el teu equip t’indiqui una altra cosa.</p>
+<h4>Avalua el teu risc nutricional</h4>
+<p>El test <strong>MUST</strong> estima el teu risc nutricional en 1 minut. Et recomanem fer-lo <strong>en començar</strong> i <strong>al final del programa</strong> per veure la teva evolució, i compartir-lo amb el teu equip.</p>`,
   },
 };
 
