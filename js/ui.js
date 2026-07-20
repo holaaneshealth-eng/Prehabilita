@@ -541,8 +541,9 @@ function renderMentalPieces(state, rec) {
     if (p.priority) badges.push(`<span class="tag-you">${t('mental_priority')}</span>`);
     if (p.calendar === 'pre') badges.push(`<span class="tag-you">${t('mental_preop')}</span>`);
     if (p.calendar === 'post') badges.push(`<span class="tag-you">${t('mental_postop')}</span>`);
-    const media = p.vimeo
-      ? `<div class="video"><iframe src="https://player.vimeo.com/video/${p.vimeo}" title="${esc(tr(p, 'title'))}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`
+    const vid = p.vimeo ? (typeof p.vimeo === 'object' ? (p.vimeo[getLang()] || '') : p.vimeo) : '';
+    const media = vid
+      ? `<div class="video"><iframe src="https://player.vimeo.com/video/${vid}" title="${esc(tr(p, 'title'))}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>`
       : `<p class="muted small">(${t('mental_soon')})</p>`;
     return `<details class="fasting-block"${isToday ? ' open' : ''}>
       <summary>${isSeen ? '✅ ' : ''}${esc(tr(p, 'title'))} ${badges.join(' ')}</summary>
@@ -792,15 +793,15 @@ export function renderLearn(state) {
   const checklist = preop.map((c) => `<li>☐ ${esc(c)}</li>`).join('');
 
   return `
-    <div class="section-label">${t('learn_posts')}</div>
-    <div class="post-list">${postCards}</div>
-    <div class="section-label">${t('learn_pills')}</div>
-    ${lessons}
-    <section class="card">
+    <section class="card" style="border-left:4px solid var(--accent)">
       <h3>${t('preop_title')}</h3>
       <ul class="preop">${checklist}</ul>
       <p class="muted small">${t('preop_note')}</p>
     </section>
+    <div class="section-label">${t('learn_posts')}</div>
+    <div class="post-list">${postCards}</div>
+    <div class="section-label">${t('learn_pills')}</div>
+    ${lessons}
     <section class="card disclaimer-card"><h3>${t('med_notice')}</h3><p class="small">${esc(disc())}</p></section>`;
 }
 

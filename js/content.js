@@ -352,6 +352,8 @@ export const BADGES = [
     check: (s) => (s.stats.taskCounts['gimnasia-mental'] || 0) >= 10 },
   { id: 'memoria-maestra', emoji: '🃏', name: 'Maestro de la memoria', name_en: 'Memory master', name_ca: 'Mestre de la memòria', desc: 'Gana una partida del juego de memoria.', desc_en: 'Win a round of the memory game.', desc_ca: 'Guanya una partida del joc de memòria.',
     check: (s) => (s.games && s.games.memory && s.games.memory.wins > 0) },
+  { id: 'memoria-hierro', emoji: '🎴', name: 'Memoria de hierro', name_en: 'Iron memory', name_ca: 'Memòria de ferro', desc: 'Gana 5 partidas del juego de memoria.', desc_en: 'Win 5 rounds of the memory game.', desc_ca: 'Guanya 5 partides del joc de memòria.',
+    check: (s) => (s.games && s.games.memory && s.games.memory.wins >= 5) },
   { id: 'hidratado', emoji: '💧', name: 'Bien hidratado', name_en: 'Well hydrated', name_ca: 'Ben hidratat', desc: 'Alcanza tu meta de hidratación 5 días.', desc_en: 'Reach your hydration goal on 5 days.', desc_ca: 'Assoleix la teva meta d’hidratació 5 dies.',
     check: (s) => (s.stats.hydrationGoalDays || 0) >= 5 },
   { id: 'listo', emoji: '🎉', name: '¡Listo para el quirófano!', name_en: 'Ready for the OR!', name_ca: 'A punt per al quiròfan!', desc: 'Completa 21 días de programa.', desc_en: 'Complete 21 days of the program.', desc_ca: 'Completa 21 dies de programa.',
@@ -2250,9 +2252,9 @@ export const MENTAL_GUIDE = {
 // `priority` = pieza esencial a priorizar si la cirugía está cerca. `vimeo` se
 // rellena con el ID cuando el contenido esté validado.
 export const MENTAL_PIECES = [
-  { id: 'v1', day: 0, priority: true, vimeo: '1210571832', title: 'V1. Bienvenida', title_en: 'V1. Welcome', title_ca: 'V1. Benvinguda',
+  { id: 'v1', day: 0, priority: true, vimeo: { es: '1210571832' }, title: 'V1. Bienvenida', title_en: 'V1. Welcome', title_ca: 'V1. Benvinguda',
     desc: 'Presenta el programa, normaliza dudas y nervios, e introduce el botón de pausa.', desc_en: 'Introduces the programme, normalises doubts and nerves, and introduces the pause button.', desc_ca: 'Presenta el programa, normalitza dubtes i nervis, i introdueix el botó de pausa.' },
-  { id: 'v2', day: 1, priority: true, vimeo: '1211511202', title: 'V2. Tu cirugía, paso a paso', title_en: 'V2. Your surgery, step by step', title_ca: 'V2. La teva cirurgia, pas a pas',
+  { id: 'v2', day: 1, priority: true, vimeo: { es: '1211511202' }, title: 'V2. Tu cirugía, paso a paso', title_en: 'V2. Your surgery, step by step', title_ca: 'V2. La teva cirurgia, pas a pas',
     desc: 'El recorrido perioperatorio en orden, de la preparación al alta, para reducir la incertidumbre.', desc_en: 'The perioperative journey in order, from preparation to discharge, to reduce uncertainty.', desc_ca: 'El recorregut perioperatori en ordre, de la preparació a l’alta, per reduir la incertesa.' },
   { id: 'v3', day: 2, priority: true, vimeo: '', title: 'V3. Qué notarás: la anestesia', title_en: 'V3. What you\'ll notice: anaesthesia', title_ca: 'V3. Què notaràs: l’anestèsia',
     desc: 'Sensaciones esperables, el papel del anestesista y respuestas a miedos frecuentes.', desc_en: 'Expected sensations, the anaesthetist\'s role and answers to common fears.', desc_ca: 'Sensacions esperables, el paper de l’anestesista i respostes a pors freqüents.' },

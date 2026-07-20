@@ -1716,6 +1716,17 @@ Senyals per parar i consultar: dolor al pit, mareig, falta d’aire desproporcio
       check: (s) => s.games && s.games.memory && s.games.memory.wins > 0
     },
     {
+      id: "memoria-hierro",
+      emoji: "\uD83C\uDFB4",
+      name: "Memoria de hierro",
+      name_en: "Iron memory",
+      name_ca: "Memòria de ferro",
+      desc: "Gana 5 partidas del juego de memoria.",
+      desc_en: "Win 5 rounds of the memory game.",
+      desc_ca: "Guanya 5 partides del joc de memòria.",
+      check: (s) => s.games && s.games.memory && s.games.memory.wins >= 5
+    },
+    {
       id: "hidratado",
       emoji: "\uD83D\uDCA7",
       name: "Bien hidratado",
@@ -3663,7 +3674,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       id: "v1",
       day: 0,
       priority: true,
-      vimeo: "1210571832",
+      vimeo: { es: "1210571832" },
       title: "V1. Bienvenida",
       title_en: "V1. Welcome",
       title_ca: "V1. Benvinguda",
@@ -3675,7 +3686,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       id: "v2",
       day: 1,
       priority: true,
-      vimeo: "1211511202",
+      vimeo: { es: "1211511202" },
       title: "V2. Tu cirugía, paso a paso",
       title_en: "V2. Your surgery, step by step",
       title_ca: "V2. La teva cirurgia, pas a pas",
@@ -5170,7 +5181,7 @@ EL MÉS ÚTIL QUE POTS FER: portar a la consulta de preanestèsia una llista com
       meds_title: "\uD83D\uDC8A Mi medicación y alergias",
       meds_intro: "Prepara tu lista para la consulta de preanestesia. Incluye TODO: recetados, sin receta y productos de herbolario. Al terminar podrás guardarla en PDF.",
       meds_anticoag_title: "Anticoagulantes y antiagregantes",
-      meds_anticoag_body: '<p>Si tomas <strong>anticoagulantes</strong> o <strong>antiagregantes</strong>, <strong>no los suspendas ni los mantengas por tu cuenta</strong>: requieren la <strong>indicación expresa de tu anestesista</strong>. Comunícalo <strong>al menos 10 días antes</strong> de la intervención.</p><p class="small"><strong>Antiagregantes:</strong> ácido acetilsalicílico/AAS (Adiro®, Aspirina®), clopidogrel (Plavix®, Iscover®), prasugrel (Efient®), ticagrelor (Brilique®), triflusal (Disgren®).</p><p class="small"><strong>Anticoagulantes:</strong> acenocumarol (Sintrom®), warfarina (Aldocumar®), dabigatrán (Pradaxa®), rivaroxabán (Xarelto®), apixabán (Eliquis®), edoxabán (Lixiana®), heparinas de bajo peso molecular (enoxaparina/Clexane®, bemiparina/Hibor®, dalteparina/Fragmin®).</p><p class="small muted">Si alguno de estos figura en tu medicación, avísalo cuanto antes a tu equipo.</p>',
+      meds_anticoag_body: '<p>Si tomas <strong>anticoagulantes</strong> o <strong>antiagregantes</strong>, <strong>no los suspendas ni los mantengas por tu cuenta</strong>: requieren la <strong>indicación expresa de tu anestesista</strong>. Comunícalo <strong>al menos 10 días antes</strong> de la intervención.</p><p class="small"><strong>Antiagregantes:</strong> ácido acetilsalicílico/AAS (Adiro®, Aspirina®), clopidogrel (Plavix®, Iscover®), prasugrel (Efient®), ticagrelor (Brilique®), triflusal (Disgren®).</p><p class="small"><strong>Anticoagulantes:</strong> acenocumarol (Sintrom®), warfarina (Aldocumar®), dabigatrán (Pradaxa®), rivaroxabán (Xarelto®), apixabán (Eliquis®), edoxabán (Lixiana®), heparinas de bajo peso molecular (enoxaparina/Clexane®, bemiparina/Hibor®, dalteparina/Fragmin®), fondaparinux (Arixtra®) y sulodexida (Aterina®).</p><p class="small muted">Si alguno de estos figura en tu medicación, avísalo cuanto antes a tu equipo.</p>',
       meds_add: "Añadir medicamento",
       meds_name: "Nombre",
       meds_dose: "Dosis",
@@ -5533,7 +5544,7 @@ Gracias.`,
       meds_title: "\uD83D\uDC8A My medication & allergies",
       meds_intro: "Prepare your list for the pre-anesthesia consultation. Include EVERYTHING: prescription, over-the-counter and herbal products. When done you can save it as PDF.",
       meds_anticoag_title: "Anticoagulants and antiplatelets",
-      meds_anticoag_body: `<p>If you take <strong>anticoagulants</strong> or <strong>antiplatelets</strong>, <strong>do not stop or continue them on your own</strong>: they require your <strong>anaesthetist's explicit instruction</strong>. Tell them <strong>at least 10 days before</strong> surgery.</p><p class="small"><strong>Antiplatelets:</strong> acetylsalicylic acid/ASA (Adiro®, Aspirina®), clopidogrel (Plavix®, Iscover®), prasugrel (Efient®), ticagrelor (Brilique®), triflusal (Disgren®).</p><p class="small"><strong>Anticoagulants:</strong> acenocoumarol (Sintrom®), warfarin (Aldocumar®), dabigatran (Pradaxa®), rivaroxaban (Xarelto®), apixaban (Eliquis®), edoxaban (Lixiana®), low-molecular-weight heparins (enoxaparin/Clexane®, bemiparin/Hibor®, dalteparin/Fragmin®).</p><p class="small muted">If any of these is in your medication, tell your team as soon as possible.</p>`,
+      meds_anticoag_body: `<p>If you take <strong>anticoagulants</strong> or <strong>antiplatelets</strong>, <strong>do not stop or continue them on your own</strong>: they require your <strong>anaesthetist's explicit instruction</strong>. Tell them <strong>at least 10 days before</strong> surgery.</p><p class="small"><strong>Antiplatelets:</strong> acetylsalicylic acid/ASA (Adiro®, Aspirina®), clopidogrel (Plavix®, Iscover®), prasugrel (Efient®), ticagrelor (Brilique®), triflusal (Disgren®).</p><p class="small"><strong>Anticoagulants:</strong> acenocoumarol (Sintrom®), warfarin (Aldocumar®), dabigatran (Pradaxa®), rivaroxaban (Xarelto®), apixaban (Eliquis®), edoxaban (Lixiana®), low-molecular-weight heparins (enoxaparin/Clexane®, bemiparin/Hibor®, dalteparin/Fragmin®), fondaparinux (Arixtra®) and sulodexide (Aterina®).</p><p class="small muted">If any of these is in your medication, tell your team as soon as possible.</p>`,
       meds_add: "Add medication",
       meds_name: "Name",
       meds_dose: "Dose",
@@ -5896,7 +5907,7 @@ Thank you.`,
       meds_title: "\uD83D\uDC8A La meva medicació i al·lèrgies",
       meds_intro: "Prepara la teva llista per a la consulta de preanestèsia. Inclou-ho TOT: amb recepta, sense recepta i productes d’herbolari. En acabar podràs desar-la en PDF.",
       meds_anticoag_title: "Anticoagulants i antiagregants",
-      meds_anticoag_body: '<p>Si prens <strong>anticoagulants</strong> o <strong>antiagregants</strong>, <strong>no els suspenguis ni els mantinguis pel teu compte</strong>: requereixen la <strong>indicació expressa del teu anestesista</strong>. Comunica-ho <strong>almenys 10 dies abans</strong> de la intervenció.</p><p class="small"><strong>Antiagregants:</strong> àcid acetilsalicílic/AAS (Adiro®, Aspirina®), clopidogrel (Plavix®, Iscover®), prasugrel (Efient®), ticagrelor (Brilique®), triflusal (Disgren®).</p><p class="small"><strong>Anticoagulants:</strong> acenocumarol (Sintrom®), warfarina (Aldocumar®), dabigatran (Pradaxa®), rivaroxaban (Xarelto®), apixaban (Eliquis®), edoxaban (Lixiana®), heparines de baix pes molecular (enoxaparina/Clexane®, bemiparina/Hibor®, dalteparina/Fragmin®).</p><p class="small muted">Si algun d’aquests figura a la teva medicació, avisa el teu equip com més aviat millor.</p>',
+      meds_anticoag_body: '<p>Si prens <strong>anticoagulants</strong> o <strong>antiagregants</strong>, <strong>no els suspenguis ni els mantinguis pel teu compte</strong>: requereixen la <strong>indicació expressa del teu anestesista</strong>. Comunica-ho <strong>almenys 10 dies abans</strong> de la intervenció.</p><p class="small"><strong>Antiagregants:</strong> àcid acetilsalicílic/AAS (Adiro®, Aspirina®), clopidogrel (Plavix®, Iscover®), prasugrel (Efient®), ticagrelor (Brilique®), triflusal (Disgren®).</p><p class="small"><strong>Anticoagulants:</strong> acenocumarol (Sintrom®), warfarina (Aldocumar®), dabigatran (Pradaxa®), rivaroxaban (Xarelto®), apixaban (Eliquis®), edoxaban (Lixiana®), heparines de baix pes molecular (enoxaparina/Clexane®, bemiparina/Hibor®, dalteparina/Fragmin®), fondaparinux (Arixtra®) i sulodexida (Aterina®).</p><p class="small muted">Si algun d’aquests figura a la teva medicació, avisa el teu equip com més aviat millor.</p>',
       meds_add: "Afegir medicament",
       meds_name: "Nom",
       meds_dose: "Dosi",
@@ -6499,7 +6510,8 @@ Gràcies.`,
         badges.push(`<span class="tag-you">${t("mental_preop")}</span>`);
       if (p.calendar === "post")
         badges.push(`<span class="tag-you">${t("mental_postop")}</span>`);
-      const media = p.vimeo ? `<div class="video"><iframe src="https://player.vimeo.com/video/${p.vimeo}" title="${esc(tr(p, "title"))}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>` : `<p class="muted small">(${t("mental_soon")})</p>`;
+      const vid = p.vimeo ? typeof p.vimeo === "object" ? p.vimeo[getLang()] || "" : p.vimeo : "";
+      const media = vid ? `<div class="video"><iframe src="https://player.vimeo.com/video/${vid}" title="${esc(tr(p, "title"))}" loading="lazy" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe></div>` : `<p class="muted small">(${t("mental_soon")})</p>`;
       return `<details class="fasting-block"${isToday ? " open" : ""}>
       <summary>${isSeen ? "✅ " : ""}${esc(tr(p, "title"))} ${badges.join(" ")}</summary>
       <div class="fasting-body">
@@ -6729,15 +6741,15 @@ Gràcies.`,
     const preop = pickArr(PREOP_CHECKLIST, PREOP_CHECKLIST_EN, PREOP_CHECKLIST_CA);
     const checklist = preop.map((c) => `<li>☐ ${esc(c)}</li>`).join("");
     return `
-    <div class="section-label">${t("learn_posts")}</div>
-    <div class="post-list">${postCards}</div>
-    <div class="section-label">${t("learn_pills")}</div>
-    ${lessons}
-    <section class="card">
+    <section class="card" style="border-left:4px solid var(--accent)">
       <h3>${t("preop_title")}</h3>
       <ul class="preop">${checklist}</ul>
       <p class="muted small">${t("preop_note")}</p>
     </section>
+    <div class="section-label">${t("learn_posts")}</div>
+    <div class="post-list">${postCards}</div>
+    <div class="section-label">${t("learn_pills")}</div>
+    ${lessons}
     <section class="card disclaimer-card"><h3>${t("med_notice")}</h3><p class="small">${esc(disc())}</p></section>`;
   }
   function renderPost(state2, id) {
